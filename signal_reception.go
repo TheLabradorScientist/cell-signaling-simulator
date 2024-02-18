@@ -1,13 +1,13 @@
 package main
 
 // Signal stores 4 different shapes
-func matchSR(signal string, receptor string) bool {
-	return signalReceptor[signal] == receptor
+func matchSR(signalType string, receptorType string) bool {
+	return signalReceptor[signalType] == receptorType
 }
 
 var signalReceptor = map[string]string{
-	"signalA.png":"receptorA.png", 
-	"signalB.png":"receptorB.png", 
-	"signalC.png":"receptorC.png", 
-	"signalD.png":"receptorD.png", 
+	"signalA":"receptorA", 
+	"signalB":"receptorB", 
+	"signalC":"receptorC", 
+	"signalD":"receptorD", 
 }

@@ -19,12 +19,20 @@ type Signal struct {
 	image      *ebiten.Image
 	rect       Rectangle
 	is_dragged bool
+	signalType string
 }
 
 type Receptor struct {
 	image              *ebiten.Image
 	rect               Rectangle
 	is_touching_signal bool
+	receptorType       string
+}
+
+type Kinase struct {
+	image         *ebiten.Image
+	rect          Rectangle
+	is_clicked_on bool
 }
 
 func newButton(path string, rect Rectangle, cmd SceneSwapFunc) Button {
@@ -50,6 +58,18 @@ func newSignal(path string, rect Rectangle) Signal {
 		image:      sig_image,
 		rect:       rect,
 		is_dragged: false,
+	}
+}
+
+func newKinase(path string, rect Rectangle) Kinase {
+	var kin_image, _, err = ebitenutil.NewImageFromFile(path)
+	if err != nil {
+		fmt.Println("Error parsing date:", err)
+	}
+	return Kinase{
+		image:         kin_image,
+		rect:          rect,
+		is_clicked_on: false,
 	}
 }
 
@@ -90,7 +110,7 @@ func (s Signal) draw(screen *ebiten.Image) {
 	screen.DrawImage(s.image, op)
 }
 
-func newReceptor(path string, rect Rectangle) Receptor {
+func newReceptor(path string, rect Rectangle, rtype string) Receptor {
 	var rec_image, _, err = ebitenutil.NewImageFromFile(path)
 
 	if err != nil {
@@ -100,6 +120,7 @@ func newReceptor(path string, rect Rectangle) Receptor {
 		image:              rec_image,
 		rect:               rect,
 		is_touching_signal: false,
+		receptorType:       rtype,
 	}
 }
 
@@ -107,4 +128,24 @@ func (r Receptor) draw(screen *ebiten.Image) {
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Translate(float64(r.rect.pos.x), float64(r.rect.pos.y))
 	screen.DrawImage(r.image, op)
+}
+
+func (r *Receptor) update() {
+	if aabb_collision(signal.rect, r.rect) {
+		r.is_touching_signal = true
+	} else {
+		r.is_touching_signal = false
+	}
+}
+
+func (k *Kinase) update() {
+	var x_c, y_c = ebiten.CursorPosition()
+	var b_pos = newVector(x_c, y_c)
+
+	if !k.is_clicked_on {
+		k.rect.pos = newVector(k.rect.pos.x+1, k.rect.pos.y+1)
+	}
+	if rect_point_collision(k.rect, b_pos) {
+		k.is_clicked_on = true
+	}
 }

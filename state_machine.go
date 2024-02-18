@@ -9,7 +9,6 @@ type State interface {
 	Init()
 	Update(*Game)
 	Draw(*ebiten.Image)
-	Finish()
 }
 
 type StateMachine struct {
@@ -25,9 +24,6 @@ func newStateMachine(s_map SceneConstructorMap) StateMachine {
 }
 
 func (s StateMachine) changeState(s_name string) {
-	if s.state != nil {
-		s.state.Finish()
-	}
 	s.state = s.s_map[s_name]()
 	s.state.Init()
 }
