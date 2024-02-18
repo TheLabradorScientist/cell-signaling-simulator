@@ -36,17 +36,23 @@ var (
 	tfa           TFA
 	rna           [5]RNA
 	dna           [5]DNA
+	currentFrag   = 0
 	rnaPolymerase *ebiten.Image
 	ribosome      Ribosome
 	rightChoice   CodonChoice
 	wrongChoice1  CodonChoice
 	wrongChoice2  CodonChoice
-	trna          [5]RNA
-	trna_ptr      int
+	mrna          [5]DNA
+	mrna_ptr      int
+	rightTrna     CodonChoice
+	wrongTrna1    CodonChoice
+	wrongTrna2    CodonChoice
+	reset         bool
 )
 
 type Game struct {
 	defaultFont            Font
+	codonFont              Font
 	switchedMenuToPlasma   bool
 	switchedPlasmaToMenu   bool
 	switchedPlasmaToCyto1  bool
@@ -122,18 +128,22 @@ func init() {
 		signal = newSignal("signalA.png", newRect(100, 100, 75, 75))
 		signal.signalType = "signalA"
 		// PLACEHOLDER IN CASE WE DO NOT GET TIME TO CODE RANDOM CODONS
-		template = [5]string{"TAC", "GTC", "CGG", "ACA", "UGA"}
-
+		template = [5]string{"TAC", "GTC", "CGG", "ACA", "ACT"}
 	case 2:
 		signal = newSignal("signalB.png", newRect(100, 100, 75, 75))
-
 		signal.signalType = "signalB"
+		// PLACEHOLDER IN CASE WE DO NOT GET TIME TO CODE RANDOM CODONS
+		template = [5]string{"TAC", "GTC", "CGG", "ACA", "ACT"}
 	case 3:
 		signal = newSignal("signalC.png", newRect(100, 100, 75, 75))
 		signal.signalType = "signalC"
+		// PLACEHOLDER IN CASE WE DO NOT GET TIME TO CODE RANDOM CODONS
+		template = [5]string{"TAC", "GTC", "CGG", "ACA", "ACT"}
 	case 4:
 		signal = newSignal("signalD.png", newRect(100, 100, 75, 75))
 		signal.signalType = "signalD"
+		// PLACEHOLDER IN CASE WE DO NOT GET TIME TO CODE RANDOM CODONS
+		template = [5]string{"TAC", "GTC", "CGG", "ACA", "ACT"}
 	}
 
 	receptorA = newReceptor("receptorA.png", newRect(0, 500, 100, 150), "receptorA")
@@ -146,7 +156,7 @@ func init() {
 	tfa = newTFA("TFA.png", newRect(300, 500, 150, 150))
 
 	for x := 0; x < 5; x++ {
-		dna[x] = newDNA("DNA.png", newRect(-100, 500, 150, 150), template[x], x)
+		dna[x] = newDNA("DNA.png", newRect(-100+200*x, 500, 150, 150), template[x], x)
 	}
 	for x := 0; x < 5; x++ {
 		rna[x] = newRNA("RNA.png", newRect(-100, 200, 150, 150), transcribe(template[x]))
@@ -157,11 +167,24 @@ func init() {
 		log.Fatal(err)
 	}
 
-	rightChoice = newCodonChoice("codonButton", newRect(0, 0, 258, 144), transcribe(dna[0].codon))
-	wrongChoice1 = newCodonChoice("codonButton", newRect(100, 0, 258, 144), randomize())
-	wrongChoice2 = newCodonChoice("codonButton", newRect(200, 0, 258, 144), randomize())
-	ribosome = newRibosome("PlayButton.png", newRect(0, 0, 160, 160))
-	trna_ptr = 0
+	for x := 0; x < 5; x++ {
+		mrna[x] = newDNA("RNA.png", newRect(-100, 400, 150, 150), transcribe(dna[x].codon), x)
+	}
+
+	reset = false
+
+	rightChoice = newCodonChoice("codonButton.png", newRect(50, 150, 192, 111), transcribe(dna[0].codon))
+	wrongChoice1 = newCodonChoice("codonButton.png", newRect(350, 150, 192, 111), randomize(rightChoice.bases))
+	wrongChoice2 = newCodonChoice("codonButton.png", newRect(650, 150, 192, 111), randomize(rightChoice.bases))
+
+	ribosome = newRibosome("ribosome.png", newRect(0, 300, 404, 367))
+
+	mrna_ptr = 0
+
+	rightTrna = newCodonChoice("codonButton.png", newRect(50, 150, 192, 111), translate(mrna[0].codon))
+	wrongTrna1 = newCodonChoice("codonButton.png", newRect(350, 150, 192, 111), translate(randomize(rightTrna.bases)))
+	wrongTrna2 = newCodonChoice("codonButton.png", newRect(650, 150, 192, 111), translate(randomize(rightTrna.bases)))
+
 }
 
 func (g *Game) Update() error {
@@ -218,8 +241,35 @@ func (g *Game) Update() error {
 		}
 	case "Transcription":
 		ebiten.SetWindowTitle("Cell Signaling Synthesis - Transcription")
+		if reset {
+			rightChoice.bases = transcribe(dna[currentFrag].codon)
+			wrongChoice1.bases = randomize(rightChoice.bases)
+			wrongChoice2.bases = randomize(rightChoice.bases)
+			reset = false
+		}
+		//fmt.Printf("%t\n", dna[currentFrag].is_complete)
+		dna[currentFrag].is_complete = rightChoice.update1(g, dna[currentFrag].codon)
+		//fmt.Printf("%t\n", dna[currentFrag].is_complete)
+		wrongChoice1.update1(g, dna[currentFrag].codon)
+		wrongChoice2.update1(g, dna[currentFrag].codon)
+		if dna[currentFrag].is_complete {
+			nextCodon(g)
+		}
+
 	case "Translation":
 		ebiten.SetWindowTitle("Cell Signaling Synthesis - Translation")
+		if reset {
+			rightTrna.bases = translate(mrna[mrna_ptr].codon)
+			wrongTrna1.bases = randomize(rightTrna.bases)
+			wrongTrna2.bases = randomize(rightTrna.bases)
+			reset = false
+		}
+		mrna[mrna_ptr].is_complete = rightTrna.update2(g, mrna[mrna_ptr].codon)
+		wrongTrna1.update2(g, mrna[mrna_ptr].codon)
+		wrongTrna2.update2(g, mrna[mrna_ptr].codon)
+		if mrna[mrna_ptr].is_complete {
+			nextMRNACodon(g)
+		}
 	}
 	return nil
 }
@@ -229,8 +279,6 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	case "Main Menu":
 		screen.DrawImage(startBg, nil)
 		playbutton.draw(screen)
-		//ebitenutil.DebugPrint(screen, transcribe("CAT"))
-		//ebitenutil.DebugPrint(screen, translate("UAG"))
 		if g.switchedMenuToPlasma {
 			scene = "Signal Reception"
 		}
@@ -241,7 +289,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		receptorC.draw(screen)
 		receptorD.draw(screen)
 		signal.draw(screen)
-		g.defaultFont.drawFont(screen, "WELCOME TO THE PLASMA MEMBRANE! \n Drag the signal to the matching receptor to enter the cell!", 100, 100, color.White)
+		g.defaultFont.drawFont(screen, "WELCOME TO THE PLASMA MEMBRANE! \n Drag the signal to the matching receptor to enter the cell!", 100, 50, color.White)
 		if signal.is_dragged {
 			signal.draw(screen)
 		}
@@ -256,7 +304,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		tk1.draw(screen)
 		tk2.draw(screen)
 		tfa.draw(screen)
-		g.defaultFont.drawFont(screen, "WELCOME TO THE CYTOPLASM! \n Click when each kinase overlaps to follow the phosphorylation cascade!!", 100, 100, color.Black)
+		g.defaultFont.drawFont(screen, "WELCOME TO THE CYTOPLASM! \n Click when each kinase overlaps to follow \n the phosphorylation cascade!!", 100, 50, color.Black)
 		if g.switchedCyto1ToNucleus {
 			scene = "Transcription"
 		}
@@ -264,27 +312,61 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		screen.DrawImage(nucleusBg, nil)
 		for x := 0; x < 5; x++ {
 			rna[x].draw(screen)
-			dna[x].draw(screen)
 		}
-		g.defaultFont.drawFont(screen, "WELCOME TO THE NUCLEUS! \n Match each codon on the DNA template to the corresponding\n RNA codon to transcribe a new mRNA molecule!!!", 100, 100, color.White)
-		if g.switchedNucleusToCyto2 {
-			scene = "Transcription"
-		}
+		dna[0].draw(screen)
+
+		g.defaultFont.drawFont(screen, "WELCOME TO THE NUCLEUS! \n Match each codon on the DNA template to the \n corresponding RNA codon to transcribe a new mRNA molecule!!!", 100, 50, color.White)
 
 		op := &ebiten.DrawImageOptions{}
 		op.GeoM.Translate(0, 300)
 		screen.DrawImage(rnaPolymerase, op)
-
+		//g.codonFont.drawFont(screen, strings.Join(template[0:5], ""), dna[currentFrag].rect.pos.x+300, dna[currentFrag].rect.pos.y, color.Black)
+		if currentFrag != -1 {
+			g.codonFont.drawFont(screen, dna[currentFrag].codon, dna[0].rect.pos.x+500, dna[0].rect.pos.y, color.Black)
+		}
 		rightChoice.draw(screen)
 		wrongChoice1.draw(screen)
 		wrongChoice2.draw(screen)
+		g.codonFont.drawFont(screen, rightChoice.bases, rightChoice.rect.pos.x+50, rightChoice.rect.pos.y+100, color.Black)
+		g.codonFont.drawFont(screen, wrongChoice1.bases, wrongChoice1.rect.pos.x+50, wrongChoice1.rect.pos.y+100, color.Black)
+		g.codonFont.drawFont(screen, wrongChoice2.bases, wrongChoice2.rect.pos.x+50, wrongChoice2.rect.pos.y+100, color.Black)
+		switch currentFrag {
+		case 1:
+			g.codonFont.drawFont(screen, rna[0].codon, rna[0].rect.pos.x+500, rna[0].rect.pos.y+100, color.Black)
+		case 2:
+			g.codonFont.drawFont(screen, rna[0].codon, rna[0].rect.pos.x+500, rna[0].rect.pos.y+100, color.Black)
+			g.codonFont.drawFont(screen, rna[1].codon, rna[0].rect.pos.x+650, rna[0].rect.pos.y+100, color.Black)
+		case 3:
+			g.codonFont.drawFont(screen, rna[0].codon, rna[0].rect.pos.x+500, rna[0].rect.pos.y+100, color.Black)
+			g.codonFont.drawFont(screen, rna[1].codon, rna[0].rect.pos.x+650, rna[0].rect.pos.y+100, color.Black)
+			g.codonFont.drawFont(screen, rna[2].codon, rna[0].rect.pos.x+800, rna[0].rect.pos.y+100, color.Black)
+		case 4:
+			g.codonFont.drawFont(screen, rna[0].codon, rna[0].rect.pos.x+500, rna[0].rect.pos.y+100, color.Black)
+			g.codonFont.drawFont(screen, rna[1].codon, rna[0].rect.pos.x+650, rna[0].rect.pos.y+100, color.Black)
+			g.codonFont.drawFont(screen, rna[2].codon, rna[0].rect.pos.x+800, rna[0].rect.pos.y+100, color.Black)
+			g.codonFont.drawFont(screen, rna[3].codon, rna[0].rect.pos.x+950, rna[0].rect.pos.y+100, color.Black)
+		default:
+			break
+		}
 
+		if g.switchedNucleusToCyto2 {
+			scene = "Translation"
+		}
 	case "Translation":
 		screen.DrawImage(cytoBg_2, nil)
 
+		mrna[0].draw(screen)
 		ribosome.draw(screen)
-		trna[trna_ptr].draw(screen)
-		g.defaultFont.drawFont(screen, "FINALLY, BACK TO THE CYTOPLASM! \n Match each codon from your mRNA template to its corresponding amino acid to synthesize your protein!!!!", 100, 100, color.Black)
+
+		rightTrna.draw(screen)
+		wrongTrna1.draw(screen)
+		wrongTrna2.draw(screen)
+
+		g.codonFont.drawFont(screen, rightTrna.bases, rightTrna.rect.pos.x+50, rightTrna.rect.pos.y+100, color.Black)
+		g.codonFont.drawFont(screen, wrongTrna1.bases, wrongTrna1.rect.pos.x+50, wrongTrna1.rect.pos.y+100, color.Black)
+		g.codonFont.drawFont(screen, wrongTrna2.bases, wrongTrna2.rect.pos.x+50, wrongTrna2.rect.pos.y+100, color.Black)
+
+		g.defaultFont.drawFont(screen, "FINALLY, BACK TO THE CYTOPLASM! \n Match each codon from your mRNA template \n to its corresponding amino acid to synthesize your protein!!!!", 100, 50, color.Black)
 
 	}
 }
@@ -295,7 +377,8 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
 
 func main() {
 	game := &Game{}
-	game.defaultFont = newFont("ThaleahFat.ttf", 25)
+	game.defaultFont = newFont("ThaleahFat.ttf", 32)
+	game.codonFont = newFont("ThaleahFat.ttf", 90)
 	if err := ebiten.RunGame(game); err != nil {
 		log.Fatal(err)
 	}

@@ -2,11 +2,13 @@ package main
 
 import (
 	"fmt"
+	"os"
 
 	"math/rand"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
+	"github.com/hajimehoshi/ebiten/v2/inpututil"
 )
 
 type SceneSwapFunc func(*Game)
@@ -281,9 +283,26 @@ func (dna DNA) draw(screen *ebiten.Image) {
 	screen.DrawImage(dna.image, op)
 }
 
-func (dna *DNA) nextCodon() {
-	if dna.is_complete && dna.rect.pos.x >= -750 {
-		dna.rect.pos.x -= 2
+func nextCodon(g *Game) {
+	if currentFrag < 4 {
+		currentFrag++
+		dna[currentFrag].is_complete = false
+		reset = true
+	} else {
+		NucleusToCyto2(g)
+		reset = false
+	}
+}
+
+func nextMRNACodon(g *Game) {
+	if mrna_ptr < 4 {
+		mrna_ptr++
+		mrna[mrna_ptr].is_complete = false
+		reset = true
+		ribosome.update_movement()
+	} else {
+		os.Exit(3)
+		reset = false
 	}
 }
 
@@ -311,21 +330,33 @@ func newCodonChoice(path string, rect Rectangle, bases string) CodonChoice {
 	}
 }
 
-func (c CodonChoice) on_click(g *Game, dnaFrag string) {
+func (c CodonChoice) update1(g *Game, dnaFrag string) bool {
 	var x_c, y_c = ebiten.CursorPosition()
 	var b_pos = newVector(x_c, y_c)
-	if rect_point_collision(c.rect, b_pos) && ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
-		//c.cmd(g)
-		if c.bases == dnaFrag {
-			//
+	if rect_point_collision(c.rect, b_pos) && inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
+		if c.bases == transcribe(dnaFrag) {
+			return true
 		}
 	}
+	return false
 }
 
-func randomize() string {
+func (c CodonChoice) update2(g *Game, mrnaFrag string) bool {
+	var x_c, y_c = ebiten.CursorPosition()
+	var b_pos = newVector(x_c, y_c)
+	if rect_point_collision(c.rect, b_pos) && inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
+		fmt.Print("d\n")
+		if c.bases == translate(mrnaFrag) {
+			return true
+		}
+	}
+	return false
+}
+
+func randomize(exception string) string {
 	randomCodon := ""
-	for x := 0; x<3; x++ {
-		seedSignal    = rand.Intn(4) + 1
+	for x := 0; x < 3; x++ {
+		seedSignal = rand.Intn(4) + 1
 		switch seedSignal {
 		case 1:
 			randomCodon += "A"
@@ -337,7 +368,11 @@ func randomize() string {
 			randomCodon += "C"
 		}
 	}
-	return randomCodon
+	if randomCodon != exception {
+		return randomCodon
+	} else {
+		return randomize(exception)
+	}
 }
 
 func (c CodonChoice) draw(screen *ebiten.Image) {
@@ -347,7 +382,7 @@ func (c CodonChoice) draw(screen *ebiten.Image) {
 }
 
 func (ribo *Ribosome) update_movement() {
-	ribo.rect.pos.x -= screenWidth / 6
+	ribo.rect.pos.x += screenWidth / 6
 }
 
 func (ribo Ribosome) draw(screen *ebiten.Image) {
