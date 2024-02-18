@@ -16,27 +16,33 @@ const (
 )
 
 var (
-	err        error
-	scene      string = "Main Menu"
-	startBg    *ebiten.Image
-	plasmaBg   *ebiten.Image
-	cytoBg_1   *ebiten.Image
-	nucleusBg  *ebiten.Image
-	cytoBg_2   *ebiten.Image
-	playbutton Button
-	seedSignal = rand.Intn(4) + 1
-	signal     Signal
-	receptorA  Receptor
-	receptorB  Receptor
-	receptorC  Receptor
-	receptorD  Receptor
-	template   = [5]string{}
-	tk1        Kinase
-	tk2        Kinase
-	tfa        TFA
-	rna        [5]RNA
-	dna        [5]DNA
-	ribosome   Ribosome
+	err           error
+	scene         string = "Main Menu"
+	startBg       *ebiten.Image
+	plasmaBg      *ebiten.Image
+	cytoBg_1      *ebiten.Image
+	nucleusBg     *ebiten.Image
+	cytoBg_2      *ebiten.Image
+	playbutton    Button
+	seedSignal    = rand.Intn(4) + 1
+	signal        Signal
+	receptorA     Receptor
+	receptorB     Receptor
+	receptorC     Receptor
+	receptorD     Receptor
+	template      = [5]string{}
+	tk1           Kinase
+	tk2           Kinase
+	tfa           TFA
+	rna           [5]RNA
+	dna           [5]DNA
+	rnaPolymerase *ebiten.Image
+	ribosome      Ribosome
+	rightChoice   CodonChoice
+	wrongChoice1  CodonChoice
+	wrongChoice2  CodonChoice
+	trna          [5]RNA
+	trna_ptr      int
 )
 
 type Game struct {
@@ -146,7 +152,16 @@ func init() {
 		rna[x] = newRNA("RNA.png", newRect(-100, 200, 150, 150), transcribe(template[x]))
 	}
 
-	ribosome = newRibosome()
+	rnaPolymerase, _, err = ebitenutil.NewImageFromFile("rnaPolym.png")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	rightChoice = newCodonChoice("codonButton", newRect(0, 0, 258, 144), transcribe(dna[0].codon))
+	wrongChoice1 = newCodonChoice("codonButton", newRect(100, 0, 258, 144), randomize())
+	wrongChoice2 = newCodonChoice("codonButton", newRect(200, 0, 258, 144), randomize())
+	ribosome = newRibosome("PlayButton.png", newRect(0, 0, 160, 160))
+	trna_ptr = 0
 }
 
 func (g *Game) Update() error {
@@ -255,9 +270,20 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		if g.switchedNucleusToCyto2 {
 			scene = "Transcription"
 		}
+
+		op := &ebiten.DrawImageOptions{}
+		op.GeoM.Translate(0, 300)
+		screen.DrawImage(rnaPolymerase, op)
+
+		rightChoice.draw(screen)
+		wrongChoice1.draw(screen)
+		wrongChoice2.draw(screen)
+
 	case "Translation":
 		screen.DrawImage(cytoBg_2, nil)
 
+		ribosome.draw(screen)
+		trna[trna_ptr].draw(screen)
 		g.defaultFont.drawFont(screen, "FINALLY, BACK TO THE CYTOPLASM! \n Match each codon from your mRNA template to its corresponding amino acid to synthesize your protein!!!!", 100, 100, color.Black)
 
 	}

@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 
+	"math/rand"
+
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
@@ -58,10 +60,10 @@ type DNA struct {
 	is_complete bool
 }
 
-type codonChoice struct {
-	image       *ebiten.Image
-	rect		Rectangle
-	bases 		string
+type CodonChoice struct {
+	image *ebiten.Image
+	rect  Rectangle
+	bases string
 	// codonType string // Correct vs Incorrect
 }
 
@@ -69,7 +71,6 @@ type Ribosome struct {
 	image *ebiten.Image
 	rect  Rectangle
 }
-
 
 func newSignal(path string, rect Rectangle) Signal {
 	var sig_image, _, err = ebitenutil.NewImageFromFile(path)
@@ -192,7 +193,6 @@ func (k *Kinase) update(rect Rectangle) {
 	var b_pos = newVector(x_c, y_c)
 	if !k.is_clicked_on && k.is_moving {
 		if k.rect.pos.y <= 425 && k.kinaseType == "tk2" {
-
 			k.descend()
 		} else {
 			k.rect.pos.x += k.delta
@@ -267,10 +267,10 @@ func newDNA(path string, rect Rectangle, codon string, fragment int) DNA {
 		fmt.Println("Error parsing date:", err)
 	}
 	return DNA{
-		image:    dna_image,
-		rect:     rect,
-		codon:    codon,
-		fragment: fragment,
+		image:       dna_image,
+		rect:        rect,
+		codon:       codon,
+		fragment:    fragment,
 		is_complete: false,
 	}
 }
@@ -298,39 +298,56 @@ func newRibosome(path string, rect Rectangle) Ribosome {
 	}
 }
 
-
-func newCodonChoice(path string, rect Rectangle, bases string) codonChoice {
+func newCodonChoice(path string, rect Rectangle, bases string) CodonChoice {
 	var cdn_image, _, err = ebitenutil.NewImageFromFile(path)
 
 	if err != nil {
 		fmt.Println("Error parsing date:", err)
 	}
-	return codonChoice{
+	return CodonChoice{
 		image: cdn_image,
 		rect:  rect,
-		bases:   bases,
+		bases: bases,
 	}
 }
 
-func (c codonChoice) on_click(g *Game, dnaFrag string) {
+func (c CodonChoice) on_click(g *Game, dnaFrag string) {
 	var x_c, y_c = ebiten.CursorPosition()
 	var b_pos = newVector(x_c, y_c)
 	if rect_point_collision(c.rect, b_pos) && ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
 		//c.cmd(g)
 		if c.bases == dnaFrag {
-			
+			//
 		}
 	}
 }
 
-func (c codonChoice) draw(screen *ebiten.Image) {
+func randomize() string {
+	randomCodon := ""
+	for x := 0; x<3; x++ {
+		seedSignal    = rand.Intn(4) + 1
+		switch seedSignal {
+		case 1:
+			randomCodon += "A"
+		case 2:
+			randomCodon += "U"
+		case 3:
+			randomCodon += "G"
+		case 4:
+			randomCodon += "C"
+		}
+	}
+	return randomCodon
+}
+
+func (c CodonChoice) draw(screen *ebiten.Image) {
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Translate(float64(c.rect.pos.x), float64(c.rect.pos.y))
 	screen.DrawImage(c.image, op)
 }
 
 func (ribo *Ribosome) update_movement() {
-	ribo.rect.pos.x -= screenWidth/6
+	ribo.rect.pos.x -= screenWidth / 6
 }
 
 func (ribo Ribosome) draw(screen *ebiten.Image) {
