@@ -32,21 +32,44 @@ type Receptor struct {
 type Kinase struct {
 	image         *ebiten.Image
 	rect          Rectangle
+	is_moving     bool
 	is_clicked_on bool
+	delta         int
+	kinaseType    string
 }
 
-func newButton(path string, rect Rectangle, cmd SceneSwapFunc) Button {
-	var btn_image, _, err = ebitenutil.NewImageFromFile(path)
-
-	if err != nil {
-		fmt.Println("Error parsing date:", err)
-	}
-	return Button{
-		image: btn_image,
-		rect:  rect,
-		cmd:   cmd,
-	}
+type TFA struct {
+	image     *ebiten.Image
+	rect      Rectangle
+	is_active bool
 }
+
+type RNA struct {
+	image *ebiten.Image
+	rect  Rectangle
+	codon string
+}
+
+type DNA struct {
+	image       *ebiten.Image
+	rect        Rectangle
+	codon       string
+	fragment    int
+	is_complete bool
+}
+
+type codonChoice struct {
+	image       *ebiten.Image
+	rect		Rectangle
+	bases 		string
+	// codonType string // Correct vs Incorrect
+}
+
+type Ribosome struct {
+	image *ebiten.Image
+	rect  Rectangle
+}
+
 
 func newSignal(path string, rect Rectangle) Signal {
 	var sig_image, _, err = ebitenutil.NewImageFromFile(path)
@@ -61,7 +84,7 @@ func newSignal(path string, rect Rectangle) Signal {
 	}
 }
 
-func newKinase(path string, rect Rectangle) Kinase {
+func newKinase(path string, rect Rectangle, ktype string) Kinase {
 	var kin_image, _, err = ebitenutil.NewImageFromFile(path)
 	if err != nil {
 		fmt.Println("Error parsing date:", err)
@@ -69,7 +92,35 @@ func newKinase(path string, rect Rectangle) Kinase {
 	return Kinase{
 		image:         kin_image,
 		rect:          rect,
+		is_moving:     false,
 		is_clicked_on: false,
+		delta:         3,
+		kinaseType:    ktype,
+	}
+}
+
+func newTFA(path string, rect Rectangle) TFA {
+	var tfa_image, _, err = ebitenutil.NewImageFromFile(path)
+	if err != nil {
+		fmt.Println("Error parsing date:", err)
+	}
+	return TFA{
+		image:     tfa_image,
+		rect:      rect,
+		is_active: false,
+	}
+}
+
+func newButton(path string, rect Rectangle, cmd SceneSwapFunc) Button {
+	var btn_image, _, err = ebitenutil.NewImageFromFile(path)
+
+	if err != nil {
+		fmt.Println("Error parsing date:", err)
+	}
+	return Button{
+		image: btn_image,
+		rect:  rect,
+		cmd:   cmd,
 	}
 }
 
@@ -95,8 +146,6 @@ func (s *Signal) on_click(g *Game) {
 		if rect_point_collision(s.rect, b_pos) && ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
 			s.is_dragged = true
 		}
-	} else {
-		s.is_dragged = false
 	}
 
 	if s.is_dragged {
@@ -138,14 +187,154 @@ func (r *Receptor) update() {
 	}
 }
 
-func (k *Kinase) update() {
+func (k *Kinase) update(rect Rectangle) {
 	var x_c, y_c = ebiten.CursorPosition()
 	var b_pos = newVector(x_c, y_c)
+	if !k.is_clicked_on && k.is_moving {
+		if k.rect.pos.y <= 425 && k.kinaseType == "tk2" {
 
-	if !k.is_clicked_on {
-		k.rect.pos = newVector(k.rect.pos.x+1, k.rect.pos.y+1)
+			k.descend()
+		} else {
+			k.rect.pos.x += k.delta
+		}
 	}
-	if rect_point_collision(k.rect, b_pos) {
+
+	if rect_point_collision(k.rect, b_pos) &&
+		ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) &&
+		aabb_collision(k.rect, rect) {
 		k.is_clicked_on = true
 	}
+
+	if k.rect.pos.x+k.rect.width >= screenWidth {
+		k.delta = -3
+	} else if k.rect.pos.x <= 0 {
+		k.delta = 3
+	}
+
+}
+
+func (k Kinase) draw(screen *ebiten.Image) {
+	op := &ebiten.DrawImageOptions{}
+	op.GeoM.Translate(float64(k.rect.pos.x), float64(k.rect.pos.y))
+	screen.DrawImage(k.image, op)
+}
+
+func (k *Kinase) activate() {
+	k.is_moving = true
+}
+
+func (k *Kinase) descend() {
+	k.rect.pos.y += 2
+}
+
+func (t *TFA) activate() {
+	tfa.is_active = true
+}
+
+func (t *TFA) update() {
+	if t.is_active && t.rect.pos.y <= 750 {
+		t.rect.pos.y += 2
+	}
+}
+
+func (t TFA) draw(screen *ebiten.Image) {
+	op := &ebiten.DrawImageOptions{}
+	op.GeoM.Translate(float64(t.rect.pos.x), float64(t.rect.pos.y))
+	screen.DrawImage(t.image, op)
+}
+
+func newRNA(path string, rect Rectangle, codon string) RNA {
+	var rna_image, _, err = ebitenutil.NewImageFromFile(path)
+	if err != nil {
+		fmt.Println("Error parsing date:", err)
+	}
+	return RNA{
+		image: rna_image,
+		rect:  rect,
+		codon: codon,
+	}
+}
+
+func (rna RNA) draw(screen *ebiten.Image) {
+	op := &ebiten.DrawImageOptions{}
+	op.GeoM.Translate(float64(rna.rect.pos.x), float64(rna.rect.pos.y))
+	screen.DrawImage(rna.image, op)
+}
+
+func newDNA(path string, rect Rectangle, codon string, fragment int) DNA {
+	var dna_image, _, err = ebitenutil.NewImageFromFile(path)
+	if err != nil {
+		fmt.Println("Error parsing date:", err)
+	}
+	return DNA{
+		image:    dna_image,
+		rect:     rect,
+		codon:    codon,
+		fragment: fragment,
+		is_complete: false,
+	}
+}
+
+func (dna DNA) draw(screen *ebiten.Image) {
+	op := &ebiten.DrawImageOptions{}
+	op.GeoM.Translate(float64(dna.rect.pos.x), float64(dna.rect.pos.y))
+	screen.DrawImage(dna.image, op)
+}
+
+func (dna *DNA) nextCodon() {
+	if dna.is_complete && dna.rect.pos.x >= -750 {
+		dna.rect.pos.x -= 2
+	}
+}
+
+func newRibosome(path string, rect Rectangle) Ribosome {
+	var ribo_image, _, err = ebitenutil.NewImageFromFile(path)
+	if err != nil {
+		fmt.Println("Error parsing date:", err)
+	}
+	return Ribosome{
+		image: ribo_image,
+		rect:  rect,
+	}
+}
+
+
+func newCodonChoice(path string, rect Rectangle, bases string) codonChoice {
+	var cdn_image, _, err = ebitenutil.NewImageFromFile(path)
+
+	if err != nil {
+		fmt.Println("Error parsing date:", err)
+	}
+	return codonChoice{
+		image: cdn_image,
+		rect:  rect,
+		bases:   bases,
+	}
+}
+
+func (c codonChoice) on_click(g *Game, dnaFrag string) {
+	var x_c, y_c = ebiten.CursorPosition()
+	var b_pos = newVector(x_c, y_c)
+	if rect_point_collision(c.rect, b_pos) && ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
+		//c.cmd(g)
+		if c.bases == dnaFrag {
+			
+		}
+	}
+}
+
+func (c codonChoice) draw(screen *ebiten.Image) {
+	op := &ebiten.DrawImageOptions{}
+	op.GeoM.Translate(float64(c.rect.pos.x), float64(c.rect.pos.y))
+	screen.DrawImage(c.image, op)
+}
+
+func (ribo *Ribosome) update_movement() {
+	ribo.rect.pos.x -= screenWidth/6
+}
+
+func (ribo Ribosome) draw(screen *ebiten.Image) {
+	op := &ebiten.DrawImageOptions{}
+	op.GeoM.Translate(float64(ribo.rect.pos.x), float64(ribo.rect.pos.y))
+	screen.DrawImage(ribo.image, op)
 }

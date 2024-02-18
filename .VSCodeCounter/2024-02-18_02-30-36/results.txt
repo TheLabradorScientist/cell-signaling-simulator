@@ -1,0 +1,36 @@
+Date : 2024-02-18 02:30:36
+Directory : /Users/ashnaguha/Desktop/Go Extra
+Total : 10 files,  708 codes, 15 comments, 109 blanks, all 832 lines
+
+Languages
++------------------+------------+------------+------------+------------+------------+
+| language         | files      | code       | comment    | blank      | total      |
++------------------+------------+------------+------------+------------+------------+
+| Go               |          8 |        644 |         15 |        104 |        763 |
+| Go Checksum File |          1 |         51 |          0 |          1 |         52 |
+| Go Module File   |          1 |         13 |          0 |          4 |         17 |
++------------------+------------+------------+------------+------------+------------+
+
+Directories
++-------------------------------------------------------+------------+------------+------------+------------+------------+
+| path                                                  | files      | code       | comment    | blank      | total      |
++-------------------------------------------------------+------------+------------+------------+------------+------------+
+| .                                                     |         10 |        708 |         15 |        109 |        832 |
++-------------------------------------------------------+------------+------------+------------+------------+------------+
+
+Files
++-------------------------------------------------------+------------------+------------+------------+------------+------------+
+| filename                                              | language         | code       | comment    | blank      | total      |
++-------------------------------------------------------+------------------+------------+------------+------------+------------+
+| /Users/ashnaguha/Desktop/Go Extra/animations.go       | Go               |          1 |          0 |          2 |          3 |
+| /Users/ashnaguha/Desktop/Go Extra/codon_chart.go      | Go               |         45 |          0 |          7 |         52 |
+| /Users/ashnaguha/Desktop/Go Extra/font.go             | Go               |         37 |          5 |          7 |         49 |
+| /Users/ashnaguha/Desktop/Go Extra/geom.go             | Go               |         39 |          6 |          7 |         52 |
+| /Users/ashnaguha/Desktop/Go Extra/go.mod              | Go Module File   |         13 |          0 |          4 |         17 |
+| /Users/ashnaguha/Desktop/Go Extra/go.sum              | Go Checksum File |         51 |          0 |          1 |         52 |
+| /Users/ashnaguha/Desktop/Go Extra/gui.go              | Go               |        236 |          0 |         46 |        282 |
+| /Users/ashnaguha/Desktop/Go Extra/main.go             | Go               |        247 |          3 |         24 |        274 |
+| /Users/ashnaguha/Desktop/Go Extra/signal_reception.go | Go               |         10 |          1 |          2 |         13 |
+| /Users/ashnaguha/Desktop/Go Extra/state_machine.go    | Go               |         29 |          0 |          9 |         38 |
+| Total                                                 |                  |        708 |         15 |        109 |        832 |
++-------------------------------------------------------+------------------+------------+------------+------------+------------+
