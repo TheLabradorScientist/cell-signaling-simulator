@@ -345,7 +345,6 @@ func (c CodonChoice) update2(g *Game, mrnaFrag string) bool {
 	var x_c, y_c = ebiten.CursorPosition()
 	var b_pos = newVector(x_c, y_c)
 	if rect_point_collision(c.rect, b_pos) && inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
-		fmt.Print("d\n")
 		if c.bases == translate(mrnaFrag) {
 			return true
 		}

@@ -43,6 +43,7 @@ var (
 	wrongChoice1  CodonChoice
 	wrongChoice2  CodonChoice
 	mrna          [5]DNA
+	protein		  [5]RNA
 	mrna_ptr      int
 	rightTrna     CodonChoice
 	wrongTrna1    CodonChoice
@@ -169,6 +170,9 @@ func init() {
 
 	for x := 0; x < 5; x++ {
 		mrna[x] = newDNA("RNA.png", newRect(-100, 400, 150, 150), transcribe(dna[x].codon), x)
+	}
+	for x := 0; x < 5; x++ {
+		protein[x] = newRNA("RNA.png", newRect(-100, 400, 150, 150), translate(mrna[x].codon))
 	}
 
 	reset = false
@@ -354,6 +358,9 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		}
 	case "Translation":
 		screen.DrawImage(cytoBg_2, nil)
+		for x := 0; x < 5; x++ {
+			protein[x].draw(screen)
+		}
 
 		mrna[0].draw(screen)
 		ribosome.draw(screen)
@@ -367,7 +374,24 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		g.codonFont.drawFont(screen, wrongTrna2.bases, wrongTrna2.rect.pos.x+50, wrongTrna2.rect.pos.y+100, color.Black)
 
 		g.defaultFont.drawFont(screen, "FINALLY, BACK TO THE CYTOPLASM! \n Match each codon from your mRNA template \n to its corresponding amino acid to synthesize your protein!!!!", 100, 50, color.Black)
-
+		switch mrna_ptr {
+		case 1:
+			g.codonFont.drawFont(screen, protein[0].codon, protein[0].rect.pos.x+200, protein[0].rect.pos.y+100, color.Black)
+		case 2:
+			g.codonFont.drawFont(screen, protein[0].codon, protein[0].rect.pos.x+200, protein[0].rect.pos.y+100, color.Black)
+			g.codonFont.drawFont(screen, protein[1].codon, protein[0].rect.pos.x+350, protein[0].rect.pos.y+100, color.Black)
+		case 3:
+			g.codonFont.drawFont(screen, protein[0].codon, protein[0].rect.pos.x+200, protein[0].rect.pos.y+100, color.Black)
+			g.codonFont.drawFont(screen, protein[1].codon, protein[0].rect.pos.x+350, protein[0].rect.pos.y+100, color.Black)
+			g.codonFont.drawFont(screen, protein[2].codon, protein[0].rect.pos.x+500, protein[0].rect.pos.y+100, color.Black)
+		case 4:
+			g.codonFont.drawFont(screen, protein[0].codon, protein[0].rect.pos.x+200, protein[0].rect.pos.y+100, color.Black)
+			g.codonFont.drawFont(screen, protein[1].codon, protein[0].rect.pos.x+350, protein[0].rect.pos.y+100, color.Black)
+			g.codonFont.drawFont(screen, protein[2].codon, protein[0].rect.pos.x+500, protein[0].rect.pos.y+100, color.Black)
+			g.codonFont.drawFont(screen, protein[3].codon, protein[0].rect.pos.x+650, protein[0].rect.pos.y+100, color.Black)
+		default:
+			break
+		}
 	}
 }
 
