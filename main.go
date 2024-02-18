@@ -254,8 +254,6 @@ func (g *Game) Update() error {
 		//fmt.Printf("%t\n", dna[currentFrag].is_complete)
 		dna[currentFrag].is_complete = rightChoice.update1(g, dna[currentFrag].codon)
 		//fmt.Printf("%t\n", dna[currentFrag].is_complete)
-		wrongChoice1.update1(g, dna[currentFrag].codon)
-		wrongChoice2.update1(g, dna[currentFrag].codon)
 		if dna[currentFrag].is_complete {
 			nextCodon(g)
 		}
@@ -269,8 +267,7 @@ func (g *Game) Update() error {
 			reset = false
 		}
 		mrna[mrna_ptr].is_complete = rightTrna.update2(g, mrna[mrna_ptr].codon)
-		wrongTrna1.update2(g, mrna[mrna_ptr].codon)
-		wrongTrna2.update2(g, mrna[mrna_ptr].codon)
+
 		if mrna[mrna_ptr].is_complete {
 			nextMRNACodon(g)
 		}
