@@ -43,7 +43,7 @@ var (
 	wrongChoice1  CodonChoice
 	wrongChoice2  CodonChoice
 	mrna          [5]DNA
-	protein		  [5]RNA
+	protein       [5]RNA
 	mrna_ptr      int
 	rightTrna     CodonChoice
 	wrongTrna1    CodonChoice
@@ -122,7 +122,7 @@ func init() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	playbutton = newButton("PlayButton.png", newRect(400, 300, 232, 129), MenuToPlasma)
+	playbutton = newButton("PlayButton.png", newRect(400, 600, 232, 129), MenuToPlasma)
 
 	switch seedSignal {
 	case 1:
