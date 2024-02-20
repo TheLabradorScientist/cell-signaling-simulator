@@ -14,7 +14,7 @@ var codonChart = map[string]string{
 	"GCU": "Ala", "GCC": "Ala", "GCA": "Ala", "GCG": "Ala",
 
 	"UAU": "Tyr", "UAC": "Tyr", "UAA": "STOP", "UAG": "STOP",
-	"CAU": "His", "CAC": "His", "CAA": "Gin", "CAG": "Gin",
+	"CAU": "His", "CAC": "His", "CAA": "Gln", "CAG": "Gln",
 	"AAU": "Asn", "AAC": "Asn", "AAA": "Lys", "AAG": "Lys",
 	"GAU": "Asp", "GAC": "Asp", "GAA": "Glu", "GAG": "Glu",
 

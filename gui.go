@@ -62,6 +62,12 @@ type DNA struct {
 	is_complete bool
 }
 
+type Nucleobase struct {
+	image    *ebiten.Image
+	rect     Rectangle
+	baseType string
+}
+
 type CodonChoice struct {
 	image *ebiten.Image
 	rect  Rectangle
@@ -388,4 +394,16 @@ func (ribo Ribosome) draw(screen *ebiten.Image) {
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Translate(float64(ribo.rect.pos.x), float64(ribo.rect.pos.y))
 	screen.DrawImage(ribo.image, op)
+}
+
+func newNucelobase(path string, rect Rectangle, btype string) Nucleobase {
+	var base_image, _, err = ebitenutil.NewImageFromFile(path)
+	if err != nil {
+		fmt.Println("Error parsing date:", err)
+	}
+	return Nucleobase{
+		image:    base_image,
+		rect:     rect,
+		baseType: btype,
+	}
 }

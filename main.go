@@ -6,13 +6,16 @@ import (
 	"log"
 	"math/rand"
 
+	/*"fmt"
+	"path/filepath"
+	"os"*/
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
 const (
-	screenWidth  = 960
-	screenHeight = 960
+	screenWidth  = 1250
+	screenHeight = 750
 )
 
 var (
@@ -102,6 +105,8 @@ func NucleusToCyto2(g *Game) {
 }
 
 func init() {
+	// Must figure out how to use filepath to import PNG images from separate folder at some point
+
 	startBg, _, err = ebitenutil.NewImageFromFile("MenuBg.png")
 	if err != nil {
 		log.Fatal(err)
@@ -122,39 +127,39 @@ func init() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	playbutton = newButton("PlayButton.png", newRect(400, 600, 232, 129), MenuToPlasma)
+	playbutton = newButton("PlayButton.png", newRect(500, 500, 232, 129), MenuToPlasma)
 
 	switch seedSignal {
 	case 1:
-		signal = newSignal("signalA.png", newRect(100, 100, 75, 75))
+		signal = newSignal("signalA.png", newRect(500, 100, 75, 75))
 		signal.signalType = "signalA"
 		// PLACEHOLDER IN CASE WE DO NOT GET TIME TO CODE RANDOM CODONS
 		template = [5]string{"TAC", "GTC", "CGG", "ACA", "ACT"}
 	case 2:
-		signal = newSignal("signalB.png", newRect(100, 100, 75, 75))
+		signal = newSignal("signalB.png", newRect(500, 100, 75, 75))
 		signal.signalType = "signalB"
 		// PLACEHOLDER IN CASE WE DO NOT GET TIME TO CODE RANDOM CODONS
 		template = [5]string{"TAC", "GTC", "CGG", "ACA", "ACT"}
 	case 3:
-		signal = newSignal("signalC.png", newRect(100, 100, 75, 75))
+		signal = newSignal("signalC.png", newRect(500, 100, 75, 75))
 		signal.signalType = "signalC"
 		// PLACEHOLDER IN CASE WE DO NOT GET TIME TO CODE RANDOM CODONS
 		template = [5]string{"TAC", "GTC", "CGG", "ACA", "ACT"}
 	case 4:
-		signal = newSignal("signalD.png", newRect(100, 100, 75, 75))
+		signal = newSignal("signalD.png", newRect(500, 100, 75, 75))
 		signal.signalType = "signalD"
 		// PLACEHOLDER IN CASE WE DO NOT GET TIME TO CODE RANDOM CODONS
 		template = [5]string{"TAC", "GTC", "CGG", "ACA", "ACT"}
 	}
 
-	receptorA = newReceptor("receptorA.png", newRect(0, 500, 100, 150), "receptorA")
-	receptorB = newReceptor("receptorB.png", newRect(250, 500, 100, 150), "receptorB")
-	receptorC = newReceptor("receptorC.png", newRect(500, 500, 100, 150), "receptorC")
-	receptorD = newReceptor("receptorD.png", newRect(750, 500, 100, 150), "receptorD")
+	receptorA = newReceptor("receptorA.png", newRect(50, 400, 100, 150), "receptorA")
+	receptorB = newReceptor("receptorB.png", newRect(350, 400, 100, 150), "receptorB")
+	receptorC = newReceptor("receptorC.png", newRect(650, 400, 100, 150), "receptorC")
+	receptorD = newReceptor("receptorD.png", newRect(950, 400, 100, 150), "receptorD")
 
-	tk1 = newKinase("TK1.png", newRect(400, 100, 150, 150), "tk1")
-	tk2 = newKinase("TK2.png", newRect(100, 175, 150, 150), "tk2")
-	tfa = newTFA("TFA.png", newRect(300, 500, 150, 150))
+	tk1 = newKinase("TK1.png", newRect(500, 100, 150, 150), "tk1")
+	tk2 = newKinase("TK2.png", newRect(250, 175, 150, 150), "tk2")
+	tfa = newTFA("TFA.png", newRect(700, 500, 150, 150))
 
 	for x := 0; x < 5; x++ {
 		dna[x] = newDNA("DNA.png", newRect(-100+200*x, 500, 150, 150), template[x], x)
@@ -290,7 +295,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		receptorC.draw(screen)
 		receptorD.draw(screen)
 		signal.draw(screen)
-		g.defaultFont.drawFont(screen, "WELCOME TO THE PLASMA MEMBRANE! \n Drag the signal to the matching receptor to enter the cell!", 100, 50, color.White)
+		g.defaultFont.drawFont(screen, "WELCOME TO THE PLASMA MEMBRANE! \n Drag the signal to the matching receptor \n to enter the cell!", 100, 50, color.White)
 		if signal.is_dragged {
 			signal.draw(screen)
 		}
@@ -316,7 +321,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		}
 		dna[0].draw(screen)
 
-		g.defaultFont.drawFont(screen, "WELCOME TO THE NUCLEUS! \n Match each codon on the DNA template to the \n corresponding RNA codon to transcribe a new mRNA molecule!!!", 100, 50, color.White)
+		g.defaultFont.drawFont(screen, "WELCOME TO THE NUCLEUS! \n Match each codon on the DNA template to the corresponding RNA \n codon to transcribe a new mRNA molecule!!!", 100, 50, color.White)
 
 		op := &ebiten.DrawImageOptions{}
 		op.GeoM.Translate(0, 300)
@@ -328,24 +333,24 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		rightChoice.draw(screen)
 		wrongChoice1.draw(screen)
 		wrongChoice2.draw(screen)
-		g.codonFont.drawFont(screen, rightChoice.bases, rightChoice.rect.pos.x+50, rightChoice.rect.pos.y+100, color.Black)
-		g.codonFont.drawFont(screen, wrongChoice1.bases, wrongChoice1.rect.pos.x+50, wrongChoice1.rect.pos.y+100, color.Black)
-		g.codonFont.drawFont(screen, wrongChoice2.bases, wrongChoice2.rect.pos.x+50, wrongChoice2.rect.pos.y+100, color.Black)
+		g.codonFont.drawFont(screen, rightChoice.bases, rightChoice.rect.pos.x+25, rightChoice.rect.pos.y+90, color.Black)
+		g.codonFont.drawFont(screen, wrongChoice1.bases, wrongChoice1.rect.pos.x+25, wrongChoice1.rect.pos.y+90, color.Black)
+		g.codonFont.drawFont(screen, wrongChoice2.bases, wrongChoice2.rect.pos.x+25, wrongChoice2.rect.pos.y+90, color.Black)
 		switch currentFrag {
 		case 1:
-			g.codonFont.drawFont(screen, rna[0].codon, rna[0].rect.pos.x+500, rna[0].rect.pos.y+100, color.Black)
+			g.codonFont.drawFont(screen, rna[0].codon, rna[0].rect.pos.x+500, rna[0].rect.pos.y+140, color.Black)
 		case 2:
-			g.codonFont.drawFont(screen, rna[0].codon, rna[0].rect.pos.x+500, rna[0].rect.pos.y+100, color.Black)
-			g.codonFont.drawFont(screen, rna[1].codon, rna[0].rect.pos.x+650, rna[0].rect.pos.y+100, color.Black)
+			g.codonFont.drawFont(screen, rna[0].codon, rna[0].rect.pos.x+500, rna[0].rect.pos.y+140, color.Black)
+			g.codonFont.drawFont(screen, rna[1].codon, rna[0].rect.pos.x+650, rna[0].rect.pos.y+140, color.Black)
 		case 3:
-			g.codonFont.drawFont(screen, rna[0].codon, rna[0].rect.pos.x+500, rna[0].rect.pos.y+100, color.Black)
-			g.codonFont.drawFont(screen, rna[1].codon, rna[0].rect.pos.x+650, rna[0].rect.pos.y+100, color.Black)
-			g.codonFont.drawFont(screen, rna[2].codon, rna[0].rect.pos.x+800, rna[0].rect.pos.y+100, color.Black)
+			g.codonFont.drawFont(screen, rna[0].codon, rna[0].rect.pos.x+500, rna[0].rect.pos.y+140, color.Black)
+			g.codonFont.drawFont(screen, rna[1].codon, rna[0].rect.pos.x+650, rna[0].rect.pos.y+140, color.Black)
+			g.codonFont.drawFont(screen, rna[2].codon, rna[0].rect.pos.x+800, rna[0].rect.pos.y+140, color.Black)
 		case 4:
-			g.codonFont.drawFont(screen, rna[0].codon, rna[0].rect.pos.x+500, rna[0].rect.pos.y+100, color.Black)
-			g.codonFont.drawFont(screen, rna[1].codon, rna[0].rect.pos.x+650, rna[0].rect.pos.y+100, color.Black)
-			g.codonFont.drawFont(screen, rna[2].codon, rna[0].rect.pos.x+800, rna[0].rect.pos.y+100, color.Black)
-			g.codonFont.drawFont(screen, rna[3].codon, rna[0].rect.pos.x+950, rna[0].rect.pos.y+100, color.Black)
+			g.codonFont.drawFont(screen, rna[0].codon, rna[0].rect.pos.x+500, rna[0].rect.pos.y+140, color.Black)
+			g.codonFont.drawFont(screen, rna[1].codon, rna[0].rect.pos.x+650, rna[0].rect.pos.y+140, color.Black)
+			g.codonFont.drawFont(screen, rna[2].codon, rna[0].rect.pos.x+800, rna[0].rect.pos.y+140, color.Black)
+			g.codonFont.drawFont(screen, rna[3].codon, rna[0].rect.pos.x+950, rna[0].rect.pos.y+140, color.Black)
 		default:
 			break
 		}
@@ -359,6 +364,10 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			protein[x].draw(screen)
 		}
 
+		if mrna_ptr != -1 {
+			g.codonFont.drawFont(screen, mrna[mrna_ptr].codon, mrna[0].rect.pos.x+500, mrna[0].rect.pos.y+400, color.Black)
+		}
+
 		mrna[0].draw(screen)
 		ribosome.draw(screen)
 
@@ -366,26 +375,26 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		wrongTrna1.draw(screen)
 		wrongTrna2.draw(screen)
 
-		g.codonFont.drawFont(screen, rightTrna.bases, rightTrna.rect.pos.x+50, rightTrna.rect.pos.y+100, color.Black)
-		g.codonFont.drawFont(screen, wrongTrna1.bases, wrongTrna1.rect.pos.x+50, wrongTrna1.rect.pos.y+100, color.Black)
-		g.codonFont.drawFont(screen, wrongTrna2.bases, wrongTrna2.rect.pos.x+50, wrongTrna2.rect.pos.y+100, color.Black)
+		g.codonFont.drawFont(screen, rightTrna.bases, rightTrna.rect.pos.x+25, rightTrna.rect.pos.y+90, color.Black)
+		g.codonFont.drawFont(screen, wrongTrna1.bases, wrongTrna1.rect.pos.x+25, wrongTrna1.rect.pos.y+90, color.Black)
+		g.codonFont.drawFont(screen, wrongTrna2.bases, wrongTrna2.rect.pos.x+25, wrongTrna2.rect.pos.y+90, color.Black)
 
 		g.defaultFont.drawFont(screen, "FINALLY, BACK TO THE CYTOPLASM! \n Match each codon from your mRNA template \n to its corresponding amino acid to synthesize your protein!!!!", 100, 50, color.Black)
 		switch mrna_ptr {
 		case 1:
-			g.codonFont.drawFont(screen, protein[0].codon, protein[0].rect.pos.x+200, protein[0].rect.pos.y+100, color.Black)
+			g.codonFont.drawFont(screen, protein[0].codon, protein[0].rect.pos.x+150, protein[0].rect.pos.y, color.Black)
 		case 2:
-			g.codonFont.drawFont(screen, protein[0].codon, protein[0].rect.pos.x+200, protein[0].rect.pos.y+100, color.Black)
-			g.codonFont.drawFont(screen, protein[1].codon, protein[0].rect.pos.x+350, protein[0].rect.pos.y+100, color.Black)
+			g.codonFont.drawFont(screen, protein[0].codon, protein[0].rect.pos.x+150, protein[0].rect.pos.y, color.Black)
+			g.codonFont.drawFont(screen, protein[1].codon, protein[0].rect.pos.x+300, protein[0].rect.pos.y, color.Black)
 		case 3:
-			g.codonFont.drawFont(screen, protein[0].codon, protein[0].rect.pos.x+200, protein[0].rect.pos.y+100, color.Black)
-			g.codonFont.drawFont(screen, protein[1].codon, protein[0].rect.pos.x+350, protein[0].rect.pos.y+100, color.Black)
-			g.codonFont.drawFont(screen, protein[2].codon, protein[0].rect.pos.x+500, protein[0].rect.pos.y+100, color.Black)
+			g.codonFont.drawFont(screen, protein[0].codon, protein[0].rect.pos.x+150, protein[0].rect.pos.y, color.Black)
+			g.codonFont.drawFont(screen, protein[1].codon, protein[0].rect.pos.x+300, protein[0].rect.pos.y, color.Black)
+			g.codonFont.drawFont(screen, protein[2].codon, protein[0].rect.pos.x+450, protein[0].rect.pos.y, color.Black)
 		case 4:
-			g.codonFont.drawFont(screen, protein[0].codon, protein[0].rect.pos.x+200, protein[0].rect.pos.y+100, color.Black)
-			g.codonFont.drawFont(screen, protein[1].codon, protein[0].rect.pos.x+350, protein[0].rect.pos.y+100, color.Black)
-			g.codonFont.drawFont(screen, protein[2].codon, protein[0].rect.pos.x+500, protein[0].rect.pos.y+100, color.Black)
-			g.codonFont.drawFont(screen, protein[3].codon, protein[0].rect.pos.x+650, protein[0].rect.pos.y+100, color.Black)
+			g.codonFont.drawFont(screen, protein[0].codon, protein[0].rect.pos.x+150, protein[0].rect.pos.y, color.Black)
+			g.codonFont.drawFont(screen, protein[1].codon, protein[0].rect.pos.x+300, protein[0].rect.pos.y, color.Black)
+			g.codonFont.drawFont(screen, protein[2].codon, protein[0].rect.pos.x+450, protein[0].rect.pos.y, color.Black)
+			g.codonFont.drawFont(screen, protein[3].codon, protein[0].rect.pos.x+600, protein[0].rect.pos.y, color.Black)
 		default:
 			break
 		}
@@ -398,8 +407,8 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
 
 func main() {
 	game := &Game{}
-	game.defaultFont = newFont("ThaleahFat.ttf", 32)
-	game.codonFont = newFont("ThaleahFat.ttf", 90)
+	game.defaultFont = newFont("CourierPrime-Regular.ttf", 32)
+	game.codonFont = newFont("Honk-Regular.ttf", 90)
 	if err := ebiten.RunGame(game); err != nil {
 		log.Fatal(err)
 	}
