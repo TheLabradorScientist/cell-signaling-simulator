@@ -48,13 +48,13 @@ type TFA struct {
 	is_active bool
 }
 
-type RNA struct {
+type Transcript struct {
 	image *ebiten.Image
 	rect  Rectangle
 	codon string
 }
 
-type DNA struct {
+type Template struct {
 	image       *ebiten.Image
 	rect        Rectangle
 	codon       string
@@ -81,7 +81,7 @@ type Ribosome struct {
 }
 
 func newSignal(path string, rect Rectangle) Signal {
-	var sig_image, _, err = ebitenutil.NewImageFromFile(path)
+	var sig_image, _, err = ebitenutil.NewImageFromFile(loadFile(path))
 
 	if err != nil {
 		fmt.Println("Error parsing date:", err)
@@ -94,7 +94,7 @@ func newSignal(path string, rect Rectangle) Signal {
 }
 
 func newKinase(path string, rect Rectangle, ktype string) Kinase {
-	var kin_image, _, err = ebitenutil.NewImageFromFile(path)
+	var kin_image, _, err = ebitenutil.NewImageFromFile(loadFile(path))
 	if err != nil {
 		fmt.Println("Error parsing date:", err)
 	}
@@ -109,7 +109,7 @@ func newKinase(path string, rect Rectangle, ktype string) Kinase {
 }
 
 func newTFA(path string, rect Rectangle) TFA {
-	var tfa_image, _, err = ebitenutil.NewImageFromFile(path)
+	var tfa_image, _, err = ebitenutil.NewImageFromFile(loadFile(path))
 	if err != nil {
 		fmt.Println("Error parsing date:", err)
 	}
@@ -121,7 +121,7 @@ func newTFA(path string, rect Rectangle) TFA {
 }
 
 func newButton(path string, rect Rectangle, cmd SceneSwapFunc) Button {
-	var btn_image, _, err = ebitenutil.NewImageFromFile(path)
+	var btn_image, _, err = ebitenutil.NewImageFromFile(loadFile(path))
 
 	if err != nil {
 		fmt.Println("Error parsing date:", err)
@@ -169,7 +169,7 @@ func (s Signal) draw(screen *ebiten.Image) {
 }
 
 func newReceptor(path string, rect Rectangle, rtype string) Receptor {
-	var rec_image, _, err = ebitenutil.NewImageFromFile(path)
+	var rec_image, _, err = ebitenutil.NewImageFromFile(loadFile(path))
 
 	if err != nil {
 		fmt.Println("Error parsing date:", err)
@@ -251,31 +251,31 @@ func (t TFA) draw(screen *ebiten.Image) {
 	screen.DrawImage(t.image, op)
 }
 
-func newRNA(path string, rect Rectangle, codon string) RNA {
-	var rna_image, _, err = ebitenutil.NewImageFromFile(path)
+func newTranscript(path string, rect Rectangle, codon string) Transcript {
+	var transcript_image, _, err = ebitenutil.NewImageFromFile(loadFile(path))
 	if err != nil {
 		fmt.Println("Error parsing date:", err)
 	}
-	return RNA{
-		image: rna_image,
+	return Transcript{
+		image: transcript_image,
 		rect:  rect,
 		codon: codon,
 	}
 }
 
-func (rna RNA) draw(screen *ebiten.Image) {
+func (transcript Transcript) draw(screen *ebiten.Image) {
 	op := &ebiten.DrawImageOptions{}
-	op.GeoM.Translate(float64(rna.rect.pos.x), float64(rna.rect.pos.y))
-	screen.DrawImage(rna.image, op)
+	op.GeoM.Translate(float64(transcript.rect.pos.x), float64(transcript.rect.pos.y))
+	screen.DrawImage(transcript.image, op)
 }
 
-func newDNA(path string, rect Rectangle, codon string, fragment int) DNA {
-	var dna_image, _, err = ebitenutil.NewImageFromFile(path)
+func newTemplate(path string, rect Rectangle, codon string, fragment int) Template {
+	var template_image, _, err = ebitenutil.NewImageFromFile(loadFile(path))
 	if err != nil {
 		fmt.Println("Error parsing date:", err)
 	}
-	return DNA{
-		image:       dna_image,
+	return Template{
+		image:       template_image,
 		rect:        rect,
 		codon:       codon,
 		fragment:    fragment,
@@ -283,10 +283,10 @@ func newDNA(path string, rect Rectangle, codon string, fragment int) DNA {
 	}
 }
 
-func (dna DNA) draw(screen *ebiten.Image) {
+func (template Template) draw(screen *ebiten.Image) {
 	op := &ebiten.DrawImageOptions{}
-	op.GeoM.Translate(float64(dna.rect.pos.x), float64(dna.rect.pos.y))
-	screen.DrawImage(dna.image, op)
+	op.GeoM.Translate(float64(template.rect.pos.x), float64(template.rect.pos.y))
+	screen.DrawImage(template.image, op)
 }
 
 func nextCodon(g *Game) {
@@ -313,7 +313,7 @@ func nextMRNACodon(g *Game) {
 }
 
 func newRibosome(path string, rect Rectangle) Ribosome {
-	var ribo_image, _, err = ebitenutil.NewImageFromFile(path)
+	var ribo_image, _, err = ebitenutil.NewImageFromFile(loadFile(path))
 	if err != nil {
 		fmt.Println("Error parsing date:", err)
 	}
@@ -324,7 +324,7 @@ func newRibosome(path string, rect Rectangle) Ribosome {
 }
 
 func newCodonChoice(path string, rect Rectangle, bases string) CodonChoice {
-	var cdn_image, _, err = ebitenutil.NewImageFromFile(path)
+	var cdn_image, _, err = ebitenutil.NewImageFromFile(loadFile(path))
 
 	if err != nil {
 		fmt.Println("Error parsing date:", err)
@@ -397,7 +397,7 @@ func (ribo Ribosome) draw(screen *ebiten.Image) {
 }
 
 func newNucelobase(path string, rect Rectangle, btype string) Nucleobase {
-	var base_image, _, err = ebitenutil.NewImageFromFile(path)
+	var base_image, _, err = ebitenutil.NewImageFromFile((loadFile(path)))
 	if err != nil {
 		fmt.Println("Error parsing date:", err)
 	}

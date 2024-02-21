@@ -1,14 +1,14 @@
 package main
 
 import (
+	"fmt"
 	"image/color"
 	_ "image/png"
 	"log"
 	"math/rand"
-
-	/*"fmt"
+	"os"
 	"path/filepath"
-	"os"*/
+
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
@@ -37,16 +37,16 @@ var (
 	tk1           Kinase
 	tk2           Kinase
 	tfa           TFA
-	rna           [5]RNA
-	dna           [5]DNA
+	rna           [5]Transcript
+	dna           [5]Template
 	currentFrag   = 0
 	rnaPolymerase *ebiten.Image
 	ribosome      Ribosome
 	rightChoice   CodonChoice
 	wrongChoice1  CodonChoice
 	wrongChoice2  CodonChoice
-	mrna          [5]DNA
-	protein       [5]RNA
+	mrna          [5]Template
+	protein       [5]Transcript
 	mrna_ptr      int
 	rightTrna     CodonChoice
 	wrongTrna1    CodonChoice
@@ -104,26 +104,39 @@ func NucleusToCyto2(g *Game) {
 	g.switchedNucleusToCyto2 = true
 }
 
-func init() {
-	// Must figure out how to use filepath to import PNG images from separate folder at some point
+func loadFile(image string) string {
+	// Construct path to file
+	imagepath := filepath.Join("Assets", "Images", image)
+	// Open file
+	file, err := os.Open(imagepath)
+	if err != nil {
+		fmt.Println("Error opening file:", err)
+		return "Error"
+	}
 
-	startBg, _, err = ebitenutil.NewImageFromFile("MenuBg.png")
+	defer file.Close()
+
+	return file.Name()
+}
+
+func init() {
+	startBg, _, err = ebitenutil.NewImageFromFile(loadFile("MenuBg.png"))
 	if err != nil {
 		log.Fatal(err)
 	}
-	plasmaBg, _, err = ebitenutil.NewImageFromFile("PlasmaBg.png")
+	plasmaBg, _, err = ebitenutil.NewImageFromFile(loadFile("PlasmaBg.png"))
 	if err != nil {
 		log.Fatal(err)
 	}
-	cytoBg_1, _, err = ebitenutil.NewImageFromFile("CytoBg1.png")
+	cytoBg_1, _, err = ebitenutil.NewImageFromFile(loadFile("CytoBg1.png"))
 	if err != nil {
 		log.Fatal(err)
 	}
-	nucleusBg, _, err = ebitenutil.NewImageFromFile("NucleusBg.png")
+	nucleusBg, _, err = ebitenutil.NewImageFromFile(loadFile("NucleusBg.png"))
 	if err != nil {
 		log.Fatal(err)
 	}
-	cytoBg_2, _, err = ebitenutil.NewImageFromFile("CytoBg2.png")
+	cytoBg_2, _, err = ebitenutil.NewImageFromFile(loadFile("CytoBg2.png"))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -162,22 +175,22 @@ func init() {
 	tfa = newTFA("TFA.png", newRect(700, 500, 150, 150))
 
 	for x := 0; x < 5; x++ {
-		dna[x] = newDNA("DNA.png", newRect(-100+200*x, 500, 150, 150), template[x], x)
+		dna[x] = newTemplate("DNA.png", newRect(-100+200*x, 500, 150, 150), template[x], x)
 	}
 	for x := 0; x < 5; x++ {
-		rna[x] = newRNA("RNA.png", newRect(-100, 200, 150, 150), transcribe(template[x]))
+		rna[x] = newTranscript("RNA.png", newRect(0, 200, 150, 150), transcribe(template[x]))
 	}
 
-	rnaPolymerase, _, err = ebitenutil.NewImageFromFile("rnaPolym.png")
+	rnaPolymerase, _, err = ebitenutil.NewImageFromFile(loadFile("rnaPolym.png"))
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	for x := 0; x < 5; x++ {
-		mrna[x] = newDNA("RNA.png", newRect(-100, 400, 150, 150), transcribe(dna[x].codon), x)
+		mrna[x] = newTemplate("RNA.png", newRect(0, 400, 150, 150), transcribe(dna[x].codon), x)
 	}
 	for x := 0; x < 5; x++ {
-		protein[x] = newRNA("RNA.png", newRect(-100, 400, 150, 150), translate(mrna[x].codon))
+		protein[x] = newTranscript("RNA.png", newRect(-100, 400, 150, 150), translate(mrna[x].codon))
 	}
 
 	reset = false
@@ -364,12 +377,12 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			protein[x].draw(screen)
 		}
 
-		if mrna_ptr != -1 {
-			g.codonFont.drawFont(screen, mrna[mrna_ptr].codon, mrna[0].rect.pos.x+500, mrna[0].rect.pos.y+400, color.Black)
-		}
-
 		mrna[0].draw(screen)
 		ribosome.draw(screen)
+
+		if mrna_ptr != -1 {
+			g.codonFont.drawFont(screen, mrna[mrna_ptr].codon, mrna[0].rect.pos.x+500, mrna[0].rect.pos.y+200, color.Black)
+		}
 
 		rightTrna.draw(screen)
 		wrongTrna1.draw(screen)
