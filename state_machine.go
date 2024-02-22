@@ -35,3 +35,46 @@ func (s StateMachine) update(g *Game) {
 func (s StateMachine) draw(screen *ebiten.Image) {
 	s.state.Draw(screen)
 }
+
+
+
+
+func MenuToPlasma(g *Game) {
+	g.switchedMenuToPlasma = true
+	g.switchedPlasmaToMenu = false
+	g.switchedPlasmaToCyto1 = false
+	g.switchedCyto1ToNucleus = false
+	g.switchedNucleusToCyto2 = false
+}
+
+func PlasmaToMenu(g *Game) {
+	g.switchedMenuToPlasma = false
+	g.switchedPlasmaToMenu = true
+	g.switchedPlasmaToCyto1 = false
+	g.switchedCyto1ToNucleus = false
+	g.switchedNucleusToCyto2 = false
+}
+
+func PlasmaToCyto1(g *Game) {
+	g.switchedMenuToPlasma = false
+	g.switchedPlasmaToMenu = false
+	g.switchedPlasmaToCyto1 = true
+	g.switchedCyto1ToNucleus = false
+	g.switchedNucleusToCyto2 = false
+}
+
+func Cyto1ToNucleus(g *Game) {
+	g.switchedMenuToPlasma = false
+	g.switchedPlasmaToMenu = false
+	g.switchedPlasmaToCyto1 = false
+	g.switchedCyto1ToNucleus = true
+	g.switchedNucleusToCyto2 = false
+}
+
+func NucleusToCyto2(g *Game) {
+	g.switchedMenuToPlasma = false
+	g.switchedPlasmaToMenu = false
+	g.switchedPlasmaToCyto1 = false
+	g.switchedCyto1ToNucleus = false
+	g.switchedNucleusToCyto2 = true
+}

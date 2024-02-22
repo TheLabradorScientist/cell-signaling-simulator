@@ -96,6 +96,38 @@ func (cd CommonDraw) draw(screen *ebiten.Image) {
 	screen.DrawImage(cd.image, op)
 } */
 
+func newButton(path string, rect Rectangle, cmd SceneSwapFunc) Button {
+	var btn_image, _, err = ebitenutil.NewImageFromFile(loadFile(path))
+
+	if err != nil {
+		fmt.Println("Error parsing date:", err)
+	}
+	return Button{
+		image: btn_image,
+		rect:  rect,
+		cmd:   cmd,
+	}
+}
+
+func (b Button) on_click(g *Game) {
+	var x_c, y_c = ebiten.CursorPosition()
+	var b_pos = newVector(x_c, y_c)
+	if rect_point_collision(b.rect, b_pos) && ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
+		b.cmd(g)
+	}
+}
+
+/*
+func (b Button) draw(screen *ebiten.Image) {
+	b.CommonDraw.draw(screen)
+} */
+
+func (b Button) draw(screen *ebiten.Image) {
+	op := &ebiten.DrawImageOptions{}
+	op.GeoM.Translate(float64(b.rect.pos.x), float64(b.rect.pos.y))
+	screen.DrawImage(b.image, op)
+}
+
 func newSignal(path string, rect Rectangle) Signal {
 	var sig_image, _, err = ebitenutil.NewImageFromFile(loadFile(path))
 
@@ -135,40 +167,6 @@ func newTFA(path string, rect Rectangle) TFA {
 		is_active: false,
 	}
 }
-
-func newButton(path string, rect Rectangle, cmd SceneSwapFunc) Button {
-	var btn_image, _, err = ebitenutil.NewImageFromFile(loadFile(path))
-
-	if err != nil {
-		fmt.Println("Error parsing date:", err)
-	}
-	return Button{
-		image: btn_image,
-		rect:  rect,
-		cmd:   cmd,
-	}
-}
-
-func (b Button) on_click(g *Game) {
-	var x_c, y_c = ebiten.CursorPosition()
-	var b_pos = newVector(x_c, y_c)
-	if rect_point_collision(b.rect, b_pos) && ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
-		b.cmd(g)
-	}
-}
-
-/* 
-func (b Button) draw(screen *ebiten.Image) {
-	b.CommonDraw.draw(screen)
-} */
-
-
-func (b Button) draw(screen *ebiten.Image) {
-	op := &ebiten.DrawImageOptions{}
-	op.GeoM.Translate(float64(b.rect.pos.x), float64(b.rect.pos.y))
-	screen.DrawImage(b.image, op)
-}
-
 
 func (s *Signal) on_click(g *Game) {
 	var x_c, y_c = ebiten.CursorPosition()
@@ -219,20 +217,32 @@ func (r *Receptor) update() {
 	}
 }
 
+func (r *Receptor) animate(newImage string) {
+	var rec_image, _, err = ebitenutil.NewImageFromFile(loadFile(newImage))
+	if err != nil {
+		fmt.Println("Error parsing date:", err)
+	}
+	r.image = rec_image
+}
+
 func (k *Kinase) update(rect Rectangle) {
 	var x_c, y_c = ebiten.CursorPosition()
 	var b_pos = newVector(x_c, y_c)
-	if !k.is_clicked_on && k.is_moving {
-		if k.rect.pos.y <= 425 && k.kinaseType == "tk2" {
+	if k.kinaseType == "temp_tk1" && k.is_moving {
+		if k.rect.pos.y <= 750 {
+			k.descend()
+		}
+	} else if !k.is_clicked_on && k.is_moving {
+		if k.rect.pos.y <= 400 && k.kinaseType == "tk2" {
+			k.descend()
+		} else if k.rect.pos.y <= 50 && k.kinaseType == "tk1" {
 			k.descend()
 		} else {
 			k.rect.pos.x += k.delta
 		}
 	}
 
-	if rect_point_collision(k.rect, b_pos) &&
-		ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) &&
-		aabb_collision(k.rect, rect) {
+	if rect_point_collision(k.rect, b_pos) && ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) && aabb_collision(k.rect, rect) {
 		k.is_clicked_on = true
 	}
 
@@ -251,8 +261,17 @@ func (k Kinase) draw(screen *ebiten.Image) {
 }
 
 func (k *Kinase) activate() {
-	if k.kinaseType == "tk1" {k.animate("act_TK1.png")}
-	if k.kinaseType == "tk2" {k.animate("act_TK2.png")}
+	if k.kinaseType == "tk1" {
+		k.animate("act_TK1.png")
+	}
+	if k.kinaseType == "tk2" {
+		k.rect.pos.y -= 3
+		k.animate("act_TK2.png")
+	}
+	if k.kinaseType == "temp_tk1" && !k.is_moving {
+		k.rect.pos.y -= 3
+		k.animate("act_TK1.png")
+	}
 	k.is_moving = true
 }
 
@@ -269,6 +288,7 @@ func (k *Kinase) animate(newImage string) {
 }
 
 func (t *TFA) activate() {
+	t.rect.pos.y -= 3
 	t.animate("act_TFA.png")
 	tfa.is_active = true
 }

@@ -40,6 +40,10 @@ var (
 	rna           [5]Transcript
 	dna           [5]Template
 	currentFrag   = 0
+	temp_tk1A      Kinase
+	temp_tk1B      Kinase
+	temp_tk1C      Kinase
+	temp_tk1D      Kinase
 	rnaPolymerase *ebiten.Image
 	ribosome      Ribosome
 	rightChoice   CodonChoice
@@ -64,45 +68,6 @@ type Game struct {
 	switchedNucleusToCyto2 bool
 }
 
-func MenuToPlasma(g *Game) {
-	g.switchedMenuToPlasma = true
-	g.switchedPlasmaToMenu = false
-	g.switchedPlasmaToCyto1 = false
-	g.switchedCyto1ToNucleus = false
-	g.switchedNucleusToCyto2 = false
-}
-
-func PlasmaToMenu(g *Game) {
-	g.switchedMenuToPlasma = false
-	g.switchedPlasmaToMenu = true
-	g.switchedPlasmaToCyto1 = false
-	g.switchedCyto1ToNucleus = false
-	g.switchedNucleusToCyto2 = false
-}
-
-func PlasmaToCyto1(g *Game) {
-	g.switchedMenuToPlasma = false
-	g.switchedPlasmaToMenu = false
-	g.switchedPlasmaToCyto1 = true
-	g.switchedCyto1ToNucleus = false
-	g.switchedNucleusToCyto2 = false
-}
-
-func Cyto1ToNucleus(g *Game) {
-	g.switchedMenuToPlasma = false
-	g.switchedPlasmaToMenu = false
-	g.switchedPlasmaToCyto1 = false
-	g.switchedCyto1ToNucleus = true
-	g.switchedNucleusToCyto2 = false
-}
-
-func NucleusToCyto2(g *Game) {
-	g.switchedMenuToPlasma = false
-	g.switchedPlasmaToMenu = false
-	g.switchedPlasmaToCyto1 = false
-	g.switchedCyto1ToNucleus = false
-	g.switchedNucleusToCyto2 = true
-}
 
 func loadFile(image string) string {
 	// Construct path to file
@@ -163,12 +128,17 @@ func init() {
 		//template = [5]string{"TAC", "GTC", "CGG", "ACA", "ACT"}
 	}
 
-	receptorA = newReceptor("receptorA.png", newRect(50, 400, 100, 150), "receptorA")
-	receptorB = newReceptor("receptorB.png", newRect(350, 400, 100, 150), "receptorB")
-	receptorC = newReceptor("receptorC.png", newRect(650, 400, 100, 150), "receptorC")
-	receptorD = newReceptor("receptorD.png", newRect(950, 400, 100, 150), "receptorD")
+	receptorA = newReceptor("inact_receptorA.png", newRect(50, 400, 100, 150), "receptorA")
+	receptorB = newReceptor("inact_receptorB.png", newRect(350, 400, 100, 150), "receptorB")
+	receptorC = newReceptor("inact_receptorC.png", newRect(650, 400, 100, 150), "receptorC")
+	receptorD = newReceptor("inact_receptorD.png", newRect(950, 400, 100, 150), "receptorD")
 
-	tk1 = newKinase("inact_TK1.png", newRect(500, 100, 150, 150), "tk1")
+	temp_tk1A = newKinase("inact_TK1.png", newRect(50, 600, 150, 150), "temp_tk1")
+	temp_tk1B = newKinase("inact_TK1.png", newRect(350, 600, 150, 150), "temp_tk1")
+	temp_tk1C = newKinase("inact_TK1.png", newRect(650, 600, 150, 150), "temp_tk1")
+	temp_tk1D = newKinase("inact_TK1.png", newRect(950, 600, 150, 150), "temp_tk1")
+
+	tk1 = newKinase("inact_TK1.png", newRect(500, -100, 150, 150), "tk1")
 	tk2 = newKinase("inact_TK2.png", newRect(250, 175, 150, 150), "tk2")
 	tfa = newTFA("inact_TFA.png", newRect(700, 500, 150, 150))
 
@@ -177,6 +147,10 @@ func init() {
 	}
 	for x := 0; x < 5; x++ {
 		rna[x] = newTranscript("RNA.png", newRect(0, 200, 150, 150), transcribe(template[x]))
+	}
+
+	if err != nil {
+		log.Fatal(err)
 	}
 
 	rnaPolymerase, _, err = ebitenutil.NewImageFromFile(loadFile("rnaPolym.png"))
@@ -194,7 +168,7 @@ func init() {
 	reset = false
 
 	rightChoice = newCodonChoice("codonButton.png", newRect(50, 150, 192, 111), transcribe(dna[0].codon))
-	wrongChoice1 = newCodonChoice("codonButton.png", newRect(350, 150, 192, 111), (rightChoice.bases))
+	wrongChoice1 = newCodonChoice("codonButton.png", newRect(350, 150, 192, 111), randomRNACodon(rightChoice.bases))
 	wrongChoice2 = newCodonChoice("codonButton.png", newRect(650, 150, 192, 111), randomRNACodon(rightChoice.bases))
 
 	ribosome = newRibosome("ribosome.png", newRect(0, 300, 404, 367))
@@ -221,25 +195,36 @@ func (g *Game) Update() error {
 		receptorB.update()
 		receptorC.update()
 		receptorD.update()
+		temp_tk1A.update(temp_tk1B.rect)
+		temp_tk1B.update(temp_tk1C.rect)
+		temp_tk1C.update(temp_tk1D.rect)
+		temp_tk1D.update(temp_tk1A.rect)
 		if receptorA.is_touching_signal {
 			if matchSR(signal.signalType, receptorA.receptorType) {
-				PlasmaToCyto1(g)
+				receptorA.animate("act_receptorA.png")
+				temp_tk1A.activate()
 			}
 		}
 		if receptorB.is_touching_signal {
 			if matchSR(signal.signalType, receptorB.receptorType) {
-				PlasmaToCyto1(g)
+				receptorB.animate("act_receptorB.png")
+				temp_tk1B.activate()
 			}
 		}
 		if receptorC.is_touching_signal {
 			if matchSR(signal.signalType, receptorC.receptorType) {
-				PlasmaToCyto1(g)
+				receptorC.animate("act_receptorC.png")
+				temp_tk1C.activate()
 			}
 		}
 		if receptorD.is_touching_signal {
 			if matchSR(signal.signalType, receptorD.receptorType) {
-				PlasmaToCyto1(g)
+				receptorD.animate("act_receptorD.png")
+				temp_tk1D.activate()
 			}
+		}
+		if (temp_tk1A.rect.pos.y >= 750 || temp_tk1B.rect.pos.y >= 750 || temp_tk1C.rect.pos.y >= 750 || temp_tk1D.rect.pos.y >= 750) {
+			PlasmaToCyto1(g)
 		}
 	case "Signal Transduction":
 		ebiten.SetWindowTitle("Cell Signaling Synthesis - Signal Transduction")
@@ -306,6 +291,10 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		receptorC.draw(screen)
 		receptorD.draw(screen)
 		signal.draw(screen)
+		temp_tk1A.draw(screen)
+		temp_tk1B.draw(screen)
+		temp_tk1C.draw(screen)
+		temp_tk1D.draw(screen)
 		g.defaultFont.drawFont(screen, "WELCOME TO THE PLASMA MEMBRANE! \n Drag the signal to the matching receptor \n to enter the cell!", 100, 50, color.White)
 		if signal.is_dragged {
 			signal.draw(screen)
