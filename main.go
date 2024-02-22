@@ -146,23 +146,21 @@ func init() {
 	case 1:
 		signal = newSignal("signalA.png", newRect(500, 100, 75, 75))
 		signal.signalType = "signalA"
-		// PLACEHOLDER IN CASE WE DO NOT GET TIME TO CODE RANDOM CODONS
-		template = [5]string{"TAC", "GTC", "CGG", "ACA", "ACT"}
+		template = [5]string{"TAC", randomDNACodon(), randomDNACodon(), randomDNACodon(), "ACT"}
 	case 2:
 		signal = newSignal("signalB.png", newRect(500, 100, 75, 75))
 		signal.signalType = "signalB"
-		// PLACEHOLDER IN CASE WE DO NOT GET TIME TO CODE RANDOM CODONS
-		template = [5]string{"TAC", "GTC", "CGG", "ACA", "ACT"}
+		template = [5]string{"TAC", randomDNACodon(), randomDNACodon(), randomDNACodon(), "ATT"}
 	case 3:
 		signal = newSignal("signalC.png", newRect(500, 100, 75, 75))
 		signal.signalType = "signalC"
-		// PLACEHOLDER IN CASE WE DO NOT GET TIME TO CODE RANDOM CODONS
-		template = [5]string{"TAC", "GTC", "CGG", "ACA", "ACT"}
+		template = [5]string{"TAC", randomDNACodon(), randomDNACodon(), randomDNACodon(), "ATC"}
 	case 4:
 		signal = newSignal("signalD.png", newRect(500, 100, 75, 75))
 		signal.signalType = "signalD"
+		template = [5]string{"TAC", randomDNACodon(), randomDNACodon(), randomDNACodon(), "ATT"}
 		// PLACEHOLDER IN CASE WE DO NOT GET TIME TO CODE RANDOM CODONS
-		template = [5]string{"TAC", "GTC", "CGG", "ACA", "ACT"}
+		//template = [5]string{"TAC", "GTC", "CGG", "ACA", "ACT"}
 	}
 
 	receptorA = newReceptor("receptorA.png", newRect(50, 400, 100, 150), "receptorA")
@@ -170,9 +168,9 @@ func init() {
 	receptorC = newReceptor("receptorC.png", newRect(650, 400, 100, 150), "receptorC")
 	receptorD = newReceptor("receptorD.png", newRect(950, 400, 100, 150), "receptorD")
 
-	tk1 = newKinase("TK1.png", newRect(500, 100, 150, 150), "tk1")
-	tk2 = newKinase("TK2.png", newRect(250, 175, 150, 150), "tk2")
-	tfa = newTFA("TFA.png", newRect(700, 500, 150, 150))
+	tk1 = newKinase("inact_TK1.png", newRect(500, 100, 150, 150), "tk1")
+	tk2 = newKinase("inact_TK2.png", newRect(250, 175, 150, 150), "tk2")
+	tfa = newTFA("inact_TFA.png", newRect(700, 500, 150, 150))
 
 	for x := 0; x < 5; x++ {
 		dna[x] = newTemplate("DNA.png", newRect(-100+200*x, 500, 150, 150), template[x], x)
@@ -196,16 +194,16 @@ func init() {
 	reset = false
 
 	rightChoice = newCodonChoice("codonButton.png", newRect(50, 150, 192, 111), transcribe(dna[0].codon))
-	wrongChoice1 = newCodonChoice("codonButton.png", newRect(350, 150, 192, 111), randomize(rightChoice.bases))
-	wrongChoice2 = newCodonChoice("codonButton.png", newRect(650, 150, 192, 111), randomize(rightChoice.bases))
+	wrongChoice1 = newCodonChoice("codonButton.png", newRect(350, 150, 192, 111), (rightChoice.bases))
+	wrongChoice2 = newCodonChoice("codonButton.png", newRect(650, 150, 192, 111), randomRNACodon(rightChoice.bases))
 
 	ribosome = newRibosome("ribosome.png", newRect(0, 300, 404, 367))
 
 	mrna_ptr = 0
 
 	rightTrna = newCodonChoice("codonButton.png", newRect(50, 150, 192, 111), translate(mrna[0].codon))
-	wrongTrna1 = newCodonChoice("codonButton.png", newRect(350, 150, 192, 111), translate(randomize(rightTrna.bases)))
-	wrongTrna2 = newCodonChoice("codonButton.png", newRect(650, 150, 192, 111), translate(randomize(rightTrna.bases)))
+	wrongTrna1 = newCodonChoice("codonButton.png", newRect(350, 150, 192, 111), translate(randomRNACodon(rightTrna.bases)))
+	wrongTrna2 = newCodonChoice("codonButton.png", newRect(650, 150, 192, 111), translate(randomRNACodon(rightTrna.bases)))
 
 }
 
@@ -265,23 +263,23 @@ func (g *Game) Update() error {
 		ebiten.SetWindowTitle("Cell Signaling Synthesis - Transcription")
 		if reset {
 			rightChoice.bases = transcribe(dna[currentFrag].codon)
-			wrongChoice1.bases = randomize(rightChoice.bases)
-			wrongChoice2.bases = randomize(rightChoice.bases)
+			wrongChoice1.bases = randomRNACodon(rightChoice.bases)
+			wrongChoice2.bases = randomRNACodon(rightChoice.bases)
 			reset = false
 		}
 		//fmt.Printf("%t\n", dna[currentFrag].is_complete)
 		dna[currentFrag].is_complete = rightChoice.update1(g, dna[currentFrag].codon)
 		//fmt.Printf("%t\n", dna[currentFrag].is_complete)
 		if dna[currentFrag].is_complete {
-			nextCodon(g)
+			nextDNACodon(g)
 		}
 
 	case "Translation":
 		ebiten.SetWindowTitle("Cell Signaling Synthesis - Translation")
 		if reset {
 			rightTrna.bases = translate(mrna[mrna_ptr].codon)
-			wrongTrna1.bases = randomize(rightTrna.bases)
-			wrongTrna2.bases = randomize(rightTrna.bases)
+			wrongTrna1.bases = translate(randomRNACodon(rightTrna.bases))
+			wrongTrna2.bases = translate(randomRNACodon(rightTrna.bases))
 			reset = false
 		}
 		mrna[mrna_ptr].is_complete = rightTrna.update2(g, mrna[mrna_ptr].codon)

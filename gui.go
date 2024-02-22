@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"os"
 
-	"math/rand"
-
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
@@ -14,6 +12,7 @@ import (
 type SceneSwapFunc func(*Game)
 
 type Button struct {
+	//CommonDraw
 	image *ebiten.Image
 	rect  Rectangle
 	cmd   SceneSwapFunc
@@ -80,6 +79,23 @@ type Ribosome struct {
 	rect  Rectangle
 }
 
+/*
+type Drawable interface {
+	draw()
+}
+
+type CommonDraw struct{
+	Drawable
+	rect   Rectangle
+	image  *ebiten.Image
+}
+
+func (cd CommonDraw) draw(screen *ebiten.Image) {
+	op := &ebiten.DrawImageOptions{}
+	op.GeoM.Translate(float64(cd.rect.pos.x), float64(cd.rect.pos.y))
+	screen.DrawImage(cd.image, op)
+} */
+
 func newSignal(path string, rect Rectangle) Signal {
 	var sig_image, _, err = ebitenutil.NewImageFromFile(loadFile(path))
 
@@ -141,11 +157,18 @@ func (b Button) on_click(g *Game) {
 	}
 }
 
+/* 
+func (b Button) draw(screen *ebiten.Image) {
+	b.CommonDraw.draw(screen)
+} */
+
+
 func (b Button) draw(screen *ebiten.Image) {
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Translate(float64(b.rect.pos.x), float64(b.rect.pos.y))
 	screen.DrawImage(b.image, op)
 }
+
 
 func (s *Signal) on_click(g *Game) {
 	var x_c, y_c = ebiten.CursorPosition()
@@ -228,6 +251,8 @@ func (k Kinase) draw(screen *ebiten.Image) {
 }
 
 func (k *Kinase) activate() {
+	if k.kinaseType == "tk1" {k.animate("act_TK1.png")}
+	if k.kinaseType == "tk2" {k.animate("act_TK2.png")}
 	k.is_moving = true
 }
 
@@ -235,7 +260,16 @@ func (k *Kinase) descend() {
 	k.rect.pos.y += 2
 }
 
+func (k *Kinase) animate(newImage string) {
+	var kin_image, _, err = ebitenutil.NewImageFromFile(loadFile(newImage))
+	if err != nil {
+		fmt.Println("Error parsing date:", err)
+	}
+	k.image = kin_image
+}
+
 func (t *TFA) activate() {
+	t.animate("act_TFA.png")
 	tfa.is_active = true
 }
 
@@ -243,6 +277,14 @@ func (t *TFA) update() {
 	if t.is_active && t.rect.pos.y <= 750 {
 		t.rect.pos.y += 2
 	}
+}
+
+func (t *TFA) animate(newImage string) {
+	var tfa_image, _, err = ebitenutil.NewImageFromFile(loadFile(newImage))
+	if err != nil {
+		fmt.Println("Error parsing date:", err)
+	}
+	t.image = tfa_image
 }
 
 func (t TFA) draw(screen *ebiten.Image) {
@@ -289,7 +331,7 @@ func (template Template) draw(screen *ebiten.Image) {
 	screen.DrawImage(template.image, op)
 }
 
-func nextCodon(g *Game) {
+func nextDNACodon(g *Game) {
 	if currentFrag < 4 {
 		currentFrag++
 		dna[currentFrag].is_complete = false
@@ -356,28 +398,6 @@ func (c CodonChoice) update2(g *Game, mrnaFrag string) bool {
 		}
 	}
 	return false
-}
-
-func randomize(exception string) string {
-	randomCodon := ""
-	for x := 0; x < 3; x++ {
-		seedSignal = rand.Intn(4) + 1
-		switch seedSignal {
-		case 1:
-			randomCodon += "A"
-		case 2:
-			randomCodon += "U"
-		case 3:
-			randomCodon += "G"
-		case 4:
-			randomCodon += "C"
-		}
-	}
-	if randomCodon != exception {
-		return randomCodon
-	} else {
-		return randomize(exception)
-	}
 }
 
 func (c CodonChoice) draw(screen *ebiten.Image) {

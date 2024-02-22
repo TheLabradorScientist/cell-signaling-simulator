@@ -1,6 +1,9 @@
 package main
 
-import "strings"
+import (
+	"math/rand"
+	"strings"
+)
 
 var codonChart = map[string]string{
 	"UUU": "Phe", "UUC": "Phe", "UUA": "Leu", "UUG": "Leu",
@@ -50,3 +53,60 @@ func translate(codon string) string {
 	result := codonChart[codon]
 	return result
 }
+
+func randomBase(nuclAcid string) string {
+	seedSignal = rand.Intn(4) + 1
+	switch seedSignal {
+	case 1:
+		return "A"
+	case 2:
+		if nuclAcid == "DNA" {
+			return "T"
+		} else {
+			return "U"
+		}
+	case 3:
+		return "G"
+	case 4:
+		return "C"
+	default:
+		return "A"
+	}
+}
+
+func randomRNACodon(exception string) string {
+	randCodon := ""
+	for x := 0; x < 3; x++ {
+		seedSignal = rand.Intn(4) + 1
+		randCodon += randomBase("RNA")
+	}
+	if randCodon != exception {
+		return randCodon
+	} else {
+		return randomRNACodon(exception)
+	}
+}
+
+func randomDNACodon() string {
+	exceptions := []string{"ATC", "ATT", "ACT"}
+	randCodon := ""
+	for x := 0; x < 3; x++ {
+		seedSignal = rand.Intn(4) + 1
+		randCodon += randomBase("DNA")
+	}
+	if !contains(exceptions, randCodon) {
+		return randCodon
+	} else {
+		return randomDNACodon()
+	}
+}
+
+func contains(list []string, T any) bool {
+	for index := 0; index < len(list); index++ {
+		if list[index] == T {
+			return true
+		}
+	}
+	return false
+}
+
