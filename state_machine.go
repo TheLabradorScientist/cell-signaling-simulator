@@ -46,6 +46,9 @@ func MenuToPlasma(g *Game) {
 	g.switchedCyto1ToNucleus = false
 	g.switchedNucleusToCyto2 = false
 
+	g.switchedMenuToInfo   = false
+	g.switchedInfoToMenu   = false
+
 	g.switchedMenuToLevelSelect = false
 	g.switchedLevelSelectToPlasma = false
 	g.switchedLevelSelectToCyto1 = false
@@ -60,6 +63,9 @@ func PlasmaToMenu(g *Game) {
 	g.switchedPlasmaToCyto1 = false
 	g.switchedCyto1ToNucleus = false
 	g.switchedNucleusToCyto2 = false
+
+	g.switchedMenuToInfo   = false
+	g.switchedInfoToMenu   = false
 
 	g.switchedMenuToLevelSelect = false
 	g.switchedLevelSelectToPlasma = false
@@ -76,6 +82,9 @@ func PlasmaToCyto1(g *Game) {
 	g.switchedCyto1ToNucleus = false
 	g.switchedNucleusToCyto2 = false
 
+	g.switchedMenuToInfo   = false
+	g.switchedInfoToMenu   = false
+
 	g.switchedMenuToLevelSelect = false
 	g.switchedLevelSelectToPlasma = false
 	g.switchedLevelSelectToCyto1 = false
@@ -90,6 +99,9 @@ func Cyto1ToNucleus(g *Game) {
 	g.switchedPlasmaToCyto1 = false
 	g.switchedCyto1ToNucleus = true
 	g.switchedNucleusToCyto2 = false
+
+	g.switchedMenuToInfo   = false
+	g.switchedInfoToMenu   = false
 
 	g.switchedMenuToLevelSelect = false
 	g.switchedLevelSelectToPlasma = false
@@ -107,6 +119,9 @@ func NucleusToCyto2(g *Game) {
 	g.switchedNucleusToCyto2 = true
 	g.switchedLevelSelectToMenu = false 
 
+	g.switchedMenuToInfo   = false
+	g.switchedInfoToMenu   = false
+
 	g.switchedMenuToLevelSelect = false
 	g.switchedLevelSelectToPlasma = false
 	g.switchedLevelSelectToCyto1 = false
@@ -120,7 +135,10 @@ func MenuToLevelSelect(g *Game) {
 	g.switchedPlasmaToMenu = false
 	g.switchedPlasmaToCyto1 = false
 	g.switchedCyto1ToNucleus = false
-	g.switchedNucleusToCyto2 = false
+	g.switchedNucleusToCyto2 = false 
+
+	g.switchedMenuToInfo   = false
+	g.switchedInfoToMenu   = false
 	
 	g.switchedMenuToLevelSelect = true
 	g.switchedLevelSelectToPlasma = false
@@ -136,6 +154,9 @@ func LevelSelectToPlasma(g *Game) {
 	g.switchedPlasmaToCyto1 = false
 	g.switchedCyto1ToNucleus = false
 	g.switchedNucleusToCyto2 = false
+
+	g.switchedMenuToInfo   = false
+	g.switchedInfoToMenu   = false
 	
 	g.switchedMenuToLevelSelect = false
 	g.switchedLevelSelectToPlasma = true
@@ -151,6 +172,9 @@ func LevelSelectToCyto1(g *Game) {
 	g.switchedPlasmaToCyto1 = false
 	g.switchedCyto1ToNucleus = false
 	g.switchedNucleusToCyto2 = false
+
+	g.switchedMenuToInfo   = false
+	g.switchedInfoToMenu   = false
 	
 	g.switchedMenuToLevelSelect = false
 	g.switchedLevelSelectToPlasma = false
@@ -166,6 +190,9 @@ func LevelSelectToNucleus(g *Game) {
 	g.switchedPlasmaToCyto1 = false
 	g.switchedCyto1ToNucleus = false
 	g.switchedNucleusToCyto2 = false
+
+	g.switchedMenuToInfo   = false
+	g.switchedInfoToMenu   = false
 	
 	g.switchedMenuToLevelSelect = false
 	g.switchedLevelSelectToPlasma = false
@@ -181,6 +208,9 @@ func LevelSelectToCyto2(g *Game) {
 	g.switchedPlasmaToCyto1 = false
 	g.switchedCyto1ToNucleus = false
 	g.switchedNucleusToCyto2 = false
+
+	g.switchedMenuToInfo   = false
+	g.switchedInfoToMenu   = false
 	
 	g.switchedMenuToLevelSelect = false
 	g.switchedLevelSelectToPlasma = false
@@ -196,6 +226,9 @@ func LevelSelectToMenu(g *Game) {
 	g.switchedPlasmaToCyto1 = false
 	g.switchedCyto1ToNucleus = false
 	g.switchedNucleusToCyto2 = false
+
+	g.switchedMenuToInfo   = false
+	g.switchedInfoToMenu   = false
 	
 	g.switchedMenuToLevelSelect = false
 	g.switchedLevelSelectToPlasma = false
@@ -203,4 +236,40 @@ func LevelSelectToMenu(g *Game) {
 	g.switchedLevelSelectToNucleus = false
 	g.switchedLevelSelectToCyto2 = false
 	g.switchedLevelSelectToMenu = true  
+}
+
+func InfoToMenu(g *Game) {
+	g.switchedMenuToPlasma = false
+	g.switchedPlasmaToMenu = false
+	g.switchedPlasmaToCyto1 = false
+	g.switchedCyto1ToNucleus = false
+	g.switchedNucleusToCyto2 = false
+
+	g.switchedMenuToInfo   = false
+	g.switchedInfoToMenu   = true
+	
+	g.switchedMenuToLevelSelect = false
+	g.switchedLevelSelectToPlasma = false
+	g.switchedLevelSelectToCyto1 = false
+	g.switchedLevelSelectToNucleus = false
+	g.switchedLevelSelectToCyto2 = false
+	g.switchedLevelSelectToMenu = false  
+}
+
+func MenuToInfo(g *Game) {
+	g.switchedMenuToPlasma = false
+	g.switchedPlasmaToMenu = false
+	g.switchedPlasmaToCyto1 = false
+	g.switchedCyto1ToNucleus = false
+	g.switchedNucleusToCyto2 = false
+
+	g.switchedMenuToInfo   = true
+	g.switchedInfoToMenu   = false
+	
+	g.switchedMenuToLevelSelect = false
+	g.switchedLevelSelectToPlasma = false
+	g.switchedLevelSelectToCyto1 = false
+	g.switchedLevelSelectToNucleus = false
+	g.switchedLevelSelectToCyto2 = false
+	g.switchedLevelSelectToMenu = false  
 }

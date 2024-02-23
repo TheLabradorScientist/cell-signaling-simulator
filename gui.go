@@ -63,8 +63,8 @@ type Template struct {
 }
 
 type RNAPolymerase struct {
-	image    *ebiten.Image
-	rect     Rectangle
+	image *ebiten.Image
+	rect  Rectangle
 }
 
 type Nucleobase struct {
@@ -295,9 +295,11 @@ func (k *Kinase) animate(newImage string) {
 }
 
 func (t *TFA) activate() {
-	if t.tfaType == "tfa1" {t.rect.pos.y -= 3}
-		t.animate("act_TFA.png")
-		t.is_active = true
+	if t.tfaType == "tfa1" {
+		t.rect.pos.y -= 3
+	}
+	t.animate("act_TFA.png")
+	t.is_active = true
 }
 
 func (t *TFA) update() {
@@ -336,7 +338,7 @@ func newRNAPolymerase(path string, rect Rectangle) RNAPolymerase {
 	}
 	return RNAPolymerase{
 		image: RNAPolym_image,
-		rect: rect,
+		rect:  rect,
 	}
 }
 

@@ -19,51 +19,54 @@ const (
 )
 
 var (
-	err           error
-	scene         string = "Main Menu"
-	startBg       *ebiten.Image
-	plasmaBg      *ebiten.Image
-	cytoBg_1      *ebiten.Image
-	nucleusBg     *ebiten.Image
-	cytoBg_2      *ebiten.Image
-	levSelBg	  *ebiten.Image
-	playbutton    Button
-	levSelButton  Button
+	err                error
+	scene              string = "Main Menu"
+	startBg            *ebiten.Image
+	infoBg             *ebiten.Image
+	plasmaBg           *ebiten.Image
+	cytoBg_1           *ebiten.Image
+	nucleusBg          *ebiten.Image
+	cytoBg_2           *ebiten.Image
+	levSelBg           *ebiten.Image
+	playbutton         Button
+	infoButton         Button
+	infoToMenuButton   Button
+	levSelButton       Button
 	levToPlasmaButton  Button
-	levToCyto1Button  Button
-	levToNucleusButton  Button
-	levToCyto2Button  Button
-	levToMenuButton  Button
-	seedSignal    = rand.Intn(4) + 1
-	signal        Signal
-	receptorA     Receptor
-	receptorB     Receptor
-	receptorC     Receptor
-	receptorD     Receptor
-	template      = [5]string{}
-	tk1           Kinase
-	tk2           Kinase
-	tfa           TFA
-	rna           [5]Transcript
-	dna           [5]Template
-	currentFrag   = 0
-	temp_tk1A      Kinase
-	temp_tk1B      Kinase
-	temp_tk1C      Kinase
-	temp_tk1D      Kinase
-	temp_tfa       TFA
-	rnaPolymerase RNAPolymerase
-	ribosome      Ribosome
-	rightChoice   CodonChoice
-	wrongChoice1  CodonChoice
-	wrongChoice2  CodonChoice
-	mrna          [5]Template
-	protein       [5]Transcript
-	mrna_ptr      int
-	rightTrna     CodonChoice
-	wrongTrna1    CodonChoice
-	wrongTrna2    CodonChoice
-	reset         bool
+	levToCyto1Button   Button
+	levToNucleusButton Button
+	levToCyto2Button   Button
+	levToMenuButton    Button
+	seedSignal         = rand.Intn(4) + 1
+	signal             Signal
+	receptorA          Receptor
+	receptorB          Receptor
+	receptorC          Receptor
+	receptorD          Receptor
+	template           = [5]string{}
+	tk1                Kinase
+	tk2                Kinase
+	tfa                TFA
+	rna                [5]Transcript
+	dna                [5]Template
+	currentFrag        = 0
+	temp_tk1A          Kinase
+	temp_tk1B          Kinase
+	temp_tk1C          Kinase
+	temp_tk1D          Kinase
+	temp_tfa           TFA
+	rnaPolymerase      RNAPolymerase
+	ribosome           Ribosome
+	rightChoice        CodonChoice
+	wrongChoice1       CodonChoice
+	wrongChoice2       CodonChoice
+	mrna               [5]Template
+	protein            [5]Transcript
+	mrna_ptr           int
+	rightTrna          CodonChoice
+	wrongTrna1         CodonChoice
+	wrongTrna2         CodonChoice
+	reset              bool
 )
 
 type Game struct {
@@ -75,6 +78,9 @@ type Game struct {
 	switchedCyto1ToNucleus bool
 	switchedNucleusToCyto2 bool
 
+	switchedMenuToInfo bool
+	switchedInfoToMenu bool
+
 	switchedMenuToLevelSelect    bool
 	switchedLevelSelectToPlasma  bool
 	switchedLevelSelectToCyto1   bool
@@ -82,7 +88,6 @@ type Game struct {
 	switchedLevelSelectToCyto2   bool
 	switchedLevelSelectToMenu    bool
 }
-
 
 func loadFile(image string) string {
 	// Construct path to file
@@ -101,6 +106,10 @@ func loadFile(image string) string {
 
 func init() {
 	startBg, _, err = ebitenutil.NewImageFromFile(loadFile("MenuBg.png"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	infoBg, _, err = ebitenutil.NewImageFromFile(loadFile("InfoBg.png"))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -125,8 +134,13 @@ func init() {
 		log.Fatal(err)
 	}
 
-	playbutton = newButton("PlayButton.png", newRect(400, 375, 242, 138), MenuToPlasma)
-	levSelButton = newButton("levSelButton.png", newRect(400, 525, 232, 140), MenuToLevelSelect)
+	// playbutton = newButton("PlayButton.png", newRect(350, 375, 242, 138), MenuToPlasma)
+	// infoButton = newButton("infoButton.png", newRect(650, 375, 242, 138), MenuToInfo)
+	// levSelButton = newButton("levSelButton.png", newRect(500, 525, 232, 140), MenuToLevelSelect)
+	playbutton = newButton("PlayButton.png", newRect(700, 200, 242, 138), MenuToPlasma)
+	infoButton = newButton("infoButton.png", newRect(700, 360, 242, 138), MenuToInfo)
+	levSelButton = newButton("levSelButton.png", newRect(700, 520, 232, 140), MenuToLevelSelect)
+	infoToMenuButton = newButton("menuButton.png", newRect(300, 375, 242, 138), InfoToMenu)
 	levToPlasmaButton = newButton("levToPlasmaBtn.png", newRect(300, 200, 232, 129), LevelSelectToPlasma)
 	levToCyto1Button = newButton("levToCyto1Btn.png", newRect(300, 350, 232, 129), LevelSelectToCyto1)
 	levToNucleusButton = newButton("levToNucleusBtn.png", newRect(650, 200, 232, 129), LevelSelectToNucleus)
@@ -168,7 +182,6 @@ func init() {
 	tk2 = newKinase("inact_TK2.png", newRect(250, 175, 150, 150), "tk2")
 	tfa = newTFA("inact_TFA.png", newRect(700, 500, 150, 150), "tfa1")
 
-
 	for x := 0; x < 5; x++ {
 		dna[x] = newTemplate("DNA.png", newRect(-50+200*x, 500, 150, 150), template[x], x)
 	}
@@ -179,7 +192,7 @@ func init() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	
+
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -216,8 +229,13 @@ func (g *Game) Update() error {
 	case "Main Menu":
 		ebiten.SetWindowTitle("Cell Signaling Pathway - Main Menu")
 		ebiten.SetWindowSize(screenWidth, screenHeight)
+		infoButton.on_click(g)
 		playbutton.on_click(g)
 		levSelButton.on_click(g)
+	case "Information":
+		ebiten.SetWindowTitle("Cell Signaling Pathway - About")
+		ebiten.SetWindowSize(screenWidth, screenHeight)
+		infoToMenuButton.on_click(g)
 	case "Level Selection":
 		ebiten.SetWindowTitle("Cell Signaling Pathway - Level Selection")
 		ebiten.SetWindowSize(screenWidth, screenHeight)
@@ -262,7 +280,7 @@ func (g *Game) Update() error {
 				temp_tk1D.activate()
 			}
 		}
-		if (temp_tk1A.rect.pos.y >= 750 || temp_tk1B.rect.pos.y >= 750 || temp_tk1C.rect.pos.y >= 750 || temp_tk1D.rect.pos.y >= 750) {
+		if temp_tk1A.rect.pos.y >= 750 || temp_tk1B.rect.pos.y >= 750 || temp_tk1C.rect.pos.y >= 750 || temp_tk1D.rect.pos.y >= 750 {
 			PlasmaToCyto1(g)
 		}
 	case "Signal Transduction":
@@ -323,12 +341,24 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	case "Main Menu":
 		screen.DrawImage(startBg, nil)
 		playbutton.draw(screen)
+		infoButton.draw(screen)
 		levSelButton.draw(screen)
 		if g.switchedMenuToPlasma {
 			scene = "Signal Reception"
 		}
 		if g.switchedMenuToLevelSelect {
 			scene = "Level Selection"
+		}
+		if g.switchedMenuToInfo {
+			scene = "Information"
+		}
+	case "Information":
+		screen.DrawImage(infoBg, nil)
+		infoToMenuButton.draw(screen)
+		g.defaultFont.drawFont(screen, "WELCOME TO THE CELL SIGNALING PATHWAY SIMULATOR! \nThis simulator will guide you through a \ncomplete signaling pathway from reception \nto translation! Click the play button or \nselect a level to begin.", 150, 200, color.Black)
+
+		if g.switchedInfoToMenu {
+			scene = "Main Menu"
 		}
 	case "Level Selection":
 		screen.DrawImage(levSelBg, nil)
@@ -345,7 +375,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		}
 		if g.switchedLevelSelectToCyto1 {
 			scene = "Signal Transduction"
-		}		
+		}
 		if g.switchedLevelSelectToNucleus {
 			scene = "Transcription"
 		}
