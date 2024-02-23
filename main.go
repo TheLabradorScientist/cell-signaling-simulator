@@ -70,23 +70,15 @@ var (
 )
 
 type Game struct {
-	defaultFont            Font
-	codonFont              Font
-	switchedMenuToPlasma   bool
-	switchedPlasmaToMenu   bool
-	switchedPlasmaToCyto1  bool
-	switchedCyto1ToNucleus bool
-	switchedNucleusToCyto2 bool
-
-	switchedMenuToInfo bool
-	switchedInfoToMenu bool
-
-	switchedMenuToLevelSelect    bool
-	switchedLevelSelectToPlasma  bool
-	switchedLevelSelectToCyto1   bool
-	switchedLevelSelectToNucleus bool
-	switchedLevelSelectToCyto2   bool
-	switchedLevelSelectToMenu    bool
+	defaultFont           Font
+	codonFont             Font
+	switchedToPlasma      bool
+	switchedToMenu        bool
+	switchedToCyto1       bool
+	switchedToNucleus     bool
+	switchedToCyto2       bool
+	switchedToInfo        bool
+	switchedToLevelSelect bool
 }
 
 func loadFile(image string) string {
@@ -137,15 +129,15 @@ func init() {
 	// playbutton = newButton("PlayButton.png", newRect(350, 375, 242, 138), MenuToPlasma)
 	// infoButton = newButton("infoButton.png", newRect(650, 375, 242, 138), MenuToInfo)
 	// levSelButton = newButton("levSelButton.png", newRect(500, 525, 232, 140), MenuToLevelSelect)
-	playbutton = newButton("PlayButton.png", newRect(700, 200, 242, 138), MenuToPlasma)
-	infoButton = newButton("infoButton.png", newRect(700, 360, 242, 138), MenuToInfo)
-	levSelButton = newButton("levSelButton.png", newRect(700, 520, 232, 140), MenuToLevelSelect)
-	infoToMenuButton = newButton("menuButton.png", newRect(300, 375, 242, 138), InfoToMenu)
-	levToPlasmaButton = newButton("levToPlasmaBtn.png", newRect(300, 200, 232, 129), LevelSelectToPlasma)
-	levToCyto1Button = newButton("levToCyto1Btn.png", newRect(300, 350, 232, 129), LevelSelectToCyto1)
-	levToNucleusButton = newButton("levToNucleusBtn.png", newRect(650, 200, 232, 129), LevelSelectToNucleus)
-	levToCyto2Button = newButton("levToCyto2Btn.png", newRect(650, 350, 232, 129), LevelSelectToCyto2)
-	levToMenuButton = newButton("menuButton.png", newRect(500, 500, 232, 129), LevelSelectToMenu)
+	playbutton = newButton("PlayButton.png", newRect(750, 200, 242, 138), ToPlasma)
+	infoButton = newButton("infoButton.png", newRect(750, 360, 242, 138), ToInfo)
+	levSelButton = newButton("levSelButton.png", newRect(740, 520, 232, 140), ToLevelSelect)
+	infoToMenuButton = newButton("menuButton.png", newRect(300, 375, 242, 138), ToMenu)
+	levToPlasmaButton = newButton("levToPlasmaBtn.png", newRect(300, 200, 232, 129), ToPlasma)
+	levToCyto1Button = newButton("levToCyto1Btn.png", newRect(300, 350, 232, 129), ToCyto1)
+	levToNucleusButton = newButton("levToNucleusBtn.png", newRect(650, 200, 232, 129), ToNucleus)
+	levToCyto2Button = newButton("levToCyto2Btn.png", newRect(650, 350, 232, 129), ToCyto2)
+	levToMenuButton = newButton("menuButton.png", newRect(500, 500, 232, 129), ToMenu)
 
 	switch seedSignal {
 	case 1:
@@ -281,7 +273,7 @@ func (g *Game) Update() error {
 			}
 		}
 		if temp_tk1A.rect.pos.y >= 750 || temp_tk1B.rect.pos.y >= 750 || temp_tk1C.rect.pos.y >= 750 || temp_tk1D.rect.pos.y >= 750 {
-			PlasmaToCyto1(g)
+			ToCyto1(g)
 		}
 	case "Signal Transduction":
 		ebiten.SetWindowTitle("Cell Signaling Pathway - Signal Transduction")
@@ -299,7 +291,7 @@ func (g *Game) Update() error {
 			tk2.is_clicked_on = false
 		}
 		if tfa.rect.pos.y > 750 {
-			Cyto1ToNucleus(g)
+			ToNucleus(g)
 		}
 	case "Transcription":
 		ebiten.SetWindowTitle("Cell Signaling Pathway - Transcription")
@@ -343,13 +335,13 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		playbutton.draw(screen)
 		infoButton.draw(screen)
 		levSelButton.draw(screen)
-		if g.switchedMenuToPlasma {
+		if g.switchedToPlasma {
 			scene = "Signal Reception"
 		}
-		if g.switchedMenuToLevelSelect {
+		if g.switchedToLevelSelect {
 			scene = "Level Selection"
 		}
-		if g.switchedMenuToInfo {
+		if g.switchedToInfo {
 			scene = "Information"
 		}
 	case "Information":
@@ -357,7 +349,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		infoToMenuButton.draw(screen)
 		g.defaultFont.drawFont(screen, "WELCOME TO THE CELL SIGNALING PATHWAY SIMULATOR! \nThis simulator will guide you through a \ncomplete signaling pathway from reception \nto translation! Click the play button or \nselect a level to begin.", 150, 200, color.Black)
 
-		if g.switchedInfoToMenu {
+		if g.switchedToMenu {
 			scene = "Main Menu"
 		}
 	case "Level Selection":
@@ -367,19 +359,19 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		levToNucleusButton.draw(screen)
 		levToCyto2Button.draw(screen)
 		levToMenuButton.draw(screen)
-		if g.switchedLevelSelectToMenu {
+		if g.switchedToMenu {
 			scene = "Main Menu"
 		}
-		if g.switchedLevelSelectToPlasma {
+		if g.switchedToPlasma {
 			scene = "Signal Reception"
 		}
-		if g.switchedLevelSelectToCyto1 {
+		if g.switchedToCyto1 {
 			scene = "Signal Transduction"
 		}
-		if g.switchedLevelSelectToNucleus {
+		if g.switchedToNucleus {
 			scene = "Transcription"
 		}
-		if g.switchedLevelSelectToCyto2 {
+		if g.switchedToCyto2 {
 			scene = "Translation"
 		}
 	case "Signal Reception":
@@ -397,10 +389,10 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		if signal.is_dragged {
 			signal.draw(screen)
 		}
-		if g.switchedPlasmaToMenu {
+		if g.switchedToMenu {
 			scene = "Main Menu"
 		}
-		if g.switchedPlasmaToCyto1 {
+		if g.switchedToCyto1 {
 			scene = "Signal Transduction"
 		}
 	case "Signal Transduction":
@@ -409,7 +401,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		tk2.draw(screen)
 		tfa.draw(screen)
 		g.defaultFont.drawFont(screen, "WELCOME TO THE CYTOPLASM! \n Click when each kinase overlaps to follow \n the phosphorylation cascade!!", 100, 50, color.Black)
-		if g.switchedCyto1ToNucleus {
+		if g.switchedToNucleus {
 			scene = "Transcription"
 		}
 	case "Transcription":
@@ -454,7 +446,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			break
 		}
 
-		if g.switchedNucleusToCyto2 {
+		if g.switchedToCyto2 {
 			scene = "Translation"
 		}
 	case "Translation":
@@ -479,6 +471,11 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		g.codonFont.drawFont(screen, wrongTrna2.bases, wrongTrna2.rect.pos.x+25, wrongTrna2.rect.pos.y+90, color.Black)
 
 		g.defaultFont.drawFont(screen, "FINALLY, BACK TO THE CYTOPLASM! \n Match each codon from your mRNA template \n to its corresponding amino acid to synthesize your protein!!!!", 100, 50, color.Black)
+
+		if g.switchedToMenu {
+			scene = "Main Menu"
+		}
+
 		switch mrna_ptr {
 		case 1:
 			protein[0].draw(screen)

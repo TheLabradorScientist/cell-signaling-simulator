@@ -36,240 +36,49 @@ func (s StateMachine) draw(screen *ebiten.Image) {
 	s.state.Draw(screen)
 }
 
-
-
-
-func MenuToPlasma(g *Game) {
-	g.switchedMenuToPlasma = true
-	g.switchedPlasmaToMenu = false
-	g.switchedPlasmaToCyto1 = false
-	g.switchedCyto1ToNucleus = false
-	g.switchedNucleusToCyto2 = false
-
-	g.switchedMenuToInfo   = false
-	g.switchedInfoToMenu   = false
-
-	g.switchedMenuToLevelSelect = false
-	g.switchedLevelSelectToPlasma = false
-	g.switchedLevelSelectToCyto1 = false
-	g.switchedLevelSelectToNucleus = false
-	g.switchedLevelSelectToCyto2 = false
-	g.switchedLevelSelectToMenu = false 
+func setAllSwitchedFalse(g *Game) {
+	g.switchedToPlasma = false
+	g.switchedToMenu = false
+	g.switchedToCyto1 = false
+	g.switchedToNucleus = false
+	g.switchedToCyto2 = false
+	g.switchedToInfo   = false
+	g.switchedToLevelSelect = false
 }
 
-func PlasmaToMenu(g *Game) {
-	g.switchedMenuToPlasma = false
-	g.switchedPlasmaToMenu = true
-	g.switchedPlasmaToCyto1 = false
-	g.switchedCyto1ToNucleus = false
-	g.switchedNucleusToCyto2 = false
 
-	g.switchedMenuToInfo   = false
-	g.switchedInfoToMenu   = false
-
-	g.switchedMenuToLevelSelect = false
-	g.switchedLevelSelectToPlasma = false
-	g.switchedLevelSelectToCyto1 = false
-	g.switchedLevelSelectToNucleus = false
-	g.switchedLevelSelectToCyto2 = false
-	g.switchedLevelSelectToMenu = false 
+func ToPlasma(g *Game) {
+	setAllSwitchedFalse(g)
+	g.switchedToPlasma = true
 }
 
-func PlasmaToCyto1(g *Game) {
-	g.switchedMenuToPlasma = false
-	g.switchedPlasmaToMenu = false
-	g.switchedPlasmaToCyto1 = true
-	g.switchedCyto1ToNucleus = false
-	g.switchedNucleusToCyto2 = false
-
-	g.switchedMenuToInfo   = false
-	g.switchedInfoToMenu   = false
-
-	g.switchedMenuToLevelSelect = false
-	g.switchedLevelSelectToPlasma = false
-	g.switchedLevelSelectToCyto1 = false
-	g.switchedLevelSelectToNucleus = false
-	g.switchedLevelSelectToCyto2 = false
-	g.switchedLevelSelectToMenu = false 
+func ToMenu(g *Game) {
+	setAllSwitchedFalse(g)
+	g.switchedToMenu = true
 }
 
-func Cyto1ToNucleus(g *Game) {
-	g.switchedMenuToPlasma = false
-	g.switchedPlasmaToMenu = false
-	g.switchedPlasmaToCyto1 = false
-	g.switchedCyto1ToNucleus = true
-	g.switchedNucleusToCyto2 = false
-
-	g.switchedMenuToInfo   = false
-	g.switchedInfoToMenu   = false
-
-	g.switchedMenuToLevelSelect = false
-	g.switchedLevelSelectToPlasma = false
-	g.switchedLevelSelectToCyto1 = false
-	g.switchedLevelSelectToNucleus = false
-	g.switchedLevelSelectToCyto2 = false
-	g.switchedLevelSelectToMenu = false 
+func ToCyto1(g *Game) {
+	setAllSwitchedFalse(g)
+	g.switchedToCyto1 = true
 }
 
-func NucleusToCyto2(g *Game) {
-	g.switchedMenuToPlasma = false
-	g.switchedPlasmaToMenu = false
-	g.switchedPlasmaToCyto1 = false
-	g.switchedCyto1ToNucleus = false
-	g.switchedNucleusToCyto2 = true
-	g.switchedLevelSelectToMenu = false 
-
-	g.switchedMenuToInfo   = false
-	g.switchedInfoToMenu   = false
-
-	g.switchedMenuToLevelSelect = false
-	g.switchedLevelSelectToPlasma = false
-	g.switchedLevelSelectToCyto1 = false
-	g.switchedLevelSelectToNucleus = false
-	g.switchedLevelSelectToCyto2 = false
-	g.switchedLevelSelectToMenu = false 
+func ToNucleus(g *Game) {
+	setAllSwitchedFalse(g)
+	g.switchedToNucleus = true
 }
 
-func MenuToLevelSelect(g *Game) {
-	g.switchedMenuToPlasma = false
-	g.switchedPlasmaToMenu = false
-	g.switchedPlasmaToCyto1 = false
-	g.switchedCyto1ToNucleus = false
-	g.switchedNucleusToCyto2 = false 
-
-	g.switchedMenuToInfo   = false
-	g.switchedInfoToMenu   = false
-	
-	g.switchedMenuToLevelSelect = true
-	g.switchedLevelSelectToPlasma = false
-	g.switchedLevelSelectToCyto1 = false
-	g.switchedLevelSelectToNucleus = false
-	g.switchedLevelSelectToCyto2 = false
-	g.switchedLevelSelectToMenu = false 
+func ToCyto2(g *Game) {
+	setAllSwitchedFalse(g)
+	g.switchedToCyto2 = true
 }
 
-func LevelSelectToPlasma(g *Game) {
-	g.switchedMenuToPlasma = false
-	g.switchedPlasmaToMenu = false
-	g.switchedPlasmaToCyto1 = false
-	g.switchedCyto1ToNucleus = false
-	g.switchedNucleusToCyto2 = false
-
-	g.switchedMenuToInfo   = false
-	g.switchedInfoToMenu   = false
-	
-	g.switchedMenuToLevelSelect = false
-	g.switchedLevelSelectToPlasma = true
-	g.switchedLevelSelectToCyto1 = false
-	g.switchedLevelSelectToNucleus = false
-	g.switchedLevelSelectToCyto2 = false
-	g.switchedLevelSelectToMenu = false  
+func ToLevelSelect(g *Game) {
+	setAllSwitchedFalse(g)	
+	g.switchedToLevelSelect = true
 }
 
-func LevelSelectToCyto1(g *Game) {
-	g.switchedMenuToPlasma = false
-	g.switchedPlasmaToMenu = false
-	g.switchedPlasmaToCyto1 = false
-	g.switchedCyto1ToNucleus = false
-	g.switchedNucleusToCyto2 = false
 
-	g.switchedMenuToInfo   = false
-	g.switchedInfoToMenu   = false
-	
-	g.switchedMenuToLevelSelect = false
-	g.switchedLevelSelectToPlasma = false
-	g.switchedLevelSelectToCyto1 = true
-	g.switchedLevelSelectToNucleus = false
-	g.switchedLevelSelectToCyto2 = false
-	g.switchedLevelSelectToMenu = false  
-}
-
-func LevelSelectToNucleus(g *Game) {
-	g.switchedMenuToPlasma = false
-	g.switchedPlasmaToMenu = false
-	g.switchedPlasmaToCyto1 = false
-	g.switchedCyto1ToNucleus = false
-	g.switchedNucleusToCyto2 = false
-
-	g.switchedMenuToInfo   = false
-	g.switchedInfoToMenu   = false
-	
-	g.switchedMenuToLevelSelect = false
-	g.switchedLevelSelectToPlasma = false
-	g.switchedLevelSelectToCyto1 = false
-	g.switchedLevelSelectToNucleus = true
-	g.switchedLevelSelectToCyto2 = false
-	g.switchedLevelSelectToMenu = false  
-}
-
-func LevelSelectToCyto2(g *Game) {
-	g.switchedMenuToPlasma = false
-	g.switchedPlasmaToMenu = false
-	g.switchedPlasmaToCyto1 = false
-	g.switchedCyto1ToNucleus = false
-	g.switchedNucleusToCyto2 = false
-
-	g.switchedMenuToInfo   = false
-	g.switchedInfoToMenu   = false
-	
-	g.switchedMenuToLevelSelect = false
-	g.switchedLevelSelectToPlasma = false
-	g.switchedLevelSelectToCyto1 = false
-	g.switchedLevelSelectToNucleus = false
-	g.switchedLevelSelectToCyto2 = true
-	g.switchedLevelSelectToMenu = false  
-}
-
-func LevelSelectToMenu(g *Game) {
-	g.switchedMenuToPlasma = false
-	g.switchedPlasmaToMenu = false
-	g.switchedPlasmaToCyto1 = false
-	g.switchedCyto1ToNucleus = false
-	g.switchedNucleusToCyto2 = false
-
-	g.switchedMenuToInfo   = false
-	g.switchedInfoToMenu   = false
-	
-	g.switchedMenuToLevelSelect = false
-	g.switchedLevelSelectToPlasma = false
-	g.switchedLevelSelectToCyto1 = false
-	g.switchedLevelSelectToNucleus = false
-	g.switchedLevelSelectToCyto2 = false
-	g.switchedLevelSelectToMenu = true  
-}
-
-func InfoToMenu(g *Game) {
-	g.switchedMenuToPlasma = false
-	g.switchedPlasmaToMenu = false
-	g.switchedPlasmaToCyto1 = false
-	g.switchedCyto1ToNucleus = false
-	g.switchedNucleusToCyto2 = false
-
-	g.switchedMenuToInfo   = false
-	g.switchedInfoToMenu   = true
-	
-	g.switchedMenuToLevelSelect = false
-	g.switchedLevelSelectToPlasma = false
-	g.switchedLevelSelectToCyto1 = false
-	g.switchedLevelSelectToNucleus = false
-	g.switchedLevelSelectToCyto2 = false
-	g.switchedLevelSelectToMenu = false  
-}
-
-func MenuToInfo(g *Game) {
-	g.switchedMenuToPlasma = false
-	g.switchedPlasmaToMenu = false
-	g.switchedPlasmaToCyto1 = false
-	g.switchedCyto1ToNucleus = false
-	g.switchedNucleusToCyto2 = false
-
-	g.switchedMenuToInfo   = true
-	g.switchedInfoToMenu   = false
-	
-	g.switchedMenuToLevelSelect = false
-	g.switchedLevelSelectToPlasma = false
-	g.switchedLevelSelectToCyto1 = false
-	g.switchedLevelSelectToNucleus = false
-	g.switchedLevelSelectToCyto2 = false
-	g.switchedLevelSelectToMenu = false  
+func ToInfo(g *Game) {
+	setAllSwitchedFalse(g)
+	g.switchedToInfo   = true
 }

@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
@@ -401,7 +400,7 @@ func nextDNACodon(g *Game) {
 		dna[currentFrag].is_complete = false
 		reset = true
 	} else {
-		NucleusToCyto2(g)
+		ToCyto2(g)
 		reset = false
 	}
 }
@@ -413,7 +412,7 @@ func nextMRNACodon(g *Game) {
 		reset = true
 		ribosome.update_movement()
 	} else {
-		os.Exit(3)
+		ToMenu(g)
 		reset = false
 	}
 }
