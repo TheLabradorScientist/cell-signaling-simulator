@@ -45,6 +45,7 @@ type TFA struct {
 	image     *ebiten.Image
 	rect      Rectangle
 	is_active bool
+	tfaType   string
 }
 
 type Transcript struct {
@@ -59,6 +60,11 @@ type Template struct {
 	codon       string
 	fragment    int
 	is_complete bool
+}
+
+type RNAPolymerase struct {
+	image    *ebiten.Image
+	rect     Rectangle
 }
 
 type Nucleobase struct {
@@ -112,7 +118,7 @@ func newButton(path string, rect Rectangle, cmd SceneSwapFunc) Button {
 func (b Button) on_click(g *Game) {
 	var x_c, y_c = ebiten.CursorPosition()
 	var b_pos = newVector(x_c, y_c)
-	if rect_point_collision(b.rect, b_pos) && ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
+	if rect_point_collision(b.rect, b_pos) && inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
 		b.cmd(g)
 	}
 }
@@ -138,33 +144,6 @@ func newSignal(path string, rect Rectangle) Signal {
 		image:      sig_image,
 		rect:       rect,
 		is_dragged: false,
-	}
-}
-
-func newKinase(path string, rect Rectangle, ktype string) Kinase {
-	var kin_image, _, err = ebitenutil.NewImageFromFile(loadFile(path))
-	if err != nil {
-		fmt.Println("Error parsing date:", err)
-	}
-	return Kinase{
-		image:         kin_image,
-		rect:          rect,
-		is_moving:     false,
-		is_clicked_on: false,
-		delta:         3,
-		kinaseType:    ktype,
-	}
-}
-
-func newTFA(path string, rect Rectangle) TFA {
-	var tfa_image, _, err = ebitenutil.NewImageFromFile(loadFile(path))
-	if err != nil {
-		fmt.Println("Error parsing date:", err)
-	}
-	return TFA{
-		image:     tfa_image,
-		rect:      rect,
-		is_active: false,
 	}
 }
 
@@ -223,6 +202,34 @@ func (r *Receptor) animate(newImage string) {
 		fmt.Println("Error parsing date:", err)
 	}
 	r.image = rec_image
+}
+
+func newKinase(path string, rect Rectangle, ktype string) Kinase {
+	var kin_image, _, err = ebitenutil.NewImageFromFile(loadFile(path))
+	if err != nil {
+		fmt.Println("Error parsing date:", err)
+	}
+	return Kinase{
+		image:         kin_image,
+		rect:          rect,
+		is_moving:     false,
+		is_clicked_on: false,
+		delta:         3,
+		kinaseType:    ktype,
+	}
+}
+
+func newTFA(path string, rect Rectangle, tfaType string) TFA {
+	var tfa_image, _, err = ebitenutil.NewImageFromFile(loadFile(path))
+	if err != nil {
+		fmt.Println("Error parsing date:", err)
+	}
+	return TFA{
+		image:     tfa_image,
+		rect:      rect,
+		is_active: false,
+		tfaType:   tfaType,
+	}
 }
 
 func (k *Kinase) update(rect Rectangle) {
@@ -288,14 +295,20 @@ func (k *Kinase) animate(newImage string) {
 }
 
 func (t *TFA) activate() {
-	t.rect.pos.y -= 3
-	t.animate("act_TFA.png")
-	tfa.is_active = true
+	if t.tfaType == "tfa1" {t.rect.pos.y -= 3}
+		t.animate("act_TFA.png")
+		t.is_active = true
 }
 
 func (t *TFA) update() {
-	if t.is_active && t.rect.pos.y <= 750 {
-		t.rect.pos.y += 2
+	if t.is_active {
+		if t.rect.pos.y <= 750 && t.tfaType == "tfa1" {
+			t.rect.pos.y += 2
+		}
+		if t.rect.pos.y <= 300 && t.tfaType == "tfa2" {
+			t.rect.pos.y += 2
+			t.rect.pos.x -= 1
+		}
 	}
 }
 
@@ -310,7 +323,36 @@ func (t *TFA) animate(newImage string) {
 func (t TFA) draw(screen *ebiten.Image) {
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Translate(float64(t.rect.pos.x), float64(t.rect.pos.y))
+	if t.tfaType == "tfa2" {
+		op.GeoM.Scale(1.25, 1.25)
+	}
 	screen.DrawImage(t.image, op)
+}
+
+func newRNAPolymerase(path string, rect Rectangle) RNAPolymerase {
+	var RNAPolym_image, _, err = ebitenutil.NewImageFromFile(loadFile(path))
+	if err != nil {
+		fmt.Println("Error parsing date:", err)
+	}
+	return RNAPolymerase{
+		image: RNAPolym_image,
+		rect: rect,
+	}
+}
+
+func (r *RNAPolymerase) update(tfaPosY int) {
+	if tfaPosY >= 300 {
+		if r.rect.pos.x <= 25 {
+			r.rect.pos.y += 1
+			r.rect.pos.x += 2
+		}
+	}
+}
+
+func (r RNAPolymerase) draw(screen *ebiten.Image) {
+	op := &ebiten.DrawImageOptions{}
+	op.GeoM.Translate(float64(r.rect.pos.x), float64(r.rect.pos.y))
+	screen.DrawImage(r.image, op)
 }
 
 func newTranscript(path string, rect Rectangle, codon string) Transcript {
@@ -427,7 +469,7 @@ func (c CodonChoice) draw(screen *ebiten.Image) {
 }
 
 func (ribo *Ribosome) update_movement() {
-	ribo.rect.pos.x += screenWidth / 6
+	ribo.rect.pos.x += screenWidth / 7
 }
 
 func (ribo Ribosome) draw(screen *ebiten.Image) {

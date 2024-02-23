@@ -26,7 +26,14 @@ var (
 	cytoBg_1      *ebiten.Image
 	nucleusBg     *ebiten.Image
 	cytoBg_2      *ebiten.Image
+	levSelBg	  *ebiten.Image
 	playbutton    Button
+	levSelButton  Button
+	levToPlasmaButton  Button
+	levToCyto1Button  Button
+	levToNucleusButton  Button
+	levToCyto2Button  Button
+	levToMenuButton  Button
 	seedSignal    = rand.Intn(4) + 1
 	signal        Signal
 	receptorA     Receptor
@@ -44,7 +51,8 @@ var (
 	temp_tk1B      Kinase
 	temp_tk1C      Kinase
 	temp_tk1D      Kinase
-	rnaPolymerase *ebiten.Image
+	temp_tfa       TFA
+	rnaPolymerase RNAPolymerase
 	ribosome      Ribosome
 	rightChoice   CodonChoice
 	wrongChoice1  CodonChoice
@@ -66,6 +74,13 @@ type Game struct {
 	switchedPlasmaToCyto1  bool
 	switchedCyto1ToNucleus bool
 	switchedNucleusToCyto2 bool
+
+	switchedMenuToLevelSelect    bool
+	switchedLevelSelectToPlasma  bool
+	switchedLevelSelectToCyto1   bool
+	switchedLevelSelectToNucleus bool
+	switchedLevelSelectToCyto2   bool
+	switchedLevelSelectToMenu    bool
 }
 
 
@@ -105,7 +120,18 @@ func init() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	playbutton = newButton("PlayButton.png", newRect(500, 500, 232, 129), MenuToPlasma)
+	levSelBg, _, err = ebitenutil.NewImageFromFile(loadFile("levSelBg.png"))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	playbutton = newButton("PlayButton.png", newRect(400, 375, 242, 138), MenuToPlasma)
+	levSelButton = newButton("levSelButton.png", newRect(400, 525, 232, 140), MenuToLevelSelect)
+	levToPlasmaButton = newButton("levToPlasmaBtn.png", newRect(300, 200, 232, 129), LevelSelectToPlasma)
+	levToCyto1Button = newButton("levToCyto1Btn.png", newRect(300, 350, 232, 129), LevelSelectToCyto1)
+	levToNucleusButton = newButton("levToNucleusBtn.png", newRect(650, 200, 232, 129), LevelSelectToNucleus)
+	levToCyto2Button = newButton("levToCyto2Btn.png", newRect(650, 350, 232, 129), LevelSelectToCyto2)
+	levToMenuButton = newButton("menuButton.png", newRect(500, 500, 232, 129), LevelSelectToMenu)
 
 	switch seedSignal {
 	case 1:
@@ -138,12 +164,13 @@ func init() {
 	temp_tk1C = newKinase("inact_TK1.png", newRect(650, 600, 150, 150), "temp_tk1")
 	temp_tk1D = newKinase("inact_TK1.png", newRect(950, 600, 150, 150), "temp_tk1")
 
-	tk1 = newKinase("inact_TK1.png", newRect(500, -100, 150, 150), "tk1")
+	tk1 = newKinase("act_TK1.png", newRect(500, -100, 150, 150), "tk1")
 	tk2 = newKinase("inact_TK2.png", newRect(250, 175, 150, 150), "tk2")
-	tfa = newTFA("inact_TFA.png", newRect(700, 500, 150, 150))
+	tfa = newTFA("inact_TFA.png", newRect(700, 500, 150, 150), "tfa1")
+
 
 	for x := 0; x < 5; x++ {
-		dna[x] = newTemplate("DNA.png", newRect(-100+200*x, 500, 150, 150), template[x], x)
+		dna[x] = newTemplate("DNA.png", newRect(-50+200*x, 500, 150, 150), template[x], x)
 	}
 	for x := 0; x < 5; x++ {
 		rna[x] = newTranscript("RNA.png", newRect(0, 200, 150, 150), transcribe(template[x]))
@@ -152,8 +179,7 @@ func init() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	rnaPolymerase, _, err = ebitenutil.NewImageFromFile(loadFile("rnaPolym.png"))
+	
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -162,8 +188,12 @@ func init() {
 		mrna[x] = newTemplate("RNA.png", newRect(0, 400, 150, 150), transcribe(dna[x].codon), x)
 	}
 	for x := 0; x < 5; x++ {
-		protein[x] = newTranscript("RNA.png", newRect(-100, 400, 150, 150), translate(mrna[x].codon))
+		protein[x] = newTranscript("aminoAcid.png", newRect(50+(150*x), 400, 150, 150), translate(mrna[x].codon))
 	}
+
+	rnaPolymerase = newRNAPolymerase("rnaPolym.png", newRect(-350, 100, 340, 265))
+
+	temp_tfa = newTFA("act_TFA.png", newRect(400, -100, 150, 150), "tfa2")
 
 	reset = false
 
@@ -184,11 +214,20 @@ func init() {
 func (g *Game) Update() error {
 	switch scene {
 	case "Main Menu":
-		ebiten.SetWindowTitle("Cell Signaling Synthesis - Main Menu")
+		ebiten.SetWindowTitle("Cell Signaling Pathway - Main Menu")
 		ebiten.SetWindowSize(screenWidth, screenHeight)
 		playbutton.on_click(g)
+		levSelButton.on_click(g)
+	case "Level Selection":
+		ebiten.SetWindowTitle("Cell Signaling Pathway - Level Selection")
+		ebiten.SetWindowSize(screenWidth, screenHeight)
+		levToPlasmaButton.on_click(g)
+		levToCyto1Button.on_click(g)
+		levToNucleusButton.on_click(g)
+		levToCyto2Button.on_click(g)
+		levToMenuButton.on_click(g)
 	case "Signal Reception":
-		ebiten.SetWindowTitle("Cell Signaling Synthesis - Signal Reception")
+		ebiten.SetWindowTitle("Cell Signaling Pathway - Signal Reception")
 		ebiten.SetWindowSize(screenWidth, screenHeight)
 		signal.on_click(g)
 		receptorA.update()
@@ -227,7 +266,7 @@ func (g *Game) Update() error {
 			PlasmaToCyto1(g)
 		}
 	case "Signal Transduction":
-		ebiten.SetWindowTitle("Cell Signaling Synthesis - Signal Transduction")
+		ebiten.SetWindowTitle("Cell Signaling Pathway - Signal Transduction")
 		ebiten.SetWindowSize(screenWidth, screenHeight)
 		tk1.activate()
 		tk1.update(tk2.rect)
@@ -245,7 +284,10 @@ func (g *Game) Update() error {
 			Cyto1ToNucleus(g)
 		}
 	case "Transcription":
-		ebiten.SetWindowTitle("Cell Signaling Synthesis - Transcription")
+		ebiten.SetWindowTitle("Cell Signaling Pathway - Transcription")
+		temp_tfa.activate()
+		temp_tfa.update()
+		rnaPolymerase.update(temp_tfa.rect.pos.y)
 		if reset {
 			rightChoice.bases = transcribe(dna[currentFrag].codon)
 			wrongChoice1.bases = randomRNACodon(rightChoice.bases)
@@ -260,7 +302,7 @@ func (g *Game) Update() error {
 		}
 
 	case "Translation":
-		ebiten.SetWindowTitle("Cell Signaling Synthesis - Translation")
+		ebiten.SetWindowTitle("Cell Signaling Pathway - Translation")
 		if reset {
 			rightTrna.bases = translate(mrna[mrna_ptr].codon)
 			wrongTrna1.bases = translate(randomRNACodon(rightTrna.bases))
@@ -281,8 +323,34 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	case "Main Menu":
 		screen.DrawImage(startBg, nil)
 		playbutton.draw(screen)
+		levSelButton.draw(screen)
 		if g.switchedMenuToPlasma {
 			scene = "Signal Reception"
+		}
+		if g.switchedMenuToLevelSelect {
+			scene = "Level Selection"
+		}
+	case "Level Selection":
+		screen.DrawImage(levSelBg, nil)
+		levToPlasmaButton.draw(screen)
+		levToCyto1Button.draw(screen)
+		levToNucleusButton.draw(screen)
+		levToCyto2Button.draw(screen)
+		levToMenuButton.draw(screen)
+		if g.switchedLevelSelectToMenu {
+			scene = "Main Menu"
+		}
+		if g.switchedLevelSelectToPlasma {
+			scene = "Signal Reception"
+		}
+		if g.switchedLevelSelectToCyto1 {
+			scene = "Signal Transduction"
+		}		
+		if g.switchedLevelSelectToNucleus {
+			scene = "Transcription"
+		}
+		if g.switchedLevelSelectToCyto2 {
+			scene = "Translation"
 		}
 	case "Signal Reception":
 		screen.DrawImage(plasmaBg, nil)
@@ -325,7 +393,8 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 		op := &ebiten.DrawImageOptions{}
 		op.GeoM.Translate(0, 300)
-		screen.DrawImage(rnaPolymerase, op)
+		rnaPolymerase.draw(screen)
+		temp_tfa.draw(screen)
 		//g.codonFont.drawFont(screen, strings.Join(template[0:5], ""), dna[currentFrag].rect.pos.x+300, dna[currentFrag].rect.pos.y, color.Black)
 		if currentFrag != -1 {
 			g.codonFont.drawFont(screen, dna[currentFrag].codon, dna[0].rect.pos.x+500, dna[0].rect.pos.y, color.Black)
@@ -360,9 +429,9 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		}
 	case "Translation":
 		screen.DrawImage(cytoBg_2, nil)
-		for x := 0; x < 5; x++ {
-			protein[x].draw(screen)
-		}
+		// for x := 0; x < 5; x++ {
+		// 	protein[x].draw(screen)
+		// }
 
 		mrna[0].draw(screen)
 		ribosome.draw(screen)
@@ -382,19 +451,29 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		g.defaultFont.drawFont(screen, "FINALLY, BACK TO THE CYTOPLASM! \n Match each codon from your mRNA template \n to its corresponding amino acid to synthesize your protein!!!!", 100, 50, color.Black)
 		switch mrna_ptr {
 		case 1:
-			g.codonFont.drawFont(screen, protein[0].codon, protein[0].rect.pos.x+150, protein[0].rect.pos.y, color.Black)
+			protein[0].draw(screen)
+			g.codonFont.drawFont(screen, protein[0].codon, protein[0].rect.pos.x, protein[0].rect.pos.y, color.Black)
 		case 2:
-			g.codonFont.drawFont(screen, protein[0].codon, protein[0].rect.pos.x+150, protein[0].rect.pos.y, color.Black)
-			g.codonFont.drawFont(screen, protein[1].codon, protein[0].rect.pos.x+300, protein[0].rect.pos.y, color.Black)
+			protein[0].draw(screen)
+			protein[1].draw(screen)
+			g.codonFont.drawFont(screen, protein[0].codon, protein[0].rect.pos.x, protein[0].rect.pos.y, color.Black)
+			g.codonFont.drawFont(screen, protein[1].codon, protein[1].rect.pos.x, protein[1].rect.pos.y, color.Black)
 		case 3:
-			g.codonFont.drawFont(screen, protein[0].codon, protein[0].rect.pos.x+150, protein[0].rect.pos.y, color.Black)
-			g.codonFont.drawFont(screen, protein[1].codon, protein[0].rect.pos.x+300, protein[0].rect.pos.y, color.Black)
-			g.codonFont.drawFont(screen, protein[2].codon, protein[0].rect.pos.x+450, protein[0].rect.pos.y, color.Black)
+			protein[0].draw(screen)
+			protein[1].draw(screen)
+			protein[2].draw(screen)
+			g.codonFont.drawFont(screen, protein[0].codon, protein[0].rect.pos.x, protein[0].rect.pos.y, color.Black)
+			g.codonFont.drawFont(screen, protein[1].codon, protein[1].rect.pos.x, protein[1].rect.pos.y, color.Black)
+			g.codonFont.drawFont(screen, protein[2].codon, protein[2].rect.pos.x, protein[2].rect.pos.y, color.Black)
 		case 4:
-			g.codonFont.drawFont(screen, protein[0].codon, protein[0].rect.pos.x+150, protein[0].rect.pos.y, color.Black)
-			g.codonFont.drawFont(screen, protein[1].codon, protein[0].rect.pos.x+300, protein[0].rect.pos.y, color.Black)
-			g.codonFont.drawFont(screen, protein[2].codon, protein[0].rect.pos.x+450, protein[0].rect.pos.y, color.Black)
-			g.codonFont.drawFont(screen, protein[3].codon, protein[0].rect.pos.x+600, protein[0].rect.pos.y, color.Black)
+			protein[0].draw(screen)
+			protein[1].draw(screen)
+			protein[2].draw(screen)
+			protein[3].draw(screen)
+			g.codonFont.drawFont(screen, protein[0].codon, protein[0].rect.pos.x, protein[0].rect.pos.y, color.Black)
+			g.codonFont.drawFont(screen, protein[1].codon, protein[1].rect.pos.x, protein[1].rect.pos.y, color.Black)
+			g.codonFont.drawFont(screen, protein[2].codon, protein[2].rect.pos.x, protein[2].rect.pos.y, color.Black)
+			g.codonFont.drawFont(screen, protein[3].codon, protein[3].rect.pos.x, protein[3].rect.pos.y, color.Black)
 		default:
 			break
 		}
