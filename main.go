@@ -126,18 +126,15 @@ func init() {
 		log.Fatal(err)
 	}
 
-	// playbutton = newButton("PlayButton.png", newRect(350, 375, 242, 138), MenuToPlasma)
-	// infoButton = newButton("infoButton.png", newRect(650, 375, 242, 138), MenuToInfo)
-	// levSelButton = newButton("levSelButton.png", newRect(500, 525, 232, 140), MenuToLevelSelect)
 	playbutton = newButton("PlayButton.png", newRect(750, 200, 242, 138), ToPlasma)
 	infoButton = newButton("infoButton.png", newRect(750, 360, 242, 138), ToInfo)
 	levSelButton = newButton("levSelButton.png", newRect(740, 520, 232, 140), ToLevelSelect)
 	infoToMenuButton = newButton("menuButton.png", newRect(300, 375, 242, 138), ToMenu)
-	levToPlasmaButton = newButton("levToPlasmaBtn.png", newRect(300, 200, 232, 129), ToPlasma)
-	levToCyto1Button = newButton("levToCyto1Btn.png", newRect(300, 350, 232, 129), ToCyto1)
-	levToNucleusButton = newButton("levToNucleusBtn.png", newRect(650, 200, 232, 129), ToNucleus)
-	levToCyto2Button = newButton("levToCyto2Btn.png", newRect(650, 350, 232, 129), ToCyto2)
-	levToMenuButton = newButton("menuButton.png", newRect(500, 500, 232, 129), ToMenu)
+	levToPlasmaButton = newButton("levToPlasmaBtn.png", newRect(400, 125, 232, 129), ToPlasma)
+	levToCyto1Button = newButton("levToCyto1Btn.png", newRect(750, 125, 232, 129), ToCyto1)
+	levToNucleusButton = newButton("levToNucleusBtn.png", newRect(400, 250, 232, 129), ToNucleus)
+	levToCyto2Button = newButton("levToCyto2Btn.png", newRect(750, 250, 232, 129), ToCyto2)
+	levToMenuButton = newButton("menuButton.png", newRect(775, 400, 232, 129), ToMenu)
 
 	switch seedSignal {
 	case 1:
@@ -347,7 +344,12 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	case "Information":
 		screen.DrawImage(infoBg, nil)
 		infoToMenuButton.draw(screen)
-		g.defaultFont.drawFont(screen, "WELCOME TO THE CELL SIGNALING PATHWAY SIMULATOR! \nThis simulator will guide you through a \ncomplete signaling pathway from reception \nto translation! Click the play button or \nselect a level to begin.", 150, 200, color.Black)
+		m := "WELCOME TO THE CELL\nSIGNALING PATHWAY\nSIMULATOR!\n"
+		m += "This simulator will\nguide you through the\ncomplete cell signaling\n"
+		m += "pathway from reception\nthrough translation!\nClick the play "
+		m += "button\nor select a level\nto begin."
+		Red := color.RGBA{50, 5, 5, 250}
+		g.defaultFont.drawFont(screen, m, 775, 275, color.RGBA(Red))
 
 		if g.switchedToMenu {
 			scene = "Main Menu"
