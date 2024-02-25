@@ -126,9 +126,9 @@ func init() {
 		log.Fatal(err)
 	}
 
-	playbutton = newButton("PlayButton.png", newRect(750, 200, 242, 138), ToPlasma)
-	infoButton = newButton("infoButton.png", newRect(750, 360, 242, 138), ToInfo)
-	levSelButton = newButton("levSelButton.png", newRect(740, 520, 232, 140), ToLevelSelect)
+	playbutton = newButton("PlayButton.png", newRect(750, 100, 242, 138), ToPlasma)
+	infoButton = newButton("infoButton.png", newRect(770, 260, 242, 138), ToInfo)
+	levSelButton = newButton("levSelButton.png", newRect(700, 450, 232, 140), ToLevelSelect)
 	infoToMenuButton = newButton("menuButton.png", newRect(300, 375, 242, 138), ToMenu)
 	levToPlasmaButton = newButton("levToPlasmaBtn.png", newRect(400, 125, 232, 129), ToPlasma)
 	levToCyto1Button = newButton("levToCyto1Btn.png", newRect(750, 125, 232, 129), ToCyto1)
