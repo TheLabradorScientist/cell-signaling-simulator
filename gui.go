@@ -106,8 +106,8 @@ func newParallax(path string, rect Rectangle, layer float64) Parallax {
 func (p *Parallax) update(g *Game) {
 	var x_c, y_c = ebiten.CursorPosition()
 	var l = int(p.layer)
-	p.rect.pos.x = (x_c - 1300) / (2 * l)
-	p.rect.pos.y = (y_c - 850) / (2 * l)
+	p.rect.pos.x = 3*(x_c - 1350) / (5 * l)
+	p.rect.pos.y = 3*(y_c - 850) / (5 * l)
 	//p.rect.pos.x = (x_c - 625) / (2*l);
 	//p.rect.pos.y = (y_c - 375) / (2*l);
 }
