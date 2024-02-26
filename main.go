@@ -1,15 +1,18 @@
 package main
 
 import (
+	"C"
 	"fmt"
 	"image/color"
 	_ "image/png"
+	
 	"log"
 	"math/rand"
 	"os"
 	"path/filepath"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	//"syscall/js"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
