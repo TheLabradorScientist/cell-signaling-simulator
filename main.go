@@ -141,12 +141,12 @@ func init() {
 	playbutton = newButton("PlayButton.png", newRect(750, 100, 242, 138), ToPlasma)
 	infoButton = newButton("infoButton.png", newRect(770, 260, 242, 138), ToInfo)
 	levSelButton = newButton("levSelButton.png", newRect(700, 450, 232, 140), ToLevelSelect)
-	infoToMenuButton = newButton("menuButton.png", newRect(300, 375, 242, 138), ToMenu)
-	levToPlasmaButton = newButton("levToPlasmaBtn.png", newRect(400, 125, 232, 129), ToPlasma)
-	levToCyto1Button = newButton("levToCyto1Btn.png", newRect(750, 125, 232, 129), ToCyto1)
-	levToNucleusButton = newButton("levToNucleusBtn.png", newRect(400, 250, 232, 129), ToNucleus)
-	levToCyto2Button = newButton("levToCyto2Btn.png", newRect(750, 250, 232, 129), ToCyto2)
-	levToMenuButton = newButton("menuButton.png", newRect(700, 450, 232, 129), ToMenu)
+	infoToMenuButton = newButton("menuButton.png", newRect(350, 450, 242, 138), ToMenu)
+	levToPlasmaButton = newButton("levToPlasmaBtn.png", newRect(520, 110, 232, 129), ToPlasma)
+	levToCyto1Button = newButton("levToCyto1Btn.png", newRect(820, 110, 232, 129), ToCyto1)
+	levToNucleusButton = newButton("levToNucleusBtn.png", newRect(520, 285, 232, 129), ToNucleus)
+	levToCyto2Button = newButton("levToCyto2Btn.png", newRect(820, 285, 232, 129), ToCyto2)
+	levToMenuButton = newButton("menuButton.png", newRect(250, 190, 232, 129), ToMenu)
 
 	switch seedSignal {
 	case 1:
