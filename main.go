@@ -146,7 +146,7 @@ func init() {
 	levToCyto1Button = newButton("levToCyto1Btn.png", newRect(750, 125, 232, 129), ToCyto1)
 	levToNucleusButton = newButton("levToNucleusBtn.png", newRect(400, 250, 232, 129), ToNucleus)
 	levToCyto2Button = newButton("levToCyto2Btn.png", newRect(750, 250, 232, 129), ToCyto2)
-	levToMenuButton = newButton("menuButton.png", newRect(775, 400, 232, 129), ToMenu)
+	levToMenuButton = newButton("menuButton.png", newRect(700, 450, 232, 129), ToMenu)
 
 	switch seedSignal {
 	case 1:
