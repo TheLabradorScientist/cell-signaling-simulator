@@ -21,7 +21,13 @@ const (
 var (
 	err                error
 	scene              string = "Main Menu"
-	startBg            *ebiten.Image
+	protoStartBg       *ebiten.Image
+	startBg			   Parallax
+	startP1			   Parallax
+	startP2			   Parallax
+	startP3			   Parallax
+	startP4			   Parallax
+	fixedStart         *ebiten.Image
 	infoBg             *ebiten.Image
 	plasmaBg           *ebiten.Image
 	cytoBg_1           *ebiten.Image
@@ -97,7 +103,13 @@ func loadFile(image string) string {
 }
 
 func init() {
-	startBg, _, err = ebitenutil.NewImageFromFile(loadFile("MenuBg.png"))
+	protoStartBg, _, err = ebitenutil.NewImageFromFile(loadFile("MenuBg.png"))
+	startBg = newParallax("StartBg.png", newRect(0, 0, 1250, 750), 5)
+	startP1 = newParallax("parallax-Start2.png", newRect(0, 0, 1250, 750), 4)
+	startP2 = newParallax("parallax-Start3.png", newRect(0, 0, 1250, 750), 3)
+	startP3 = newParallax("parallax-Start4.png", newRect(0, 0, 1250, 750), 2)
+	startP4 = newParallax("parallax-Start5.png", newRect(0, 0, 1250, 750), 1)
+	fixedStart, _, err = ebitenutil.NewImageFromFile(loadFile("fixed-Start.png"))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -218,6 +230,11 @@ func (g *Game) Update() error {
 	case "Main Menu":
 		ebiten.SetWindowTitle("Cell Signaling Pathway - Main Menu")
 		ebiten.SetWindowSize(screenWidth, screenHeight)
+		startBg.update(g)
+		startP1.update(g)
+		startP2.update(g)
+		startP3.update(g)
+		startP4.update(g)
 		infoButton.on_click(g)
 		playbutton.on_click(g)
 		levSelButton.on_click(g)
@@ -328,7 +345,13 @@ func (g *Game) Update() error {
 func (g *Game) Draw(screen *ebiten.Image) {
 	switch scene {
 	case "Main Menu":
-		screen.DrawImage(startBg, nil)
+		screen.DrawImage(protoStartBg, nil)
+		startBg.draw(screen)
+		startP1.draw(screen)
+		startP2.draw(screen)
+		startP3.draw(screen)
+		startP4.draw(screen)
+		screen.DrawImage(fixedStart, nil)
 		playbutton.draw(screen)
 		infoButton.draw(screen)
 		levSelButton.draw(screen)

@@ -84,6 +84,41 @@ type Ribosome struct {
 	rect  Rectangle
 }
 
+type Parallax struct {
+	image *ebiten.Image
+	rect  Rectangle
+	layer float64
+}
+
+func newParallax(path string, rect Rectangle, layer float64) Parallax {
+	var par_image, _, err = ebitenutil.NewImageFromFile(loadFile(path))
+
+	if err != nil {
+		fmt.Println("Error parsing date:", err)
+	}
+	return Parallax{
+		image: par_image,
+		rect:  rect,
+		layer: layer,
+	}
+}
+
+func (p *Parallax) update(g *Game) {
+	var x_c, y_c = ebiten.CursorPosition()
+	var l = int(p.layer)
+	p.rect.pos.x = (x_c - 1300) / (2 * l)
+	p.rect.pos.y = (y_c - 850) / (2 * l)
+	//p.rect.pos.x = (x_c - 625) / (2*l);
+	//p.rect.pos.y = (y_c - 375) / (2*l);
+}
+
+func (p Parallax) draw(screen *ebiten.Image) {
+	op := &ebiten.DrawImageOptions{}
+	op.GeoM.Translate(float64(p.rect.pos.x), float64(p.rect.pos.y))
+	op.GeoM.Scale((p.layer+0.5)/(p.layer*2), (p.layer+0.5)/(p.layer*2))
+	screen.DrawImage(p.image, op)
+}
+
 /*
 type Drawable interface {
 	draw()
