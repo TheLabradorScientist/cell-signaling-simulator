@@ -1,3 +1,5 @@
+github.com/TheLabradorScientist/cell-signaling-pathway-simulator v0.0.0-20240226065204-837d91e8b27c h1:U5/1WsjOlT5CEcWqi3zgbgs56XRh9kYCwqWA7MkwfoA=
+github.com/TheLabradorScientist/cell-signaling-pathway-simulator v0.0.0-20240226065204-837d91e8b27c/go.mod h1:vrR9ZAv1BxL2p+YKtP2fJTw1+qdEOP/QhJxj7CNqsDg=
 github.com/ebitengine/purego v0.6.1 h1:sjN8rfzbhXQ59/pE+wInswbU9aMDHiwlup4p/a07Mkg=
 github.com/ebitengine/purego v0.6.1/go.mod h1:ah1In8AOtksoNK6yk5z1HTJeUkC1Ez4Wk2idgGslMwQ=
 github.com/hajimehoshi/bitmapfont/v3 v3.0.0 h1:r2+6gYK38nfztS/et50gHAswb9hXgxXECYgE8Nczmi4=

@@ -12,8 +12,8 @@ import (
 	"path/filepath"
 
 	"github.com/hajimehoshi/ebiten/v2"
-	//"syscall/js"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
+	//"github.com/TheLabradorScientist/cell-signaling-pathway-simulator"
 )
 
 const (
