@@ -1,7 +1,7 @@
 package main
 
 import (
-	"C"
+	//"C"
 	"fmt"
 	"image/color"
 	_ "image/png"
@@ -15,6 +15,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	//"github.com/TheLabradorScientist/cell-signaling-pathway-simulator"
 )
+import "github.com/hajimehoshi/ebiten/v2/inpututil"
 
 const (
 	screenWidth  = 1250
@@ -46,6 +47,7 @@ var (
 	levToNucleusButton Button
 	levToCyto2Button   Button
 	levToMenuButton    Button
+	otherToMenuButton    Button
 	seedSignal         = rand.Intn(4) + 1
 	signal             Signal
 	receptorA          Receptor
@@ -114,7 +116,9 @@ func init() {
 	startP2 = newParallax("parallax-Start3.png", newRect(0, 0, 1250, 750), 3)
 	startP3 = newParallax("parallax-Start4.png", newRect(0, 0, 1250, 750), 2)
 	startP4 = newParallax("parallax-Start5.png", newRect(0, 0, 1250, 750), 1)
-	infoButton = newInfoPage("infoButton.png", "infoPage.png", newRect(1000, 0, 165, 165), "btn")
+	infoButton = newInfoPage("infoButton.png", "infoPage.png", newRect(850, 0, 165, 165), "btn")
+	otherToMenuButton = newButton("menuButton.png", newRect(1000, 0, 242, 138), ToMenu)
+
 	fixedStart, _, err = ebitenutil.NewImageFromFile(loadFile("fixed-Start.png"))
 	if err != nil {
 		log.Fatal(err)
@@ -221,7 +225,7 @@ func init() {
 	wrongChoice1 = newCodonChoice("codonButton.png", newRect(350, 150, 192, 111), randomRNACodon(rightChoice.bases))
 	wrongChoice2 = newCodonChoice("codonButton.png", newRect(650, 150, 192, 111), randomRNACodon(rightChoice.bases))
 
-	ribosome = newRibosome("ribosome.png", newRect(0, 300, 404, 367))
+	ribosome = newRibosome("ribosome.png", newRect(40, 300, 404, 367))
 
 	mrna_ptr = 0
 
@@ -268,6 +272,7 @@ func (g *Game) Update() error {
 		temp_tk1B.update(temp_tk1C.rect)
 		temp_tk1C.update(temp_tk1D.rect)
 		temp_tk1D.update(temp_tk1A.rect)
+		otherToMenuButton.on_click(g)
 		infoButton.on_click(g)
 		info = updateInfo()
 		if receptorA.is_touching_signal {
@@ -300,6 +305,7 @@ func (g *Game) Update() error {
 	case "Signal Transduction":
 		ebiten.SetWindowTitle("Cell Signaling Pathway - Signal Transduction")
 		ebiten.SetWindowSize(screenWidth, screenHeight)
+		otherToMenuButton.on_click(g)
 		tk1.activate()
 		tk1.update(tk2.rect)
 		tk2.update(tfa.rect)
@@ -319,6 +325,7 @@ func (g *Game) Update() error {
 		}
 	case "Transcription":
 		ebiten.SetWindowTitle("Cell Signaling Pathway - Transcription")
+		otherToMenuButton.on_click(g)
 		temp_tfa.activate()
 		temp_tfa.update()
 		rnaPolymerase.update(temp_tfa.rect.pos.y)
@@ -339,6 +346,7 @@ func (g *Game) Update() error {
 
 	case "Translation":
 		ebiten.SetWindowTitle("Cell Signaling Pathway - Translation")
+		otherToMenuButton.on_click(g)
 		infoButton.on_click(g)
 		info = updateInfo()
 		if reset {
@@ -347,11 +355,12 @@ func (g *Game) Update() error {
 			wrongTrna2.bases = translate(randomRNACodon(rightTrna.bases))
 			reset = false
 		}
-		mrna[mrna_ptr].is_complete = rightTrna.update2(g, mrna[mrna_ptr].codon)
-
-		if mrna[mrna_ptr].is_complete {
-			nextMRNACodon(g)
+		if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
+			mrna[mrna_ptr].is_complete = rightTrna.update2(g, mrna[mrna_ptr].codon)
 		}
+
+		if ribosome.update_movement() {nextMRNACodon(g)} else {ribosome.update_movement()}
+	
 	}
 	return nil
 }
@@ -424,6 +433,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		temp_tk1B.draw(screen)
 		temp_tk1C.draw(screen)
 		temp_tk1D.draw(screen)
+		otherToMenuButton.draw(screen)
 		m := "WELCOME TO THE PLASMA MEMBRANE!"
 		m += "\nDrag the signal to the matching receptor\nto enter the cell!"
 		Pink := color.RGBA{220, 100, 100, 50}
@@ -445,8 +455,12 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		tfa.draw(screen)
 		g.defaultFont.drawFont(screen, "WELCOME TO THE CYTOPLASM! \n Click when each kinase overlaps to follow \n the phosphorylation cascade!!", 100, 50, color.Black)
 		infoButton.draw(screen, g)
+		otherToMenuButton.draw(screen)
 		if g.switchedToNucleus {
 			scene = "Transcription"
+		}
+		if g.switchedToMenu {
+			scene = "Main Menu"
 		}
 	case "Transcription":
 		screen.DrawImage(nucleusBg, nil)
@@ -490,17 +504,20 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			break
 		}
 		infoButton.draw(screen, g)
+		otherToMenuButton.draw(screen)
 		if g.switchedToCyto2 {
-			scene = "Translation"
+			scene = "Translatio]n"
+		}
+		if g.switchedToMenu {
+			scene = "Main Menu"
 		}
 	case "Translation":
 		screen.DrawImage(cytoBg_2, nil)
-		// for x := 0; x < 5; x++ {
+		// for x := 0; x < 5; x++ { 
 		// 	protein[x].draw(screen)
 		// }
 
 		mrna[0].draw(screen)
-		ribosome.draw(screen)
 
 		if mrna_ptr != -1 {
 			g.codonFont.drawFont(screen, mrna[mrna_ptr].codon, mrna[0].rect.pos.x+500, mrna[0].rect.pos.y+200, color.Black)
@@ -521,21 +538,30 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		}
 
 		switch mrna_ptr {
-		case 1:
+		case 0:
 			protein[0].draw(screen)
 			g.codonFont.drawFont(screen, protein[0].codon, protein[0].rect.pos.x, protein[0].rect.pos.y, color.Black)
-		case 2:
+		case 1:
 			protein[0].draw(screen)
 			protein[1].draw(screen)
 			g.codonFont.drawFont(screen, protein[0].codon, protein[0].rect.pos.x, protein[0].rect.pos.y, color.Black)
 			g.codonFont.drawFont(screen, protein[1].codon, protein[1].rect.pos.x, protein[1].rect.pos.y, color.Black)
-		case 3:
+		case 2:
 			protein[0].draw(screen)
 			protein[1].draw(screen)
 			protein[2].draw(screen)
 			g.codonFont.drawFont(screen, protein[0].codon, protein[0].rect.pos.x, protein[0].rect.pos.y, color.Black)
 			g.codonFont.drawFont(screen, protein[1].codon, protein[1].rect.pos.x, protein[1].rect.pos.y, color.Black)
 			g.codonFont.drawFont(screen, protein[2].codon, protein[2].rect.pos.x, protein[2].rect.pos.y, color.Black)
+		case 3:
+			protein[0].draw(screen)
+			protein[1].draw(screen)
+			protein[2].draw(screen)
+			protein[3].draw(screen)
+			g.codonFont.drawFont(screen, protein[0].codon, protein[0].rect.pos.x, protein[0].rect.pos.y, color.Black)
+			g.codonFont.drawFont(screen, protein[1].codon, protein[1].rect.pos.x, protein[1].rect.pos.y, color.Black)
+			g.codonFont.drawFont(screen, protein[2].codon, protein[2].rect.pos.x, protein[2].rect.pos.y, color.Black)
+			g.codonFont.drawFont(screen, protein[3].codon, protein[3].rect.pos.x, protein[3].rect.pos.y, color.Black)
 		case 4:
 			protein[0].draw(screen)
 			protein[1].draw(screen)
@@ -549,7 +575,10 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			break
 		}
 
+		ribosome.draw(screen)
 		infoButton.draw(screen, g)
+
+		otherToMenuButton.draw(screen)
 
 	}
 }
@@ -561,7 +590,7 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
 func main() {
 	game := &Game{}
 	game.defaultFont = newFont("CourierPrime-Regular.ttf", 32)
-	game.codonFont = newFont("Honk-Regular.ttf", 90)
+	game.codonFont = newFont("BlackOpsOne-Regular.ttf", 60)
 	if err := ebiten.RunGame(game); err != nil {
 		log.Fatal(err)
 	}

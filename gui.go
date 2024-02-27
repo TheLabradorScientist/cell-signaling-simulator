@@ -93,10 +93,10 @@ type Parallax struct {
 
 type InfoPage struct {
 	btn_image *ebiten.Image
-	pg_image *ebiten.Image
-	rect  Rectangle
-	status string
-	// Functions: when screen switches, is drawn in btn status. When mouseButtonJustPressed + btn status, 
+	pg_image  *ebiten.Image
+	rect      Rectangle
+	status    string
+	// Functions: when screen switches, is drawn in btn status. When mouseButtonJustPressed + btn status,
 	// changes to pg status. When mouseButtonJustPressed + pg status, changes to button status.
 	// update function sets image to status + "_image". Pg image should say "Click to exit."
 	// if status = btn, if status = pg
@@ -115,9 +115,9 @@ func newInfoPage(path1 string, path2 string, rect Rectangle, stat string) InfoPa
 
 	return InfoPage{
 		btn_image: btn_img,
-		pg_image: pg_img,
-		rect:  rect,
-		status: stat,
+		pg_image:  pg_img,
+		rect:      rect,
+		status:    stat,
 	}
 }
 
@@ -126,26 +126,27 @@ func (i *InfoPage) on_click(g *Game) {
 	var b_pos = newVector(x_c, y_c)
 	if rect_point_collision(i.rect, b_pos) && inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
 		if i.status == "btn" {
-		 	i.status = "pg"
+			i.status = "pg"
 			i.rect = newRect(0, 0, 1250, 750)
 		} else {
 			i.status = "btn"
-			i.rect = newRect(1000, 0, 165, 165)
+			i.rect = newRect(850, 0, 165, 165)
 		}
 	}
 }
 
-
 func (i InfoPage) draw(screen *ebiten.Image, g *Game) {
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Translate(float64(i.rect.pos.x), float64(i.rect.pos.y))
-	if i.status == "btn" {screen.DrawImage(i.btn_image, op)}
-	if i.status == "pg" {screen.DrawImage(i.pg_image, op)
+	if i.status == "btn" {
+		screen.DrawImage(i.btn_image, op)
+	}
+	if i.status == "pg" {
+		screen.DrawImage(i.pg_image, op)
 		Purple := color.RGBA{50, 0, 50, 250}
 		g.defaultFont.drawFont(screen, info, 400, 200, color.RGBA(Purple))
 	}
 }
-
 
 func newParallax(path string, rect Rectangle, layer float64) Parallax {
 	var par_image, _, err = ebitenutil.NewImageFromFile(loadFile(path))
@@ -163,8 +164,8 @@ func newParallax(path string, rect Rectangle, layer float64) Parallax {
 func (p *Parallax) update(g *Game) {
 	var x_c, y_c = ebiten.CursorPosition()
 	var l = int(p.layer)
-	p.rect.pos.x = 5*(x_c - 1350) / (7 * l)
-	p.rect.pos.y = 3*(y_c - 850) / (5 * l)
+	p.rect.pos.x = 5 * (x_c - 1350) / (7 * l)
+	p.rect.pos.y = 3 * (y_c - 850) / (5 * l)
 	//p.rect.pos.x = (x_c - 625) / (2*l);
 	//p.rect.pos.y = (y_c - 375) / (2*l);
 }
@@ -502,7 +503,6 @@ func nextMRNACodon(g *Game) {
 		mrna_ptr++
 		mrna[mrna_ptr].is_complete = false
 		reset = true
-		ribosome.update_movement()
 	} else {
 		ToMenu(g)
 		reset = false
@@ -561,8 +561,22 @@ func (c CodonChoice) draw(screen *ebiten.Image) {
 	screen.DrawImage(c.image, op)
 }
 
-func (ribo *Ribosome) update_movement() {
-	ribo.rect.pos.x += screenWidth / 7
+func (ribo *Ribosome) update_movement() bool {
+	if mrna[mrna_ptr].is_complete {
+		if mrna_ptr == 4 && ribo.rect.pos.x < 1300 {
+			ribo.rect.pos.x += 4
+			ribo.rect.pos.y += 2
+			return false
+		} else if ribo.rect.pos.x < (165 * (mrna_ptr + 1)) {
+			ribo.rect.pos.x += 2
+			return false
+		} else {
+			return true
+		}
+	}
+
+	//ribo.rect.pos.x += screenWidth / 7
+	return false
 }
 
 func (ribo Ribosome) draw(screen *ebiten.Image) {
