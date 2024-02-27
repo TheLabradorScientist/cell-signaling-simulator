@@ -1,4 +1,5 @@
-module cell-signaling-pathway-simulator
+module github.com/TheLabradorScientist/cell-signaling-pathway-simulator
+
 
 go 1.21.4
 
