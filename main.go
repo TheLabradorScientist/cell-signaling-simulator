@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"image/color"
 	_ "image/png"
-	
+
 	"log"
 	"math/rand"
 	"os"
@@ -25,21 +25,21 @@ var (
 	err                error
 	scene              string = "Main Menu"
 	protoStartBg       *ebiten.Image
-	startBg			   Parallax
-	startP1			   Parallax
-	startP2			   Parallax
-	startP3			   Parallax
-	startP4			   Parallax
+	startBg            Parallax
+	startP1            Parallax
+	startP2            Parallax
+	startP3            Parallax
+	startP4            Parallax
 	fixedStart         *ebiten.Image
-	infoBg             *ebiten.Image
+	aboutBg             *ebiten.Image
 	plasmaBg           *ebiten.Image
 	cytoBg_1           *ebiten.Image
 	nucleusBg          *ebiten.Image
 	cytoBg_2           *ebiten.Image
 	levSelBg           *ebiten.Image
 	playbutton         Button
-	infoButton         Button
-	infoToMenuButton   Button
+	aboutButton        Button
+	aboutToMenuButton   Button
 	levSelButton       Button
 	levToPlasmaButton  Button
 	levToCyto1Button   Button
@@ -76,6 +76,8 @@ var (
 	wrongTrna1         CodonChoice
 	wrongTrna2         CodonChoice
 	reset              bool
+	infoButton		   InfoPage
+	info			   string
 )
 
 type Game struct {
@@ -86,7 +88,7 @@ type Game struct {
 	switchedToCyto1       bool
 	switchedToNucleus     bool
 	switchedToCyto2       bool
-	switchedToInfo        bool
+	switchedToAbout        bool
 	switchedToLevelSelect bool
 }
 
@@ -112,11 +114,12 @@ func init() {
 	startP2 = newParallax("parallax-Start3.png", newRect(0, 0, 1250, 750), 3)
 	startP3 = newParallax("parallax-Start4.png", newRect(0, 0, 1250, 750), 2)
 	startP4 = newParallax("parallax-Start5.png", newRect(0, 0, 1250, 750), 1)
+	infoButton = newInfoPage("infoButton.png", "infoPage.png", newRect(1000, 0, 165, 165), "btn")
 	fixedStart, _, err = ebitenutil.NewImageFromFile(loadFile("fixed-Start.png"))
 	if err != nil {
 		log.Fatal(err)
 	}
-	infoBg, _, err = ebitenutil.NewImageFromFile(loadFile("InfoBg.png"))
+	aboutBg, _, err = ebitenutil.NewImageFromFile(loadFile("AboutBg.png"))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -142,9 +145,9 @@ func init() {
 	}
 
 	playbutton = newButton("PlayButton.png", newRect(750, 100, 242, 138), ToPlasma)
-	infoButton = newButton("infoButton.png", newRect(770, 260, 242, 138), ToInfo)
+	aboutButton = newButton("aboutButton.png", newRect(770, 260, 242, 138), ToAbout)
 	levSelButton = newButton("levSelButton.png", newRect(700, 450, 232, 140), ToLevelSelect)
-	infoToMenuButton = newButton("menuButton.png", newRect(350, 450, 242, 138), ToMenu)
+	aboutToMenuButton = newButton("menuButton.png", newRect(350, 450, 242, 138), ToMenu)
 	levToPlasmaButton = newButton("levToPlasmaBtn.png", newRect(520, 110, 232, 129), ToPlasma)
 	levToCyto1Button = newButton("levToCyto1Btn.png", newRect(820, 110, 232, 129), ToCyto1)
 	levToNucleusButton = newButton("levToNucleusBtn.png", newRect(520, 285, 232, 129), ToNucleus)
@@ -238,13 +241,13 @@ func (g *Game) Update() error {
 		startP2.update(g)
 		startP3.update(g)
 		startP4.update(g)
-		infoButton.on_click(g)
+		aboutButton.on_click(g)
 		playbutton.on_click(g)
 		levSelButton.on_click(g)
-	case "Information":
+	case "About":
 		ebiten.SetWindowTitle("Cell Signaling Pathway - About")
 		ebiten.SetWindowSize(screenWidth, screenHeight)
-		infoToMenuButton.on_click(g)
+		aboutToMenuButton.on_click(g)
 	case "Level Selection":
 		ebiten.SetWindowTitle("Cell Signaling Pathway - Level Selection")
 		ebiten.SetWindowSize(screenWidth, screenHeight)
@@ -265,6 +268,8 @@ func (g *Game) Update() error {
 		temp_tk1B.update(temp_tk1C.rect)
 		temp_tk1C.update(temp_tk1D.rect)
 		temp_tk1D.update(temp_tk1A.rect)
+		infoButton.on_click(g)
+		info = updateInfo()
 		if receptorA.is_touching_signal {
 			if matchSR(signal.signalType, receptorA.receptorType) {
 				receptorA.animate("act_receptorA.png")
@@ -299,6 +304,8 @@ func (g *Game) Update() error {
 		tk1.update(tk2.rect)
 		tk2.update(tfa.rect)
 		tfa.update()
+		infoButton.on_click(g)
+		info = updateInfo()
 		if tk1.is_clicked_on {
 			tk2.activate()
 			tk1.is_clicked_on = false
@@ -315,6 +322,8 @@ func (g *Game) Update() error {
 		temp_tfa.activate()
 		temp_tfa.update()
 		rnaPolymerase.update(temp_tfa.rect.pos.y)
+		infoButton.on_click(g)
+		info = updateInfo()
 		if reset {
 			rightChoice.bases = transcribe(dna[currentFrag].codon)
 			wrongChoice1.bases = randomRNACodon(rightChoice.bases)
@@ -330,6 +339,8 @@ func (g *Game) Update() error {
 
 	case "Translation":
 		ebiten.SetWindowTitle("Cell Signaling Pathway - Translation")
+		infoButton.on_click(g)
+		info = updateInfo()
 		if reset {
 			rightTrna.bases = translate(mrna[mrna_ptr].codon)
 			wrongTrna1.bases = translate(randomRNACodon(rightTrna.bases))
@@ -356,7 +367,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		startP4.draw(screen)
 		screen.DrawImage(fixedStart, nil)
 		playbutton.draw(screen)
-		infoButton.draw(screen)
+		aboutButton.draw(screen)
 		levSelButton.draw(screen)
 		if g.switchedToPlasma {
 			scene = "Signal Reception"
@@ -364,12 +375,12 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		if g.switchedToLevelSelect {
 			scene = "Level Selection"
 		}
-		if g.switchedToInfo {
-			scene = "Information"
+		if g.switchedToAbout {
+			scene = "About"
 		}
-	case "Information":
-		screen.DrawImage(infoBg, nil)
-		infoToMenuButton.draw(screen)
+	case "About":
+		screen.DrawImage(aboutBg, nil)
+		aboutToMenuButton.draw(screen)
 		m := "WELCOME TO THE CELL\nSIGNALING PATHWAY\nSIMULATOR!\n"
 		m += "This simulator will\nguide you through the\ncomplete cell signaling\n"
 		m += "pathway from reception\nthrough translation!\nClick the play "
@@ -413,10 +424,14 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		temp_tk1B.draw(screen)
 		temp_tk1C.draw(screen)
 		temp_tk1D.draw(screen)
-		g.defaultFont.drawFont(screen, "WELCOME TO THE PLASMA MEMBRANE! \n Drag the signal to the matching receptor \n to enter the cell!", 100, 50, color.White)
+		m := "WELCOME TO THE PLASMA MEMBRANE!"
+		m += "\nDrag the signal to the matching receptor\nto enter the cell!"
+		Pink := color.RGBA{220, 100, 100, 50}
+		g.defaultFont.drawFont(screen, m, 100, 50, color.RGBA(Pink))
 		if signal.is_dragged {
 			signal.draw(screen)
 		}
+		infoButton.draw(screen, g)
 		if g.switchedToMenu {
 			scene = "Main Menu"
 		}
@@ -429,6 +444,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		tk2.draw(screen)
 		tfa.draw(screen)
 		g.defaultFont.drawFont(screen, "WELCOME TO THE CYTOPLASM! \n Click when each kinase overlaps to follow \n the phosphorylation cascade!!", 100, 50, color.Black)
+		infoButton.draw(screen, g)
 		if g.switchedToNucleus {
 			scene = "Transcription"
 		}
@@ -473,7 +489,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		default:
 			break
 		}
-
+		infoButton.draw(screen, g)
 		if g.switchedToCyto2 {
 			scene = "Translation"
 		}
@@ -532,6 +548,9 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		default:
 			break
 		}
+
+		infoButton.draw(screen, g)
+
 	}
 }
 

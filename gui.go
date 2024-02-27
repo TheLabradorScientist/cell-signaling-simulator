@@ -2,11 +2,11 @@ package main
 
 import (
 	"fmt"
+	"image/color"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
-
 )
 
 type SceneSwapFunc func(*Game)
@@ -90,6 +90,62 @@ type Parallax struct {
 	rect  Rectangle
 	layer float64
 }
+
+type InfoPage struct {
+	btn_image *ebiten.Image
+	pg_image *ebiten.Image
+	rect  Rectangle
+	status string
+	// Functions: when screen switches, is drawn in btn status. When mouseButtonJustPressed + btn status, 
+	// changes to pg status. When mouseButtonJustPressed + pg status, changes to button status.
+	// update function sets image to status + "_image". Pg image should say "Click to exit."
+	// if status = btn, if status = pg
+}
+
+func newInfoPage(path1 string, path2 string, rect Rectangle, stat string) InfoPage {
+	var btn_img, _, err1 = ebitenutil.NewImageFromFile(loadFile(path1))
+	var pg_img, _, err2 = ebitenutil.NewImageFromFile(loadFile(path2))
+
+	if err1 != nil {
+		fmt.Println("Error parsing date:", err)
+	}
+	if err2 != nil {
+		fmt.Println("Error parsing date:", err)
+	}
+
+	return InfoPage{
+		btn_image: btn_img,
+		pg_image: pg_img,
+		rect:  rect,
+		status: stat,
+	}
+}
+
+func (i *InfoPage) on_click(g *Game) {
+	var x_c, y_c = ebiten.CursorPosition()
+	var b_pos = newVector(x_c, y_c)
+	if rect_point_collision(i.rect, b_pos) && inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
+		if i.status == "btn" {
+		 	i.status = "pg"
+			i.rect = newRect(0, 0, 1250, 750)
+		} else {
+			i.status = "btn"
+			i.rect = newRect(1000, 0, 165, 165)
+		}
+	}
+}
+
+
+func (i InfoPage) draw(screen *ebiten.Image, g *Game) {
+	op := &ebiten.DrawImageOptions{}
+	op.GeoM.Translate(float64(i.rect.pos.x), float64(i.rect.pos.y))
+	if i.status == "btn" {screen.DrawImage(i.btn_image, op)}
+	if i.status == "pg" {screen.DrawImage(i.pg_image, op)
+		Purple := color.RGBA{50, 0, 50, 250}
+		g.defaultFont.drawFont(screen, info, 400, 200, color.RGBA(Purple))
+	}
+}
+
 
 func newParallax(path string, rect Rectangle, layer float64) Parallax {
 	var par_image, _, err = ebitenutil.NewImageFromFile(loadFile(path))

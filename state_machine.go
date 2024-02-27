@@ -42,7 +42,7 @@ func setAllSwitchedFalse(g *Game) {
 	g.switchedToCyto1 = false
 	g.switchedToNucleus = false
 	g.switchedToCyto2 = false
-	g.switchedToInfo   = false
+	g.switchedToAbout   = false
 	g.switchedToLevelSelect = false
 }
 
@@ -78,7 +78,7 @@ func ToLevelSelect(g *Game) {
 }
 
 
-func ToInfo(g *Game) {
+func ToAbout(g *Game) {
 	setAllSwitchedFalse(g)
-	g.switchedToInfo   = true
+	g.switchedToAbout = true
 }
