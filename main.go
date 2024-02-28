@@ -1,7 +1,6 @@
 package main
 
 import (
-	//"C"
 	"fmt"
 	"image/color"
 	_ "image/png"
@@ -13,9 +12,9 @@ import (
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
-	//"github.com/TheLabradorScientist/cell-signaling-pathway-simulator"
+	"github.com/hajimehoshi/ebiten/v2/inpututil"
+
 )
-import "github.com/hajimehoshi/ebiten/v2/inpututil"
 
 const (
 	screenWidth  = 1250
@@ -110,6 +109,9 @@ func loadFile(image string) string {
 }
 
 func init() {
+	ebiten.SetWindowPosition(100, 0)
+	ebiten.SetWindowSize(screenWidth, screenHeight)
+	ebiten.SetWindowResizingMode(ebiten.WindowResizingModeOnlyFullscreenEnabled)
 	protoStartBg, _, err = ebitenutil.NewImageFromFile(loadFile("MenuBg.png"))
 	startBg = newParallax("StartBg.png", newRect(0, 0, 1250, 750), 5)
 	startP1 = newParallax("parallax-Start2.png", newRect(0, 0, 1250, 750), 4)
@@ -236,10 +238,15 @@ func init() {
 }
 
 func (g *Game) Update() error {
+	if inpututil.IsKeyJustPressed(ebiten.KeyEscape) {
+		ebiten.SetFullscreen(false)
+	}
+	if ebiten.IsFullscreen() {
+		// Use this if statement to set sizes of graphics to fullscreen scale, else normal scale.
+	}
 	switch scene {
 	case "Main Menu":
 		ebiten.SetWindowTitle("Cell Signaling Pathway - Main Menu")
-		ebiten.SetWindowSize(screenWidth, screenHeight)
 		startBg.update(g)
 		startP1.update(g)
 		startP2.update(g)
@@ -250,11 +257,9 @@ func (g *Game) Update() error {
 		levSelButton.on_click(g)
 	case "About":
 		ebiten.SetWindowTitle("Cell Signaling Pathway - About")
-		ebiten.SetWindowSize(screenWidth, screenHeight)
 		aboutToMenuButton.on_click(g)
 	case "Level Selection":
 		ebiten.SetWindowTitle("Cell Signaling Pathway - Level Selection")
-		ebiten.SetWindowSize(screenWidth, screenHeight)
 		levToPlasmaButton.on_click(g)
 		levToCyto1Button.on_click(g)
 		levToNucleusButton.on_click(g)
@@ -262,7 +267,6 @@ func (g *Game) Update() error {
 		levToMenuButton.on_click(g)
 	case "Signal Reception":
 		ebiten.SetWindowTitle("Cell Signaling Pathway - Signal Reception")
-		ebiten.SetWindowSize(screenWidth, screenHeight)
 		signal.on_click(g)
 		receptorA.update()
 		receptorB.update()
@@ -304,7 +308,6 @@ func (g *Game) Update() error {
 		}
 	case "Signal Transduction":
 		ebiten.SetWindowTitle("Cell Signaling Pathway - Signal Transduction")
-		ebiten.SetWindowSize(screenWidth, screenHeight)
 		otherToMenuButton.on_click(g)
 		tk1.activate()
 		tk1.update(tk2.rect)

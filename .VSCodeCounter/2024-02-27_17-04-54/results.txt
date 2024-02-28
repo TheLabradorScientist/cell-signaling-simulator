@@ -1,0 +1,44 @@
+Date : 2024-02-27 17:04:54
+Directory : /Users/ashnaguha/Desktop/cell-signaling-pathway-simulator
+Total : 16 files,  1878 codes, 90 comments, 251 blanks, all 2219 lines
+
+Languages
++------------------+------------+------------+------------+------------+------------+
+| language         | files      | code       | comment    | blank      | total      |
++------------------+------------+------------+------------+------------+------------+
+| Go               |         10 |      1,350 |         54 |        183 |      1,587 |
+| JavaScript       |          2 |        472 |         36 |         62 |        570 |
+| Go Checksum File |          1 |         24 |          0 |          1 |         25 |
+| HTML             |          2 |         17 |          0 |          1 |         18 |
+| Go Module File   |          1 |         15 |          0 |          4 |         19 |
++------------------+------------+------------+------------+------------+------------+
+
+Directories
++-------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| path                                                                          | files      | code       | comment    | blank      | total      |
++-------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| .                                                                             |         16 |      1,878 |         90 |        251 |      2,219 |
++-------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+
+Files
++-------------------------------------------------------------------------------+------------------+------------+------------+------------+------------+
+| filename                                                                      | language         | code       | comment    | blank      | total      |
++-------------------------------------------------------------------------------+------------------+------------+------------+------------+------------+
+| /Users/ashnaguha/Desktop/cell-signaling-pathway-simulator/animations.go       | Go               |          1 |          0 |          2 |          3 |
+| /Users/ashnaguha/Desktop/cell-signaling-pathway-simulator/codon_chart.go      | Go               |        100 |          0 |         13 |        113 |
+| /Users/ashnaguha/Desktop/cell-signaling-pathway-simulator/font.go             | Go               |         37 |          5 |          7 |         49 |
+| /Users/ashnaguha/Desktop/cell-signaling-pathway-simulator/geom.go             | Go               |         39 |          6 |          7 |         52 |
+| /Users/ashnaguha/Desktop/cell-signaling-pathway-simulator/go.mod              | Go Module File   |         15 |          0 |          4 |         19 |
+| /Users/ashnaguha/Desktop/cell-signaling-pathway-simulator/go.sum              | Go Checksum File |         24 |          0 |          1 |         25 |
+| /Users/ashnaguha/Desktop/cell-signaling-pathway-simulator/gui.go              | Go               |        494 |         29 |         76 |        599 |
+| /Users/ashnaguha/Desktop/cell-signaling-pathway-simulator/index.html          | HTML             |          2 |          0 |          0 |          2 |
+| /Users/ashnaguha/Desktop/cell-signaling-pathway-simulator/infoPages.go        | Go               |         28 |          0 |          1 |         29 |
+| /Users/ashnaguha/Desktop/cell-signaling-pathway-simulator/main.go             | Go               |        537 |         12 |         49 |        598 |
+| /Users/ashnaguha/Desktop/cell-signaling-pathway-simulator/signal_reception.go | Go               |         10 |          1 |          2 |         13 |
+| /Users/ashnaguha/Desktop/cell-signaling-pathway-simulator/state_machine.go    | Go               |         66 |          0 |         18 |         84 |
+| /Users/ashnaguha/Desktop/cell-signaling-pathway-simulator/wasm_exec.js        | JavaScript       |        466 |         36 |         60 |        562 |
+| /Users/ashnaguha/Desktop/cell-signaling-pathway-simulator/web.html            | HTML             |         15 |          0 |          1 |         16 |
+| /Users/ashnaguha/Desktop/cell-signaling-pathway-simulator/webTest.go          | Go               |         38 |          1 |          8 |         47 |
+| /Users/ashnaguha/Desktop/cell-signaling-pathway-simulator/wrapper.js          | JavaScript       |          6 |          0 |          2 |          8 |
+| Total                                                                         |                  |      1,878 |         90 |        251 |      2,219 |
++-------------------------------------------------------------------------------+------------------+------------+------------+------------+------------+
