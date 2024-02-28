@@ -16,69 +16,74 @@ import (
 
 )
 
-const (
-	screenWidth  = 1250
-	screenHeight = 750
+var (
+	screenWidth, screenHeight = 1250, 750
 )
 
 var (
-	err                error
-	scene              string = "Main Menu"
-	protoStartBg       *ebiten.Image
-	startBg            Parallax
-	startP1            Parallax
-	startP2            Parallax
-	startP3            Parallax
-	startP4            Parallax
-	fixedStart         *ebiten.Image
-	aboutBg             *ebiten.Image
-	plasmaBg           *ebiten.Image
-	cytoBg_1           *ebiten.Image
-	nucleusBg          *ebiten.Image
-	cytoBg_2           *ebiten.Image
-	levSelBg           *ebiten.Image
-	playbutton         Button
-	aboutButton        Button
-	aboutToMenuButton   Button
-	levSelButton       Button
-	levToPlasmaButton  Button
-	levToCyto1Button   Button
-	levToNucleusButton Button
-	levToCyto2Button   Button
-	levToMenuButton    Button
-	otherToMenuButton    Button
-	seedSignal         = rand.Intn(4) + 1
-	signal             Signal
-	receptorA          Receptor
-	receptorB          Receptor
-	receptorC          Receptor
-	receptorD          Receptor
-	template           = [5]string{}
-	tk1                Kinase
-	tk2                Kinase
-	tfa                TFA
-	rna                [5]Transcript
-	dna                [5]Template
-	currentFrag        = 0
-	temp_tk1A          Kinase
-	temp_tk1B          Kinase
-	temp_tk1C          Kinase
-	temp_tk1D          Kinase
-	temp_tfa           TFA
-	rnaPolymerase      RNAPolymerase
-	ribosome           Ribosome
-	rightChoice        CodonChoice
-	wrongChoice1       CodonChoice
-	wrongChoice2       CodonChoice
-	mrna               [5]Template
-	protein            [5]Transcript
-	mrna_ptr           int
-	rightTrna          CodonChoice
-	wrongTrna1         CodonChoice
-	wrongTrna2         CodonChoice
-	reset              bool
-	infoButton		   InfoPage
-	info			   string
+	err                		error
+	scene              		string = "Main Menu"
+	protoStartBg       		StillImage
+	startBg            		Parallax
+	startP1     	    	Parallax
+	startP2		            Parallax
+	startP3            		Parallax
+	startP4            		Parallax
+	fixedStart         		StillImage
+	aboutBg            	 	StillImage
+	levSelBg	         	StillImage
+
+	// plasmaMembrane          Parallax
+	// ^ Note: add function to receptors that sets x and y to plasma membrane coord, -+ respective pos
+	plasmaBg           		*ebiten.Image
+	cytoBg_1           		*ebiten.Image
+	nucleusBg       		*ebiten.Image
+	cytoBg_2    	     	*ebiten.Image
+
+	playbutton         		Button
+	aboutButton        		Button
+	aboutToMenuButton  		Button
+	levSelButton       		Button
+	levToPlasmaButton  		Button
+	levToCyto1Button   		Button
+	levToNucleusButton 		Button
+	levToCyto2Button   		Button
+	levToMenuButton    		Button
+	otherToMenuButton    	Button
+
+	seedSignal         		= rand.Intn(4) + 1
+	signal        			Signal
+	receptorA          		Receptor
+	receptorB          		Receptor
+	receptorC          		Receptor
+	receptorD         		Receptor
+
+	template        		= [5]string{}
+	tk1        				Kinase
+	tk2       				Kinase
+	tfa                		TFA
+	rna                		[5]Transcript
+	dna                		[5]Template
+	currentFrag        		= 0
+	temp_tk1A          		Kinase
+	temp_tk1B          		Kinase
+	temp_tk1C          		Kinase
+	temp_tk1D          		Kinase
+	temp_tfa           		TFA
+	rnaPolymerase      		RNAPolymerase
+	ribosome	           	Ribosome
+	rightChoice        		CodonChoice
+	wrongChoice1       		CodonChoice
+	wrongChoice2       		CodonChoice
+	mrna               		[5]Template
+	protein            		[5]Transcript
+	mrna_ptr           		int
+	rightTrna          		CodonChoice
+	wrongTrna1         		CodonChoice
+	wrongTrna2         		CodonChoice
+	reset              		bool
+	infoButton		   		InfoPage
+	info			   		string
 )
 
 type Game struct {
@@ -112,7 +117,7 @@ func init() {
 	ebiten.SetWindowPosition(100, 0)
 	ebiten.SetWindowSize(screenWidth, screenHeight)
 	ebiten.SetWindowResizingMode(ebiten.WindowResizingModeOnlyFullscreenEnabled)
-	protoStartBg, _, err = ebitenutil.NewImageFromFile(loadFile("MenuBg.png"))
+	protoStartBg = newStillImage("MenuBg.png", newRect(0, 0, 1250, 750))
 	startBg = newParallax("StartBg.png", newRect(0, 0, 1250, 750), 5)
 	startP1 = newParallax("parallax-Start2.png", newRect(0, 0, 1250, 750), 4)
 	startP2 = newParallax("parallax-Start3.png", newRect(0, 0, 1250, 750), 3)
@@ -121,14 +126,10 @@ func init() {
 	infoButton = newInfoPage("infoButton.png", "infoPage.png", newRect(850, 0, 165, 165), "btn")
 	otherToMenuButton = newButton("menuButton.png", newRect(1000, 0, 242, 138), ToMenu)
 
-	fixedStart, _, err = ebitenutil.NewImageFromFile(loadFile("fixed-Start.png"))
-	if err != nil {
-		log.Fatal(err)
-	}
-	aboutBg, _, err = ebitenutil.NewImageFromFile(loadFile("AboutBg.png"))
-	if err != nil {
-		log.Fatal(err)
-	}
+	fixedStart = newStillImage("fixed-Start.png", newRect(0, 0, 1250, 750))
+	aboutBg = newStillImage("AboutBg.png", newRect(0, 0, 1250, 750))
+	levSelBg = newStillImage("levSelBg.png", newRect(0, 0, 1250, 750))
+
 	plasmaBg, _, err = ebitenutil.NewImageFromFile(loadFile("PlasmaBg.png"))
 	if err != nil {
 		log.Fatal(err)
@@ -142,10 +143,6 @@ func init() {
 		log.Fatal(err)
 	}
 	cytoBg_2, _, err = ebitenutil.NewImageFromFile(loadFile("CytoBg2.png"))
-	if err != nil {
-		log.Fatal(err)
-	}
-	levSelBg, _, err = ebitenutil.NewImageFromFile(loadFile("levSelBg.png"))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -238,12 +235,15 @@ func init() {
 }
 
 func (g *Game) Update() error {
+
 	if inpututil.IsKeyJustPressed(ebiten.KeyEscape) {
 		ebiten.SetFullscreen(false)
 	}
 	if ebiten.IsFullscreen() {
 		// Use this if statement to set sizes of graphics to fullscreen scale, else normal scale.
-	}
+		screenWidth, screenHeight = ebiten.ScreenSizeInFullscreen()
+	} else {screenWidth, screenHeight = 1250, 750}
+
 	switch scene {
 	case "Main Menu":
 		ebiten.SetWindowTitle("Cell Signaling Pathway - Main Menu")
@@ -306,6 +306,7 @@ func (g *Game) Update() error {
 		if temp_tk1A.rect.pos.y >= 750 || temp_tk1B.rect.pos.y >= 750 || temp_tk1C.rect.pos.y >= 750 || temp_tk1D.rect.pos.y >= 750 {
 			ToCyto1(g)
 		}
+
 	case "Signal Transduction":
 		ebiten.SetWindowTitle("Cell Signaling Pathway - Signal Transduction")
 		otherToMenuButton.on_click(g)
@@ -315,6 +316,7 @@ func (g *Game) Update() error {
 		tfa.update()
 		infoButton.on_click(g)
 		info = updateInfo()
+
 		if tk1.is_clicked_on {
 			tk2.activate()
 			tk1.is_clicked_on = false
@@ -326,6 +328,7 @@ func (g *Game) Update() error {
 		if tfa.rect.pos.y > 750 {
 			ToNucleus(g)
 		}
+
 	case "Transcription":
 		ebiten.SetWindowTitle("Cell Signaling Pathway - Transcription")
 		otherToMenuButton.on_click(g)
@@ -334,6 +337,7 @@ func (g *Game) Update() error {
 		rnaPolymerase.update(temp_tfa.rect.pos.y)
 		infoButton.on_click(g)
 		info = updateInfo()
+
 		if reset {
 			rightChoice.bases = transcribe(dna[currentFrag].codon)
 			wrongChoice1.bases = randomRNACodon(rightChoice.bases)
@@ -352,6 +356,7 @@ func (g *Game) Update() error {
 		otherToMenuButton.on_click(g)
 		infoButton.on_click(g)
 		info = updateInfo()
+
 		if reset {
 			rightTrna.bases = translate(mrna[mrna_ptr].codon)
 			wrongTrna1.bases = translate(randomRNACodon(rightTrna.bases))
@@ -371,16 +376,17 @@ func (g *Game) Update() error {
 func (g *Game) Draw(screen *ebiten.Image) {
 	switch scene {
 	case "Main Menu":
-		screen.DrawImage(protoStartBg, nil)
+		protoStartBg.draw(screen)
 		startBg.draw(screen)
 		startP1.draw(screen)
 		startP2.draw(screen)
 		startP3.draw(screen)
 		startP4.draw(screen)
-		screen.DrawImage(fixedStart, nil)
+		fixedStart.draw(screen)
 		playbutton.draw(screen)
 		aboutButton.draw(screen)
 		levSelButton.draw(screen)
+
 		if g.switchedToPlasma {
 			scene = "Signal Reception"
 		}
@@ -391,7 +397,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			scene = "About"
 		}
 	case "About":
-		screen.DrawImage(aboutBg, nil)
+		aboutBg.draw(screen)
 		aboutToMenuButton.draw(screen)
 		m := "WELCOME TO THE CELL\nSIGNALING PATHWAY\nSIMULATOR!\n"
 		m += "This simulator will\nguide you through the\ncomplete cell signaling\n"
@@ -404,12 +410,13 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			scene = "Main Menu"
 		}
 	case "Level Selection":
-		screen.DrawImage(levSelBg, nil)
+		levSelBg.draw(screen)
 		levToPlasmaButton.draw(screen)
 		levToCyto1Button.draw(screen)
 		levToNucleusButton.draw(screen)
 		levToCyto2Button.draw(screen)
 		levToMenuButton.draw(screen)
+
 		if g.switchedToMenu {
 			scene = "Main Menu"
 		}

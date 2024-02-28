@@ -102,6 +102,32 @@ type InfoPage struct {
 	// if status = btn, if status = pg
 }
 
+type StillImage struct {
+	image *ebiten.Image
+	rect Rectangle
+}
+
+func newStillImage(path string, rect Rectangle) StillImage {
+	var still_image, _, err = ebitenutil.NewImageFromFile(loadFile(path))
+
+	if err != nil {
+		fmt.Println("Error parsing date:", err)
+	}
+	return StillImage{
+		image: still_image,
+		rect:  rect,
+	}
+}
+
+func (s StillImage) draw(screen *ebiten.Image) {
+	op := &ebiten.DrawImageOptions{}
+	op.GeoM.Translate(float64(s.rect.pos.x), float64(s.rect.pos.y))
+	scaleW := float64(screenWidth)/1250;
+	scaleH := float64(screenHeight)/750;
+	op.GeoM.Scale(scaleW, scaleH)
+	screen.DrawImage(s.image, op)
+}
+
 func newInfoPage(path1 string, path2 string, rect Rectangle, stat string) InfoPage {
 	var btn_img, _, err1 = ebitenutil.NewImageFromFile(loadFile(path1))
 	var pg_img, _, err2 = ebitenutil.NewImageFromFile(loadFile(path2))
@@ -164,8 +190,14 @@ func newParallax(path string, rect Rectangle, layer float64) Parallax {
 func (p *Parallax) update(g *Game) {
 	var x_c, y_c = ebiten.CursorPosition()
 	var l = int(p.layer)
-	p.rect.pos.x = 5 * (x_c - 1350) / (7 * l)
-	p.rect.pos.y = 3 * (y_c - 850) / (5 * l)
+	switch scene {
+	case "Main Menu":
+		p.rect.pos.x = 5 * (x_c - 1350) / (7 * l)
+		p.rect.pos.y = 3 * (y_c - 850) / (5 * l)
+	case "Signal Reception":
+		p.rect.pos.x = 5 * (x_c - 1350) / (7 * l)
+		p.rect.pos.y = (y_c - 850) / (3 * l)		
+	}
 	//p.rect.pos.x = (x_c - 625) / (2*l);
 	//p.rect.pos.y = (y_c - 375) / (2*l);
 }
@@ -173,7 +205,9 @@ func (p *Parallax) update(g *Game) {
 func (p Parallax) draw(screen *ebiten.Image) {
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Translate(float64(p.rect.pos.x), float64(p.rect.pos.y))
-	op.GeoM.Scale((p.layer+0.5)/(p.layer*2), (p.layer+0.5)/(p.layer*2))
+	scaleW := (p.layer+0.5)/(p.layer*2) * float64(screenWidth)/1250;
+	scaleH := (p.layer+0.5)/(p.layer*2) * float64(screenHeight)/750;
+	op.GeoM.Scale(scaleW, scaleH)
 	screen.DrawImage(p.image, op)
 }
 
@@ -223,6 +257,11 @@ func (b Button) draw(screen *ebiten.Image) {
 func (b Button) draw(screen *ebiten.Image) {
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Translate(float64(b.rect.pos.x), float64(b.rect.pos.y))
+	scaleW := float64(screenWidth)/1250;
+	scaleH := float64(screenHeight)/750;
+	op.GeoM.Scale(scaleW, scaleH)
+	b.rect.width *= int(scaleW)
+	b.rect.height *= int(scaleH)
 	screen.DrawImage(b.image, op)
 }
 
