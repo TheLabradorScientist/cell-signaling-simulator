@@ -10,13 +10,13 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 )
 
-type SceneSwapFunc func(*Game)
+type ButtonFunc func(*Game)
 
 type Button struct {
 	//CommonDraw
 	image *ebiten.Image
 	rect  Rectangle
-	cmd   SceneSwapFunc
+	cmd   ButtonFunc
 }
 
 type Signal struct {
@@ -193,11 +193,11 @@ func (p *Parallax) update(g *Game) {
 	var l = int(p.layer)
 	switch scene {
 	case "Main Menu":
-		p.rect.pos.x = -5 * (x_c+100) / (7 * l)
-		p.rect.pos.y = -3 * (y_c+100) / (5 * l)
+		p.rect.pos.x = -5 * (x_c + 100) / (7 * l)
+		p.rect.pos.y = -3 * (y_c + 100) / (5 * l)
 	case "Signal Reception":
-		p.rect.pos.x = -5 * (x_c+100) / (7 * l)
-		p.rect.pos.y = -(y_c+100) / (3 * l)
+		p.rect.pos.x = -5 * (x_c + 100) / (7 * l)
+		p.rect.pos.y = -1 * (y_c + 100) / (3 * l)
 	}
 	//p.rect.pos.x = (x_c - 625) / (2*l);
 	//p.rect.pos.y = (y_c - 375) / (2*l);
@@ -229,7 +229,7 @@ func (cd CommonDraw) draw(screen *ebiten.Image) {
 	screen.DrawImage(cd.image, op)
 } */
 
-func newButton(path string, rect Rectangle, cmd SceneSwapFunc) Button {
+func newButton(path string, rect Rectangle, cmd ButtonFunc) Button {
 	var btn_image, _, err = ebitenutil.NewImageFromFile(loadFile(path))
 
 	if err != nil {
@@ -329,19 +329,28 @@ func (r Receptor) draw(screen *ebiten.Image) {
 }
 
 func (r *Receptor) update() {
+	var x_c, y_c = ebiten.CursorPosition()
 	switch r.receptorType {
 	case "receptorA":
-		r.rect.pos.x = plasmaMembrane.rect.pos.x + 50
-		r.rect.pos.y = plasmaMembrane.rect.pos.y + 400
+		r.rect.pos.x = (-5 * (x_c + 100) / (7 * 3)) + 75
+		r.rect.pos.y = (-1 * (y_c + 100) / (3 * 3)) + 450
+		//r.rect.pos.x = plasmaMembrane.rect.pos.x + 50
+		//r.rect.pos.y = plasmaMembrane.rect.pos.y + 400
 	case "receptorB":
-		r.rect.pos.x = plasmaMembrane.rect.pos.x + 500
-		r.rect.pos.y = plasmaMembrane.rect.pos.y + 400
+		r.rect.pos.x = (-5 * (x_c + 100) / (7 * 3)) + 475
+		r.rect.pos.y = (-(y_c + 100) / (3 * 3)) + 400
+		//r.rect.pos.x = plasmaMembrane.rect.pos.x + 500
+		//r.rect.pos.y = plasmaMembrane.rect.pos.y + 400
 	case "receptorC":
-		r.rect.pos.x = plasmaMembrane.rect.pos.x + 950
-		r.rect.pos.y = plasmaMembrane.rect.pos.y + 400
+		r.rect.pos.x = (-5 * (x_c + 100) / (7 * 3)) + 875
+		r.rect.pos.y = (-(y_c + 100) / (3 * 3)) + 400
+		//r.rect.pos.x = plasmaMembrane.rect.pos.x + 950
+		//r.rect.pos.y = plasmaMembrane.rect.pos.y + 400
 	case "receptorD":
-		r.rect.pos.x = plasmaMembrane.rect.pos.x + 1400
-		r.rect.pos.y = plasmaMembrane.rect.pos.y + 400
+		r.rect.pos.x = (-5 * (x_c + 100) / (7 * 3)) + 1275
+		r.rect.pos.y = (-1 * (y_c + 100) / (3 * 3)) + 450
+		//r.rect.pos.x = plasmaMembrane.rect.pos.x + 1400
+		//r.rect.pos.y = plasmaMembrane.rect.pos.y + 400
 	}
 	if aabb_collision(signal.rect, r.rect) {
 		r.is_touching_signal = true
@@ -391,19 +400,20 @@ func (k *Kinase) update(rect Rectangle) {
 	var b_pos = newVector(x_c, y_c)
 	if strings.Contains(k.kinaseType, "temp_tk1") {
 		if !k.is_moving {
+			var x_c, y_c = ebiten.CursorPosition()
 			switch k.kinaseType {
 			case "temp_tk1A":
-				k.rect.pos.x = plasmaMembrane.rect.pos.x + 50
-				k.rect.pos.y = plasmaMembrane.rect.pos.y + 600
+				k.rect.pos.x = (-5 * (x_c + 100) / (7 * 3)) + 75
+				k.rect.pos.y = (-1 * (y_c + 100) / (3 * 3)) + 625
 			case "temp_tk1B":
-				k.rect.pos.x = plasmaMembrane.rect.pos.x + 500
-				k.rect.pos.y = plasmaMembrane.rect.pos.y + 600
+				k.rect.pos.x = (-5 * (x_c + 100) / (7 * 3)) + 475
+				k.rect.pos.y = (-(y_c + 100) / (3 * 3)) + 575
 			case "temp_tk1C":
-				k.rect.pos.x = plasmaMembrane.rect.pos.x + 950
-				k.rect.pos.y = plasmaMembrane.rect.pos.y + 600
+				k.rect.pos.x = (-5 * (x_c + 100) / (7 * 3)) + 875
+				k.rect.pos.y = (-(y_c + 100) / (3 * 3)) + 575
 			case "temp_tk1D":
-				k.rect.pos.x = plasmaMembrane.rect.pos.x + 1400
-				k.rect.pos.y = plasmaMembrane.rect.pos.y + 600
+				k.rect.pos.x = (-5 * (x_c + 100) / (7 * 3)) + 1275
+				k.rect.pos.y = (-1 * (y_c + 100) / (3 * 3)) + 625
 			}
 		} else if k.is_moving {
 			if k.rect.pos.y <= 750 {

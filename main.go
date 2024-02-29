@@ -15,9 +15,9 @@ import (
 	//"github.com/hajimehoshi/ebiten/ebitenutil"
 	//"github.com/hajimehoshi/ebiten/v2/audio"
 
+	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/audio"
 	"github.com/hajimehoshi/ebiten/v2/audio/mp3"
-	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 )
 
@@ -42,15 +42,16 @@ var (
 	aboutBg      StillImage
 	levSelBg     StillImage
 
-	plasmaMembrane  Parallax
+	plasmaMembrane Parallax
 	// ^ Note: add function to receptors that sets x and y to plasma membrane coord, -+ respective pos
-	protoPlasmaBg   StillImage
-	plasmaBg		Parallax
-	cytoBg_1  		StillImage
-	nucleusBg 		StillImage
-	cytoBg_2  		StillImage
+	protoPlasmaBg StillImage
+	plasmaBg      Parallax
+	cytoBg_1      StillImage
+	nucleusBg     StillImage
+	cytoBg_2      StillImage
 
 	playbutton         Button
+	volButton          Button
 	aboutButton        Button
 	aboutToMenuButton  Button
 	levSelButton       Button
@@ -60,6 +61,8 @@ var (
 	levToCyto2Button   Button
 	levToMenuButton    Button
 	otherToMenuButton  Button
+
+	audioPlayer *audio.Player
 
 	seedSignal = rand.Intn(4) + 1
 	signal     Signal
@@ -96,7 +99,7 @@ var (
 	info          string
 )
 
-const sampleRate = 48000
+//const sampleRate = 48000
 
 type Game struct {
 	defaultFont           Font
@@ -154,15 +157,33 @@ func init() {
 	startP3 = newParallax("parallax-Start4.png", newRect(0, 0, 1250, 750), 2)
 	startP4 = newParallax("parallax-Start5.png", newRect(0, 0, 1250, 750), 1)
 	infoButton = newInfoPage("infoButton.png", "infoPage.png", newRect(850, 0, 165, 165), "btn")
-	otherToMenuButton = newButton("menuButton.png", newRect(1000, 0, 242, 138), ToMenu)
+	otherToMenuButton = newButton("menuButton.png", newRect(1000, 0, 300, 200), ToMenu)
+
+	volButton = newButton("volButtonOn.png", newRect(1100, 100, 165, 165), SwitchVol)
+
+	// Initialize audio context
+	audioContext = audio.NewContext(44100)
+
+	mp3Bytes, err := os.ReadFile(loadMusic("Signaling_of_the_Cell_MenuScreen.mp3"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	mp3Stream, err := mp3.DecodeWithoutResampling(bytes.NewReader(mp3Bytes))
+	if err != nil {
+		log.Fatal(err)
+	}
+	audioPlayer, err = audioContext.NewPlayer(mp3Stream)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	fixedStart = newStillImage("fixed-Start.png", newRect(0, 0, 1250, 750))
 	aboutBg = newStillImage("AboutBg.png", newRect(0, 0, 1250, 750))
 	levSelBg = newStillImage("levSelBg.png", newRect(0, 0, 1250, 750))
 
 	protoPlasmaBg = newStillImage("PlasmaBg.png", newRect(0, 0, 1250, 750))
-	plasmaBg = newParallax("parallax-plasma.png", newRect(0, 0, 1250, 750), 5)
-	plasmaMembrane = newParallax("plasmaMembrane.png", newRect(0, 0, 1250, 750), 3)
+	plasmaBg = newParallax("parallax-plasma.png", newRect(0, 0, 1250, 750), 4)
+	plasmaMembrane = newParallax("plasmaMembrane.png", newRect(0, 200, 1250, 750), 2)
 
 	cytoBg_1 = newStillImage("CytoBg1.png", newRect(0, 0, 1250, 750))
 	nucleusBg = newStillImage("NucleusBg.png", newRect(0, 0, 1250, 750))
@@ -279,6 +300,7 @@ func (g *Game) Update() error {
 		aboutButton.on_click(g)
 		playbutton.on_click(g)
 		levSelButton.on_click(g)
+		volButton.on_click(g)
 	case "About":
 		ebiten.SetWindowTitle("Cell Signaling Pathway - About")
 		aboutToMenuButton.on_click(g)
@@ -415,6 +437,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		playbutton.draw(screen)
 		aboutButton.draw(screen)
 		levSelButton.draw(screen)
+		volButton.draw(screen)
 
 		if g.switchedToPlasma {
 			scene = "Signal Reception"
@@ -633,18 +656,6 @@ func main() {
 	game := &Game{}
 	game.defaultFont = newFont("CourierPrime-Regular.ttf", 32)
 	game.codonFont = newFont("BlackOpsOne-Regular.ttf", 60)
-	// Initialize audio context
-	audioContext = audio.NewContext(44100)
-
-	mp3Bytes, err := os.ReadFile(loadMusic("Signaling_of_the_Cell_MenuScreen.mp3"))
-
-	mp3Stream, err := mp3.DecodeWithoutResampling(bytes.NewReader(mp3Bytes))
-
-	audioPlayer, err := audioContext.NewPlayer(mp3Stream)
-
-
-	// Start playing audio
-	audioPlayer.Play()	
 
 	//audioContext := audio.NewContext(sampleRate)
 	//game.musicPlayer = nil
@@ -652,10 +663,14 @@ func main() {
 	//game.errCh = make(chan error)
 	//m, err := NewPlayer(game, audioContext)
 	//game.musicPlayer = m
-	
+
+	// Start playing audio
+	SwitchVol(game)
+
 	if err := ebiten.RunGame(game); err != nil {
 		log.Fatal(err)
 	}
+
 	if err != nil {
 		log.Fatal(err)
 	}

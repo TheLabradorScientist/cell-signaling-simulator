@@ -1,6 +1,11 @@
 package main
 
-import "github.com/hajimehoshi/ebiten/v2"
+import (
+	"fmt"
+
+	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
+)
 
 type SceneCreatorFunc func() State
 type SceneConstructorMap map[string]SceneCreatorFunc
@@ -81,4 +86,23 @@ func ToLevelSelect(g *Game) {
 func ToAbout(g *Game) {
 	setAllSwitchedFalse(g)
 	g.switchedToAbout = true
+}
+
+func SwitchVol(g *Game) {
+	if audioPlayer.IsPlaying() {
+		audioPlayer.Pause()
+		/**/var vol_image, _, err = ebitenutil.NewImageFromFile(loadFile("volButtonOff.png"))
+		if err != nil {
+			fmt.Println("Error parsing date:", err)
+		}
+		volButton.image = vol_image
+	} else { 
+		audioPlayer.Play() 
+		/**/var vol_image, _, err = ebitenutil.NewImageFromFile(loadFile("volButtonOn.png"))
+		if err != nil {
+			fmt.Println("Error parsing date:", err)
+		}
+		volButton.image = vol_image
+	}
+
 }
