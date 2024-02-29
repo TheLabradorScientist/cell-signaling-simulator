@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"image/color"
+	"strings"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
@@ -104,7 +105,7 @@ type InfoPage struct {
 
 type StillImage struct {
 	image *ebiten.Image
-	rect Rectangle
+	rect  Rectangle
 }
 
 func newStillImage(path string, rect Rectangle) StillImage {
@@ -122,8 +123,8 @@ func newStillImage(path string, rect Rectangle) StillImage {
 func (s StillImage) draw(screen *ebiten.Image) {
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Translate(float64(s.rect.pos.x), float64(s.rect.pos.y))
-	scaleW := float64(screenWidth)/1250;
-	scaleH := float64(screenHeight)/750;
+	scaleW := float64(screenWidth) / 1250
+	scaleH := float64(screenHeight) / 750
 	op.GeoM.Scale(scaleW, scaleH)
 	screen.DrawImage(s.image, op)
 }
@@ -170,7 +171,7 @@ func (i InfoPage) draw(screen *ebiten.Image, g *Game) {
 	if i.status == "pg" {
 		screen.DrawImage(i.pg_image, op)
 		Purple := color.RGBA{50, 0, 50, 250}
-		g.defaultFont.drawFont(screen, info, 400, 200, color.RGBA(Purple))
+		g.defaultFont.drawFont(screen, info, 300, 200, color.RGBA(Purple))
 	}
 }
 
@@ -192,11 +193,11 @@ func (p *Parallax) update(g *Game) {
 	var l = int(p.layer)
 	switch scene {
 	case "Main Menu":
-		p.rect.pos.x = 5 * (x_c - 1350) / (7 * l)
-		p.rect.pos.y = 3 * (y_c - 850) / (5 * l)
+		p.rect.pos.x = -5 * (x_c+100) / (7 * l)
+		p.rect.pos.y = -3 * (y_c+100) / (5 * l)
 	case "Signal Reception":
-		p.rect.pos.x = 5 * (x_c - 1350) / (7 * l)
-		p.rect.pos.y = (y_c - 850) / (3 * l)		
+		p.rect.pos.x = -5 * (x_c+100) / (7 * l)
+		p.rect.pos.y = -(y_c+100) / (3 * l)
 	}
 	//p.rect.pos.x = (x_c - 625) / (2*l);
 	//p.rect.pos.y = (y_c - 375) / (2*l);
@@ -205,8 +206,8 @@ func (p *Parallax) update(g *Game) {
 func (p Parallax) draw(screen *ebiten.Image) {
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Translate(float64(p.rect.pos.x), float64(p.rect.pos.y))
-	scaleW := (p.layer+0.5)/(p.layer*2) * float64(screenWidth)/1250;
-	scaleH := (p.layer+0.5)/(p.layer*2) * float64(screenHeight)/750;
+	scaleW := (p.layer + 0.5) / (p.layer * 2) * float64(screenWidth) / 1250
+	scaleH := (p.layer + 0.5) / (p.layer * 2) * float64(screenHeight) / 750
 	op.GeoM.Scale(scaleW, scaleH)
 	screen.DrawImage(p.image, op)
 }
@@ -257,8 +258,8 @@ func (b Button) draw(screen *ebiten.Image) {
 func (b Button) draw(screen *ebiten.Image) {
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Translate(float64(b.rect.pos.x), float64(b.rect.pos.y))
-	scaleW := float64(screenWidth)/1250;
-	scaleH := float64(screenHeight)/750;
+	scaleW := float64(screenWidth) / 1250
+	scaleH := float64(screenHeight) / 750
 	op.GeoM.Scale(scaleW, scaleH)
 	b.rect.width *= int(scaleW)
 	b.rect.height *= int(scaleH)
@@ -286,9 +287,7 @@ func (s *Signal) on_click(g *Game) {
 		if rect_point_collision(s.rect, b_pos) && ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
 			s.is_dragged = true
 		}
-	}
-
-	if s.is_dragged {
+	} else if s.is_dragged {
 		s.rect.pos = newVector(b_pos.x-s.rect.width/2, b_pos.y-s.rect.height/2)
 	}
 }
@@ -296,6 +295,11 @@ func (s *Signal) on_click(g *Game) {
 func (s Signal) draw(screen *ebiten.Image) {
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Translate(float64(s.rect.pos.x), float64(s.rect.pos.y))
+	scaleW := float64(screenWidth) / 1250
+	scaleH := float64(screenHeight) / 750
+	op.GeoM.Scale(scaleW, scaleH)
+	s.rect.width *= int(scaleW)
+	s.rect.height *= int(scaleH)
 	screen.DrawImage(s.image, op)
 }
 
@@ -316,10 +320,29 @@ func newReceptor(path string, rect Rectangle, rtype string) Receptor {
 func (r Receptor) draw(screen *ebiten.Image) {
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Translate(float64(r.rect.pos.x), float64(r.rect.pos.y))
+	scaleW := float64(screenWidth) / 1250
+	scaleH := float64(screenHeight) / 750
+	op.GeoM.Scale(scaleW, scaleH)
+	r.rect.width *= int(scaleW)
+	r.rect.height *= int(scaleH)
 	screen.DrawImage(r.image, op)
 }
 
 func (r *Receptor) update() {
+	switch r.receptorType {
+	case "receptorA":
+		r.rect.pos.x = plasmaMembrane.rect.pos.x + 50
+		r.rect.pos.y = plasmaMembrane.rect.pos.y + 400
+	case "receptorB":
+		r.rect.pos.x = plasmaMembrane.rect.pos.x + 500
+		r.rect.pos.y = plasmaMembrane.rect.pos.y + 400
+	case "receptorC":
+		r.rect.pos.x = plasmaMembrane.rect.pos.x + 950
+		r.rect.pos.y = plasmaMembrane.rect.pos.y + 400
+	case "receptorD":
+		r.rect.pos.x = plasmaMembrane.rect.pos.x + 1400
+		r.rect.pos.y = plasmaMembrane.rect.pos.y + 400
+	}
 	if aabb_collision(signal.rect, r.rect) {
 		r.is_touching_signal = true
 	} else {
@@ -366,9 +389,26 @@ func newTFA(path string, rect Rectangle, tfaType string) TFA {
 func (k *Kinase) update(rect Rectangle) {
 	var x_c, y_c = ebiten.CursorPosition()
 	var b_pos = newVector(x_c, y_c)
-	if k.kinaseType == "temp_tk1" && k.is_moving {
-		if k.rect.pos.y <= 750 {
-			k.descend()
+	if strings.Contains(k.kinaseType, "temp_tk1") {
+		if !k.is_moving {
+			switch k.kinaseType {
+			case "temp_tk1A":
+				k.rect.pos.x = plasmaMembrane.rect.pos.x + 50
+				k.rect.pos.y = plasmaMembrane.rect.pos.y + 600
+			case "temp_tk1B":
+				k.rect.pos.x = plasmaMembrane.rect.pos.x + 500
+				k.rect.pos.y = plasmaMembrane.rect.pos.y + 600
+			case "temp_tk1C":
+				k.rect.pos.x = plasmaMembrane.rect.pos.x + 950
+				k.rect.pos.y = plasmaMembrane.rect.pos.y + 600
+			case "temp_tk1D":
+				k.rect.pos.x = plasmaMembrane.rect.pos.x + 1400
+				k.rect.pos.y = plasmaMembrane.rect.pos.y + 600
+			}
+		} else if k.is_moving {
+			if k.rect.pos.y <= 750 {
+				k.descend()
+			}
 		}
 	} else if !k.is_clicked_on && k.is_moving {
 		if k.rect.pos.y <= 400 && k.kinaseType == "tk2" {
@@ -395,6 +435,11 @@ func (k *Kinase) update(rect Rectangle) {
 func (k Kinase) draw(screen *ebiten.Image) {
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Translate(float64(k.rect.pos.x), float64(k.rect.pos.y))
+	scaleW := float64(screenWidth) / 1250
+	scaleH := float64(screenHeight) / 750
+	op.GeoM.Scale(scaleW, scaleH)
+	k.rect.width *= int(scaleW)
+	k.rect.height *= int(scaleH)
 	screen.DrawImage(k.image, op)
 }
 
@@ -456,9 +501,15 @@ func (t *TFA) animate(newImage string) {
 func (t TFA) draw(screen *ebiten.Image) {
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Translate(float64(t.rect.pos.x), float64(t.rect.pos.y))
+	scaleW := float64(screenWidth) / 1250
+	scaleH := float64(screenHeight) / 750
 	if t.tfaType == "tfa2" {
-		op.GeoM.Scale(1.25, 1.25)
+		op.GeoM.Scale(scaleW*1.25, scaleH*1.25)
+	} else {
+		op.GeoM.Scale(scaleW, scaleH)
 	}
+	t.rect.width *= int(scaleW)
+	t.rect.height *= int(scaleH)
 	screen.DrawImage(t.image, op)
 }
 
@@ -485,6 +536,11 @@ func (r *RNAPolymerase) update(tfaPosY int) {
 func (r RNAPolymerase) draw(screen *ebiten.Image) {
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Translate(float64(r.rect.pos.x), float64(r.rect.pos.y))
+	scaleW := float64(screenWidth) / 1250
+	scaleH := float64(screenHeight) / 750
+	op.GeoM.Scale(scaleW, scaleH)
+	r.rect.width *= int(scaleW)
+	r.rect.height *= int(scaleH)
 	screen.DrawImage(r.image, op)
 }
 
@@ -500,10 +556,15 @@ func newTranscript(path string, rect Rectangle, codon string) Transcript {
 	}
 }
 
-func (transcript Transcript) draw(screen *ebiten.Image) {
+func (transcr Transcript) draw(screen *ebiten.Image) {
 	op := &ebiten.DrawImageOptions{}
-	op.GeoM.Translate(float64(transcript.rect.pos.x), float64(transcript.rect.pos.y))
-	screen.DrawImage(transcript.image, op)
+	op.GeoM.Translate(float64(transcr.rect.pos.x), float64(transcr.rect.pos.y))
+	scaleW := float64(screenWidth) / 1250
+	scaleH := float64(screenHeight) / 750
+	op.GeoM.Scale(scaleW, scaleH)
+	transcr.rect.width *= int(scaleW)
+	transcr.rect.height *= int(scaleH)
+	screen.DrawImage(transcr.image, op)
 }
 
 func newTemplate(path string, rect Rectangle, codon string, fragment int) Template {
@@ -520,10 +581,15 @@ func newTemplate(path string, rect Rectangle, codon string, fragment int) Templa
 	}
 }
 
-func (template Template) draw(screen *ebiten.Image) {
+func (temp Template) draw(screen *ebiten.Image) {
 	op := &ebiten.DrawImageOptions{}
-	op.GeoM.Translate(float64(template.rect.pos.x), float64(template.rect.pos.y))
-	screen.DrawImage(template.image, op)
+	op.GeoM.Translate(float64(temp.rect.pos.x), float64(temp.rect.pos.y))
+	scaleW := float64(screenWidth) / 1250
+	scaleH := float64(screenHeight) / 750
+	op.GeoM.Scale(scaleW, scaleH)
+	temp.rect.width *= int(scaleW)
+	temp.rect.height *= int(scaleH)
+	screen.DrawImage(temp.image, op)
 }
 
 func nextDNACodon(g *Game) {
@@ -597,6 +663,11 @@ func (c CodonChoice) update2(g *Game, mrnaFrag string) bool {
 func (c CodonChoice) draw(screen *ebiten.Image) {
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Translate(float64(c.rect.pos.x), float64(c.rect.pos.y))
+	scaleW := float64(screenWidth) / 1250
+	scaleH := float64(screenHeight) / 750
+	op.GeoM.Scale(scaleW, scaleH)
+	c.rect.width *= int(scaleW)
+	c.rect.height *= int(scaleH)
 	screen.DrawImage(c.image, op)
 }
 
@@ -621,6 +692,11 @@ func (ribo *Ribosome) update_movement() bool {
 func (ribo Ribosome) draw(screen *ebiten.Image) {
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Translate(float64(ribo.rect.pos.x), float64(ribo.rect.pos.y))
+	scaleW := float64(screenWidth) / 1250
+	scaleH := float64(screenHeight) / 750
+	op.GeoM.Scale(scaleW, scaleH)
+	ribo.rect.width *= int(scaleW)
+	ribo.rect.height *= int(scaleH)
 	screen.DrawImage(ribo.image, op)
 }
 

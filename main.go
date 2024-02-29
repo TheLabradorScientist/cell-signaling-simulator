@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"image/color"
 	_ "image/png"
@@ -10,10 +11,14 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
-	"github.com/hajimehoshi/ebiten/v2/inpututil"
+	//"github.com/hajimehoshi/ebiten/v2/audio/mp3"
+	//"github.com/hajimehoshi/ebiten/ebitenutil"
+	//"github.com/hajimehoshi/ebiten/v2/audio"
 
+	"github.com/hajimehoshi/ebiten/v2/audio"
+	"github.com/hajimehoshi/ebiten/v2/audio/mp3"
+	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/inpututil"
 )
 
 var (
@@ -21,70 +26,77 @@ var (
 )
 
 var (
-	err                		error
-	scene              		string = "Main Menu"
-	protoStartBg       		StillImage
-	startBg            		Parallax
-	startP1     	    	Parallax
-	startP2		            Parallax
-	startP3            		Parallax
-	startP4            		Parallax
-	fixedStart         		StillImage
-	aboutBg            	 	StillImage
-	levSelBg	         	StillImage
-
-	// plasmaMembrane          Parallax
-	// ^ Note: add function to receptors that sets x and y to plasma membrane coord, -+ respective pos
-	plasmaBg           		*ebiten.Image
-	cytoBg_1           		*ebiten.Image
-	nucleusBg       		*ebiten.Image
-	cytoBg_2    	     	*ebiten.Image
-
-	playbutton         		Button
-	aboutButton        		Button
-	aboutToMenuButton  		Button
-	levSelButton       		Button
-	levToPlasmaButton  		Button
-	levToCyto1Button   		Button
-	levToNucleusButton 		Button
-	levToCyto2Button   		Button
-	levToMenuButton    		Button
-	otherToMenuButton    	Button
-
-	seedSignal         		= rand.Intn(4) + 1
-	signal        			Signal
-	receptorA          		Receptor
-	receptorB          		Receptor
-	receptorC          		Receptor
-	receptorD         		Receptor
-
-	template        		= [5]string{}
-	tk1        				Kinase
-	tk2       				Kinase
-	tfa                		TFA
-	rna                		[5]Transcript
-	dna                		[5]Template
-	currentFrag        		= 0
-	temp_tk1A          		Kinase
-	temp_tk1B          		Kinase
-	temp_tk1C          		Kinase
-	temp_tk1D          		Kinase
-	temp_tfa           		TFA
-	rnaPolymerase      		RNAPolymerase
-	ribosome	           	Ribosome
-	rightChoice        		CodonChoice
-	wrongChoice1       		CodonChoice
-	wrongChoice2       		CodonChoice
-	mrna               		[5]Template
-	protein            		[5]Transcript
-	mrna_ptr           		int
-	rightTrna          		CodonChoice
-	wrongTrna1         		CodonChoice
-	wrongTrna2         		CodonChoice
-	reset              		bool
-	infoButton		   		InfoPage
-	info			   		string
+	audioContext *audio.Context
 )
+
+var (
+	err          error
+	scene        string = "Main Menu"
+	protoStartBg StillImage
+	startBg      Parallax
+	startP1      Parallax
+	startP2      Parallax
+	startP3      Parallax
+	startP4      Parallax
+	fixedStart   StillImage
+	aboutBg      StillImage
+	levSelBg     StillImage
+
+	plasmaMembrane  Parallax
+	// ^ Note: add function to receptors that sets x and y to plasma membrane coord, -+ respective pos
+	protoPlasmaBg   StillImage
+	plasmaBg		Parallax
+	cytoBg_1  		StillImage
+	nucleusBg 		StillImage
+	cytoBg_2  		StillImage
+
+	playbutton         Button
+	aboutButton        Button
+	aboutToMenuButton  Button
+	levSelButton       Button
+	levToPlasmaButton  Button
+	levToCyto1Button   Button
+	levToNucleusButton Button
+	levToCyto2Button   Button
+	levToMenuButton    Button
+	otherToMenuButton  Button
+
+	seedSignal = rand.Intn(4) + 1
+	signal     Signal
+	receptorA  Receptor
+	receptorB  Receptor
+	receptorC  Receptor
+	receptorD  Receptor
+
+	template      = [5]string{}
+	tk1           Kinase
+	tk2           Kinase
+	tfa           TFA
+	rna           [5]Transcript
+	dna           [5]Template
+	currentFrag   = 0
+	temp_tk1A     Kinase
+	temp_tk1B     Kinase
+	temp_tk1C     Kinase
+	temp_tk1D     Kinase
+	temp_tfa      TFA
+	rnaPolymerase RNAPolymerase
+	ribosome      Ribosome
+	rightChoice   CodonChoice
+	wrongChoice1  CodonChoice
+	wrongChoice2  CodonChoice
+	mrna          [5]Template
+	protein       [5]Transcript
+	mrna_ptr      int
+	rightTrna     CodonChoice
+	wrongTrna1    CodonChoice
+	wrongTrna2    CodonChoice
+	reset         bool
+	infoButton    InfoPage
+	info          string
+)
+
+const sampleRate = 48000
 
 type Game struct {
 	defaultFont           Font
@@ -94,13 +106,31 @@ type Game struct {
 	switchedToCyto1       bool
 	switchedToNucleus     bool
 	switchedToCyto2       bool
-	switchedToAbout        bool
+	switchedToAbout       bool
 	switchedToLevelSelect bool
+	//musicPlayer           *Player
+	//musicPlayerCh         chan *Player
+	//errCh                 chan error
 }
 
 func loadFile(image string) string {
 	// Construct path to file
 	imagepath := filepath.Join("Assets", "Images", image)
+	// Open file
+	file, err := os.Open(imagepath)
+	if err != nil {
+		fmt.Println("Error opening file:", err)
+		return "Error"
+	}
+
+	defer file.Close()
+
+	return file.Name()
+}
+
+func loadMusic(music string) string {
+	// Construct path to file
+	imagepath := filepath.Join("Assets", "Music", music)
 	// Open file
 	file, err := os.Open(imagepath)
 	if err != nil {
@@ -130,32 +160,23 @@ func init() {
 	aboutBg = newStillImage("AboutBg.png", newRect(0, 0, 1250, 750))
 	levSelBg = newStillImage("levSelBg.png", newRect(0, 0, 1250, 750))
 
-	plasmaBg, _, err = ebitenutil.NewImageFromFile(loadFile("PlasmaBg.png"))
-	if err != nil {
-		log.Fatal(err)
-	}
-	cytoBg_1, _, err = ebitenutil.NewImageFromFile(loadFile("CytoBg1.png"))
-	if err != nil {
-		log.Fatal(err)
-	}
-	nucleusBg, _, err = ebitenutil.NewImageFromFile(loadFile("NucleusBg.png"))
-	if err != nil {
-		log.Fatal(err)
-	}
-	cytoBg_2, _, err = ebitenutil.NewImageFromFile(loadFile("CytoBg2.png"))
-	if err != nil {
-		log.Fatal(err)
-	}
+	protoPlasmaBg = newStillImage("PlasmaBg.png", newRect(0, 0, 1250, 750))
+	plasmaBg = newParallax("parallax-plasma.png", newRect(0, 0, 1250, 750), 5)
+	plasmaMembrane = newParallax("plasmaMembrane.png", newRect(0, 0, 1250, 750), 3)
 
-	playbutton = newButton("PlayButton.png", newRect(750, 100, 242, 138), ToPlasma)
-	aboutButton = newButton("aboutButton.png", newRect(770, 260, 242, 138), ToAbout)
-	levSelButton = newButton("levSelButton.png", newRect(700, 450, 232, 140), ToLevelSelect)
-	aboutToMenuButton = newButton("menuButton.png", newRect(350, 450, 242, 138), ToMenu)
-	levToPlasmaButton = newButton("levToPlasmaBtn.png", newRect(520, 110, 232, 129), ToPlasma)
-	levToCyto1Button = newButton("levToCyto1Btn.png", newRect(820, 110, 232, 129), ToCyto1)
-	levToNucleusButton = newButton("levToNucleusBtn.png", newRect(520, 285, 232, 129), ToNucleus)
-	levToCyto2Button = newButton("levToCyto2Btn.png", newRect(820, 285, 232, 129), ToCyto2)
-	levToMenuButton = newButton("menuButton.png", newRect(250, 190, 232, 129), ToMenu)
+	cytoBg_1 = newStillImage("CytoBg1.png", newRect(0, 0, 1250, 750))
+	nucleusBg = newStillImage("NucleusBg.png", newRect(0, 0, 1250, 750))
+	cytoBg_2 = newStillImage("CytoBg2.png", newRect(0, 0, 1250, 750))
+
+	playbutton = newButton("PlayButton.png", newRect(750, 100, 300, 200), ToPlasma)
+	aboutButton = newButton("aboutButton.png", newRect(770, 260, 300, 200), ToAbout)
+	levSelButton = newButton("levSelButton.png", newRect(700, 450, 300, 200), ToLevelSelect)
+	aboutToMenuButton = newButton("menuButton.png", newRect(350, 450, 300, 200), ToMenu)
+	levToPlasmaButton = newButton("levToPlasmaBtn.png", newRect(520, 110, 300, 180), ToPlasma)
+	levToCyto1Button = newButton("levToCyto1Btn.png", newRect(820, 110, 300, 180), ToCyto1)
+	levToNucleusButton = newButton("levToNucleusBtn.png", newRect(520, 285, 300, 180), ToNucleus)
+	levToCyto2Button = newButton("levToCyto2Btn.png", newRect(820, 285, 300, 180), ToCyto2)
+	levToMenuButton = newButton("menuButton.png", newRect(250, 190, 300, 200), ToMenu)
 
 	switch seedSignal {
 	case 1:
@@ -183,10 +204,10 @@ func init() {
 	receptorC = newReceptor("inact_receptorC.png", newRect(650, 400, 100, 150), "receptorC")
 	receptorD = newReceptor("inact_receptorD.png", newRect(950, 400, 100, 150), "receptorD")
 
-	temp_tk1A = newKinase("inact_TK1.png", newRect(50, 600, 150, 150), "temp_tk1")
-	temp_tk1B = newKinase("inact_TK1.png", newRect(350, 600, 150, 150), "temp_tk1")
-	temp_tk1C = newKinase("inact_TK1.png", newRect(650, 600, 150, 150), "temp_tk1")
-	temp_tk1D = newKinase("inact_TK1.png", newRect(950, 600, 150, 150), "temp_tk1")
+	temp_tk1A = newKinase("inact_TK1.png", newRect(50, 600, 150, 150), "temp_tk1A")
+	temp_tk1B = newKinase("inact_TK1.png", newRect(350, 600, 150, 150), "temp_tk1B")
+	temp_tk1C = newKinase("inact_TK1.png", newRect(650, 600, 150, 150), "temp_tk1C")
+	temp_tk1D = newKinase("inact_TK1.png", newRect(950, 600, 150, 150), "temp_tk1D")
 
 	tk1 = newKinase("act_TK1.png", newRect(500, -100, 150, 150), "tk1")
 	tk2 = newKinase("inact_TK2.png", newRect(250, 175, 150, 150), "tk2")
@@ -242,10 +263,13 @@ func (g *Game) Update() error {
 	if ebiten.IsFullscreen() {
 		// Use this if statement to set sizes of graphics to fullscreen scale, else normal scale.
 		screenWidth, screenHeight = ebiten.ScreenSizeInFullscreen()
-	} else {screenWidth, screenHeight = 1250, 750}
+	} else {
+		screenWidth, screenHeight = 1250, 750
+	}
 
 	switch scene {
 	case "Main Menu":
+		//g.musicPlayer.Play()
 		ebiten.SetWindowTitle("Cell Signaling Pathway - Main Menu")
 		startBg.update(g)
 		startP1.update(g)
@@ -267,6 +291,8 @@ func (g *Game) Update() error {
 		levToMenuButton.on_click(g)
 	case "Signal Reception":
 		ebiten.SetWindowTitle("Cell Signaling Pathway - Signal Reception")
+		plasmaBg.update(g)
+		plasmaMembrane.update(g)
 		signal.on_click(g)
 		receptorA.update()
 		receptorB.update()
@@ -367,8 +393,11 @@ func (g *Game) Update() error {
 			mrna[mrna_ptr].is_complete = rightTrna.update2(g, mrna[mrna_ptr].codon)
 		}
 
-		if ribosome.update_movement() {nextMRNACodon(g)} else {ribosome.update_movement()}
-	
+		if ribosome.update_movement() {
+			nextMRNACodon(g)
+		} else {
+			ribosome.update_movement()
+		}
 	}
 	return nil
 }
@@ -409,6 +438,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		if g.switchedToMenu {
 			scene = "Main Menu"
 		}
+
 	case "Level Selection":
 		levSelBg.draw(screen)
 		levToPlasmaButton.draw(screen)
@@ -433,7 +463,9 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			scene = "Translation"
 		}
 	case "Signal Reception":
-		screen.DrawImage(plasmaBg, nil)
+		protoPlasmaBg.draw(screen)
+		plasmaBg.draw(screen)
+		plasmaMembrane.draw(screen)
 		receptorA.draw(screen)
 		receptorB.draw(screen)
 		receptorC.draw(screen)
@@ -459,7 +491,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			scene = "Signal Transduction"
 		}
 	case "Signal Transduction":
-		screen.DrawImage(cytoBg_1, nil)
+		cytoBg_1.draw(screen)
 		tk1.draw(screen)
 		tk2.draw(screen)
 		tfa.draw(screen)
@@ -473,7 +505,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			scene = "Main Menu"
 		}
 	case "Transcription":
-		screen.DrawImage(nucleusBg, nil)
+		nucleusBg.draw(screen)
 		for x := 0; x < 5; x++ {
 			rna[x].draw(screen)
 		}
@@ -516,14 +548,14 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		infoButton.draw(screen, g)
 		otherToMenuButton.draw(screen)
 		if g.switchedToCyto2 {
-			scene = "Translatio]n"
+			scene = "Translation"
 		}
 		if g.switchedToMenu {
 			scene = "Main Menu"
 		}
 	case "Translation":
-		screen.DrawImage(cytoBg_2, nil)
-		// for x := 0; x < 5; x++ { 
+		cytoBg_2.draw(screen)
+		// for x := 0; x < 5; x++ {
 		// 	protein[x].draw(screen)
 		// }
 
@@ -589,8 +621,8 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		infoButton.draw(screen, g)
 
 		otherToMenuButton.draw(screen)
-
 	}
+
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
@@ -601,7 +633,31 @@ func main() {
 	game := &Game{}
 	game.defaultFont = newFont("CourierPrime-Regular.ttf", 32)
 	game.codonFont = newFont("BlackOpsOne-Regular.ttf", 60)
+	// Initialize audio context
+	audioContext = audio.NewContext(44100)
+
+	mp3Bytes, err := os.ReadFile(loadMusic("Signaling_of_the_Cell_MenuScreen.mp3"))
+
+	mp3Stream, err := mp3.DecodeWithoutResampling(bytes.NewReader(mp3Bytes))
+
+	audioPlayer, err := audioContext.NewPlayer(mp3Stream)
+
+
+	// Start playing audio
+	audioPlayer.Play()	
+
+	//audioContext := audio.NewContext(sampleRate)
+	//game.musicPlayer = nil
+	//game.musicPlayerCh = make(chan *Player)
+	//game.errCh = make(chan error)
+	//m, err := NewPlayer(game, audioContext)
+	//game.musicPlayer = m
+	
 	if err := ebiten.RunGame(game); err != nil {
 		log.Fatal(err)
 	}
+	if err != nil {
+		log.Fatal(err)
+	}
+
 }
