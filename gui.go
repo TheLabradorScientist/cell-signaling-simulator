@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"image/color"
+	"math"
 	"strings"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -148,7 +149,7 @@ func newInfoPage(path1 string, path2 string, rect Rectangle, stat string) InfoPa
 	}
 }
 
-func (i *InfoPage) on_click(g *Game) {
+func (i *InfoPage) on_click() {
 	var x_c, y_c = ebiten.CursorPosition()
 	var b_pos = newVector(x_c, y_c)
 	if rect_point_collision(i.rect, b_pos) && inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
@@ -188,7 +189,7 @@ func newParallax(path string, rect Rectangle, layer float64) Parallax {
 	}
 }
 
-func (p *Parallax) update(g *Game) {
+func (p *Parallax) update() {
 	var x_c, y_c = ebiten.CursorPosition()
 	var l = int(p.layer)
 	switch scene {
@@ -209,6 +210,10 @@ func (p Parallax) draw(screen *ebiten.Image) {
 	scaleW := (p.layer + 0.5) / (p.layer * 2) * float64(screenWidth) / 1250
 	scaleH := (p.layer + 0.5) / (p.layer * 2) * float64(screenHeight) / 750
 	op.GeoM.Scale(scaleW, scaleH)
+	if scene == "Signal Reception" {
+		//var l = float32(p.layer)
+		op.ColorScale.ScaleAlpha(float32(math.Pow(p.layer/4, 1.2)))
+	}
 	screen.DrawImage(p.image, op)
 }
 
@@ -279,7 +284,7 @@ func newSignal(path string, rect Rectangle) Signal {
 	}
 }
 
-func (s *Signal) on_click(g *Game) {
+func (s *Signal) on_click() {
 	var x_c, y_c = ebiten.CursorPosition()
 	var b_pos = newVector(x_c, y_c)
 
@@ -294,12 +299,12 @@ func (s *Signal) on_click(g *Game) {
 
 func (s Signal) draw(screen *ebiten.Image) {
 	op := &ebiten.DrawImageOptions{}
-	op.GeoM.Translate(float64(s.rect.pos.x), float64(s.rect.pos.y))
-	scaleW := float64(screenWidth) / 1250
-	scaleH := float64(screenHeight) / 750
+	scaleW := (3.5/6) * float64(screenWidth) / 1250
+	scaleH := (3.5/6) * float64(screenHeight) / 750
 	op.GeoM.Scale(scaleW, scaleH)
 	s.rect.width *= int(scaleW)
 	s.rect.height *= int(scaleH)
+	op.GeoM.Translate(float64(s.rect.pos.x), float64(s.rect.pos.y))
 	screen.DrawImage(s.image, op)
 }
 
@@ -319,12 +324,12 @@ func newReceptor(path string, rect Rectangle, rtype string) Receptor {
 
 func (r Receptor) draw(screen *ebiten.Image) {
 	op := &ebiten.DrawImageOptions{}
-	op.GeoM.Translate(float64(r.rect.pos.x), float64(r.rect.pos.y))
-	scaleW := float64(screenWidth) / 1250
-	scaleH := float64(screenHeight) / 750
+	scaleW := (3 + 0.5) / (3 * 2) * float64(screenWidth) / 1250
+	scaleH := (3 + 0.5) / (3 * 2) * float64(screenHeight) / 750
 	op.GeoM.Scale(scaleW, scaleH)
 	r.rect.width *= int(scaleW)
 	r.rect.height *= int(scaleH)
+	op.GeoM.Translate(float64(r.rect.pos.x), float64(r.rect.pos.y))
 	screen.DrawImage(r.image, op)
 }
 
@@ -333,22 +338,22 @@ func (r *Receptor) update() {
 	switch r.receptorType {
 	case "receptorA":
 		r.rect.pos.x = (-5 * (x_c + 100) / (7 * 3)) + 75
-		r.rect.pos.y = (-1 * (y_c + 100) / (3 * 3)) + 450
+		r.rect.pos.y = (-1 * (y_c + 100) / (3 * 3)) + 400
 		//r.rect.pos.x = plasmaMembrane.rect.pos.x + 50
 		//r.rect.pos.y = plasmaMembrane.rect.pos.y + 400
 	case "receptorB":
 		r.rect.pos.x = (-5 * (x_c + 100) / (7 * 3)) + 475
-		r.rect.pos.y = (-(y_c + 100) / (3 * 3)) + 400
+		r.rect.pos.y = (-(y_c + 100) / (3 * 3)) + 350
 		//r.rect.pos.x = plasmaMembrane.rect.pos.x + 500
 		//r.rect.pos.y = plasmaMembrane.rect.pos.y + 400
 	case "receptorC":
 		r.rect.pos.x = (-5 * (x_c + 100) / (7 * 3)) + 875
-		r.rect.pos.y = (-(y_c + 100) / (3 * 3)) + 400
+		r.rect.pos.y = (-(y_c + 100) / (3 * 3)) + 350
 		//r.rect.pos.x = plasmaMembrane.rect.pos.x + 950
 		//r.rect.pos.y = plasmaMembrane.rect.pos.y + 400
 	case "receptorD":
 		r.rect.pos.x = (-5 * (x_c + 100) / (7 * 3)) + 1275
-		r.rect.pos.y = (-1 * (y_c + 100) / (3 * 3)) + 450
+		r.rect.pos.y = (-1 * (y_c + 100) / (3 * 3)) + 400
 		//r.rect.pos.x = plasmaMembrane.rect.pos.x + 1400
 		//r.rect.pos.y = plasmaMembrane.rect.pos.y + 400
 	}
@@ -379,19 +384,6 @@ func newKinase(path string, rect Rectangle, ktype string) Kinase {
 		is_clicked_on: false,
 		delta:         3,
 		kinaseType:    ktype,
-	}
-}
-
-func newTFA(path string, rect Rectangle, tfaType string) TFA {
-	var tfa_image, _, err = ebitenutil.NewImageFromFile(loadFile(path))
-	if err != nil {
-		fmt.Println("Error parsing date:", err)
-	}
-	return TFA{
-		image:     tfa_image,
-		rect:      rect,
-		is_active: false,
-		tfaType:   tfaType,
 	}
 }
 
@@ -429,7 +421,6 @@ func (k *Kinase) update(rect Rectangle) {
 			k.rect.pos.x += k.delta
 		}
 	}
-
 	if rect_point_collision(k.rect, b_pos) && ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) && aabb_collision(k.rect, rect) {
 		k.is_clicked_on = true
 	}
@@ -486,6 +477,19 @@ func (t *TFA) activate() {
 	}
 	t.animate("act_TFA.png")
 	t.is_active = true
+}
+
+func newTFA(path string, rect Rectangle, tfaType string) TFA {
+	var tfa_image, _, err = ebitenutil.NewImageFromFile(loadFile(path))
+	if err != nil {
+		fmt.Println("Error parsing date:", err)
+	}
+	return TFA{
+		image:     tfa_image,
+		rect:      rect,
+		is_active: false,
+		tfaType:   tfaType,
+	}
 }
 
 func (t *TFA) update() {
@@ -648,7 +652,7 @@ func newCodonChoice(path string, rect Rectangle, bases string) CodonChoice {
 	}
 }
 
-func (c CodonChoice) update1(g *Game, dnaFrag string) bool {
+func (c CodonChoice) update1(dnaFrag string) bool {
 	var x_c, y_c = ebiten.CursorPosition()
 	var b_pos = newVector(x_c, y_c)
 	if rect_point_collision(c.rect, b_pos) && inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
@@ -659,7 +663,7 @@ func (c CodonChoice) update1(g *Game, dnaFrag string) bool {
 	return false
 }
 
-func (c CodonChoice) update2(g *Game, mrnaFrag string) bool {
+func (c CodonChoice) update2(mrnaFrag string) bool {
 	var x_c, y_c = ebiten.CursorPosition()
 	var b_pos = newVector(x_c, y_c)
 	if rect_point_collision(c.rect, b_pos) && inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {

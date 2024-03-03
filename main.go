@@ -43,6 +43,7 @@ var (
 	levSelBg     StillImage
 
 	plasmaMembrane Parallax
+	plasmaMembrane2 Parallax
 	// ^ Note: add function to receptors that sets x and y to plasma membrane coord, -+ respective pos
 	protoPlasmaBg StillImage
 	plasmaBg      Parallax
@@ -183,7 +184,9 @@ func init() {
 
 	protoPlasmaBg = newStillImage("PlasmaBg.png", newRect(0, 0, 1250, 750))
 	plasmaBg = newParallax("parallax-plasma.png", newRect(0, 0, 1250, 750), 4)
-	plasmaMembrane = newParallax("plasmaMembrane.png", newRect(0, 200, 1250, 750), 2)
+	plasmaMembrane = newParallax("plasmaMembrane.png", newRect(0, 200, 1250, 750), 3)
+	//plasmaMembrane2 = newParallax("plasmaMembrane.png", newRect(0, 200, 1250, 750), 2)
+
 
 	cytoBg_1 = newStillImage("CytoBg1.png", newRect(0, 0, 1250, 750))
 	nucleusBg = newStillImage("NucleusBg.png", newRect(0, 0, 1250, 750))
@@ -201,29 +204,29 @@ func init() {
 
 	switch seedSignal {
 	case 1:
-		signal = newSignal("signalA.png", newRect(500, 100, 75, 75))
+		signal = newSignal("signalA.png", newRect(500, 100, 100, 100))
 		signal.signalType = "signalA"
 		template = [5]string{"TAC", randomDNACodon(), randomDNACodon(), randomDNACodon(), "ACT"}
 	case 2:
-		signal = newSignal("signalB.png", newRect(500, 100, 75, 75))
+		signal = newSignal("signalB.png", newRect(500, 100, 100, 100))
 		signal.signalType = "signalB"
 		template = [5]string{"TAC", randomDNACodon(), randomDNACodon(), randomDNACodon(), "ATT"}
 	case 3:
-		signal = newSignal("signalC.png", newRect(500, 100, 75, 75))
+		signal = newSignal("signalC.png", newRect(500, 100, 100, 100))
 		signal.signalType = "signalC"
 		template = [5]string{"TAC", randomDNACodon(), randomDNACodon(), randomDNACodon(), "ATC"}
 	case 4:
-		signal = newSignal("signalD.png", newRect(500, 100, 75, 75))
+		signal = newSignal("signalD.png", newRect(500, 100, 100, 100))
 		signal.signalType = "signalD"
 		template = [5]string{"TAC", randomDNACodon(), randomDNACodon(), randomDNACodon(), "ATT"}
 		// PLACEHOLDER IN CASE WE DO NOT GET TIME TO CODE RANDOM CODONS
 		//template = [5]string{"TAC", "GTC", "CGG", "ACA", "ACT"}
 	}
 
-	receptorA = newReceptor("inact_receptorA.png", newRect(50, 400, 100, 150), "receptorA")
-	receptorB = newReceptor("inact_receptorB.png", newRect(350, 400, 100, 150), "receptorB")
-	receptorC = newReceptor("inact_receptorC.png", newRect(650, 400, 100, 150), "receptorC")
-	receptorD = newReceptor("inact_receptorD.png", newRect(950, 400, 100, 150), "receptorD")
+	receptorA = newReceptor("inact_receptorA.png", newRect(50, 400, 100, 100), "receptorA")
+	receptorB = newReceptor("inact_receptorB.png", newRect(350, 400, 100, 100), "receptorB")
+	receptorC = newReceptor("inact_receptorC.png", newRect(650, 400, 100, 100), "receptorC")
+	receptorD = newReceptor("inact_receptorD.png", newRect(950, 400, 100, 100), "receptorD")
 
 	temp_tk1A = newKinase("inact_TK1.png", newRect(50, 600, 150, 150), "temp_tk1A")
 	temp_tk1B = newKinase("inact_TK1.png", newRect(350, 600, 150, 150), "temp_tk1B")
@@ -292,11 +295,11 @@ func (g *Game) Update() error {
 	case "Main Menu":
 		//g.musicPlayer.Play()
 		ebiten.SetWindowTitle("Cell Signaling Pathway - Main Menu")
-		startBg.update(g)
-		startP1.update(g)
-		startP2.update(g)
-		startP3.update(g)
-		startP4.update(g)
+		startBg.update()
+		startP1.update()
+		startP2.update()
+		startP3.update()
+		startP4.update()
 		aboutButton.on_click(g)
 		playbutton.on_click(g)
 		levSelButton.on_click(g)
@@ -313,9 +316,10 @@ func (g *Game) Update() error {
 		levToMenuButton.on_click(g)
 	case "Signal Reception":
 		ebiten.SetWindowTitle("Cell Signaling Pathway - Signal Reception")
-		plasmaBg.update(g)
-		plasmaMembrane.update(g)
-		signal.on_click(g)
+		plasmaBg.update()
+		plasmaMembrane.update()
+		//plasmaMembrane2.update()
+		signal.on_click()
 		receptorA.update()
 		receptorB.update()
 		receptorC.update()
@@ -325,7 +329,7 @@ func (g *Game) Update() error {
 		temp_tk1C.update(temp_tk1D.rect)
 		temp_tk1D.update(temp_tk1A.rect)
 		otherToMenuButton.on_click(g)
-		infoButton.on_click(g)
+		infoButton.on_click()
 		info = updateInfo()
 		if receptorA.is_touching_signal {
 			if matchSR(signal.signalType, receptorA.receptorType) {
@@ -362,7 +366,7 @@ func (g *Game) Update() error {
 		tk1.update(tk2.rect)
 		tk2.update(tfa.rect)
 		tfa.update()
-		infoButton.on_click(g)
+		infoButton.on_click()
 		info = updateInfo()
 
 		if tk1.is_clicked_on {
@@ -383,7 +387,7 @@ func (g *Game) Update() error {
 		temp_tfa.activate()
 		temp_tfa.update()
 		rnaPolymerase.update(temp_tfa.rect.pos.y)
-		infoButton.on_click(g)
+		infoButton.on_click()
 		info = updateInfo()
 
 		if reset {
@@ -393,7 +397,7 @@ func (g *Game) Update() error {
 			reset = false
 		}
 		//fmt.Printf("%t\n", dna[currentFrag].is_complete)
-		dna[currentFrag].is_complete = rightChoice.update1(g, dna[currentFrag].codon)
+		dna[currentFrag].is_complete = rightChoice.update1(dna[currentFrag].codon)
 		//fmt.Printf("%t\n", dna[currentFrag].is_complete)
 		if dna[currentFrag].is_complete {
 			nextDNACodon(g)
@@ -402,7 +406,7 @@ func (g *Game) Update() error {
 	case "Translation":
 		ebiten.SetWindowTitle("Cell Signaling Pathway - Translation")
 		otherToMenuButton.on_click(g)
-		infoButton.on_click(g)
+		infoButton.on_click()
 		info = updateInfo()
 
 		if reset {
@@ -412,7 +416,7 @@ func (g *Game) Update() error {
 			reset = false
 		}
 		if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
-			mrna[mrna_ptr].is_complete = rightTrna.update2(g, mrna[mrna_ptr].codon)
+			mrna[mrna_ptr].is_complete = rightTrna.update2(mrna[mrna_ptr].codon)
 		}
 
 		if ribosome.update_movement() {
@@ -493,6 +497,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		receptorB.draw(screen)
 		receptorC.draw(screen)
 		receptorD.draw(screen)
+		//plasmaMembrane2.draw(screen)
 		signal.draw(screen)
 		temp_tk1A.draw(screen)
 		temp_tk1B.draw(screen)
