@@ -6,8 +6,8 @@ func matchSR(signalType string, receptorType string) bool {
 }
 
 var signalReceptor = map[string]string{
-	"signalA":"receptorA", 
-	"signalB":"receptorB", 
-	"signalC":"receptorC", 
-	"signalD":"receptorD", 
+	"signalA": "receptorA",
+	"signalB": "receptorB",
+	"signalC": "receptorC",
+	"signalD": "receptorD",
 }
