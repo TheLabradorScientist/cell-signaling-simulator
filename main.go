@@ -42,12 +42,14 @@ var (
 	aboutBg      StillImage
 	levSelBg     StillImage
 
-	plasmaMembrane Parallax
+	plasmaMembrane  Parallax
 	plasmaMembrane2 Parallax
 	// ^ Note: add function to receptors that sets x and y to plasma membrane coord, -+ respective pos
 	protoPlasmaBg StillImage
 	plasmaBg      Parallax
-	cytoBg_1      StillImage
+	protoCytoBg_1 StillImage
+	cytoBg_1      Parallax
+	cytoNuc_1     Parallax
 	nucleusBg     StillImage
 	cytoBg_2      StillImage
 
@@ -183,12 +185,14 @@ func init() {
 	levSelBg = newStillImage("levSelBg.png", newRect(0, 0, 1250, 750))
 
 	protoPlasmaBg = newStillImage("PlasmaBg.png", newRect(0, 0, 1250, 750))
-	plasmaBg = newParallax("parallax-plasma.png", newRect(0, 0, 1250, 750), 4)
-	plasmaMembrane = newParallax("plasmaMembrane.png", newRect(0, 200, 1250, 750), 3)
+	plasmaBg = newParallax("ParallaxPlasma.png", newRect(100, 100, 1250, 750), 4)
+	plasmaMembrane = newParallax("plasmaMembrane.png", newRect(100, 300, 1250, 750), 2)
 	//plasmaMembrane2 = newParallax("plasmaMembrane.png", newRect(0, 200, 1250, 750), 2)
 
+	protoCytoBg_1 = newStillImage("CytoBg1.png", newRect(0, 0, 1250, 750))
+	cytoBg_1 = newParallax("ParallaxCyto1.png", newRect(100, 100, 1250, 750), 4)
+	cytoNuc_1 = newParallax("ParallaxCyto1.5.png", newRect(100, 100, 1250, 750), 3)
 
-	cytoBg_1 = newStillImage("CytoBg1.png", newRect(0, 0, 1250, 750))
 	nucleusBg = newStillImage("NucleusBg.png", newRect(0, 0, 1250, 750))
 	cytoBg_2 = newStillImage("CytoBg2.png", newRect(0, 0, 1250, 750))
 
@@ -281,6 +285,9 @@ func init() {
 
 func (g *Game) Update() error {
 
+	g.defaultFont = newFont("CourierPrime-Regular.ttf", 32*screenHeight/750)
+	g.codonFont = newFont("BlackOpsOne-Regular.ttf", 60*screenHeight/750)
+
 	if inpututil.IsKeyJustPressed(ebiten.KeyEscape) {
 		ebiten.SetFullscreen(false)
 	}
@@ -355,13 +362,15 @@ func (g *Game) Update() error {
 				temp_tk1D.activate()
 			}
 		}
-		if temp_tk1A.rect.pos.y >= 750 || temp_tk1B.rect.pos.y >= 750 || temp_tk1C.rect.pos.y >= 750 || temp_tk1D.rect.pos.y >= 750 {
+		if temp_tk1A.rect.pos.y >= screenHeight || temp_tk1B.rect.pos.y >= screenHeight || temp_tk1C.rect.pos.y >= screenHeight || temp_tk1D.rect.pos.y >= screenHeight {
 			ToCyto1(g)
 		}
 
 	case "Signal Transduction":
 		ebiten.SetWindowTitle("Cell Signaling Pathway - Signal Transduction")
 		otherToMenuButton.on_click(g)
+		cytoBg_1.update()
+		cytoNuc_1.update()
 		tk1.activate()
 		tk1.update(tk2.rect)
 		tk2.update(tfa.rect)
@@ -377,7 +386,7 @@ func (g *Game) Update() error {
 			tfa.activate()
 			tk2.is_clicked_on = false
 		}
-		if tfa.rect.pos.y > 750 {
+		if tfa.rect.pos.y > screenHeight {
 			ToNucleus(g)
 		}
 
@@ -460,7 +469,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		m += "pathway from reception\nthrough translation!\nClick the play "
 		m += "button\nor select a level\nto begin."
 		Red := color.RGBA{50, 5, 5, 250}
-		g.defaultFont.drawFont(screen, m, 775, 275, color.RGBA(Red))
+		g.defaultFont.drawFont(screen, m, screenWidth*3/5, screenHeight*1/3, color.RGBA(Red))
 
 		if g.switchedToMenu {
 			scene = "Main Menu"
@@ -519,7 +528,9 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			scene = "Signal Transduction"
 		}
 	case "Signal Transduction":
+		protoCytoBg_1.draw(screen)
 		cytoBg_1.draw(screen)
+		cytoNuc_1.draw(screen)
 		tk1.draw(screen)
 		tk2.draw(screen)
 		tfa.draw(screen)
@@ -659,8 +670,6 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
 
 func main() {
 	game := &Game{}
-	game.defaultFont = newFont("CourierPrime-Regular.ttf", 32)
-	game.codonFont = newFont("BlackOpsOne-Regular.ttf", 60)
 
 	//audioContext := audio.NewContext(sampleRate)
 	//game.musicPlayer = nil
