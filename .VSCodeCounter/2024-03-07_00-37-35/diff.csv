@@ -1,0 +1,17 @@
+"filename", "language", "Go", "Go Checksum File", "Go Module File", "YAML", "comment", "blank", "total"
+"/Users/ashnaguha/Desktop/cell-signaling-pathway-simulator/.goreleaser.yaml", "YAML", 0, 0, 0, 30, 10, 7, 47
+"/Users/ashnaguha/Desktop/cell-signaling-pathway-simulator/go.mod", "Go Module File", 0, 0, 4, 0, 0, 1, 5
+"/Users/ashnaguha/Desktop/cell-signaling-pathway-simulator/go.sum", "Go Checksum File", 0, 60, 0, 0, 0, 0, 60
+"/Users/ashnaguha/Desktop/cell-signaling-pathway-simulator/gui.go", "Go", 176, 0, 0, 0, 20, 12, 208
+"/Users/ashnaguha/Desktop/cell-signaling-pathway-simulator/info.go", "Go", 1, 0, 0, 0, 44, 1, 46
+"/Users/ashnaguha/Desktop/cell-signaling-pathway-simulator/infoPages.go", "Go", 4, 0, 0, 0, 0, 1, 5
+"/Users/ashnaguha/Desktop/cell-signaling-pathway-simulator/level1.go", "Go", 111, 0, 0, 0, 3, 12, 126
+"/Users/ashnaguha/Desktop/cell-signaling-pathway-simulator/level2.go", "Go", 51, 0, 0, 0, 1, 9, 61
+"/Users/ashnaguha/Desktop/cell-signaling-pathway-simulator/level3.go", "Go", 93, 0, 0, 0, 4, 14, 111
+"/Users/ashnaguha/Desktop/cell-signaling-pathway-simulator/level4.go", "Go", 102, 0, 0, 0, 4, 21, 127
+"/Users/ashnaguha/Desktop/cell-signaling-pathway-simulator/level_select.go", "Go", 47, 0, 0, 0, 1, 10, 58
+"/Users/ashnaguha/Desktop/cell-signaling-pathway-simulator/main.go", "Go", 14, 0, 0, 0, 84, 39, 137
+"/Users/ashnaguha/Desktop/cell-signaling-pathway-simulator/main_menu.go", "Go", 58, 0, 0, 0, 4, 8, 70
+"/Users/ashnaguha/Desktop/cell-signaling-pathway-simulator/scene_switch.go", "Go", 61, 0, 0, 0, 30, 13, 104
+"/Users/ashnaguha/Desktop/cell-signaling-pathway-simulator/state_machine.go", "Go", -35, 0, 0, 0, 0, -10, -45
+"Total", "-", 683, 60, 4, 30, 205, 138, 1120

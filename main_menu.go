@@ -20,7 +20,7 @@ var (
 	playbutton   Button
 	aboutButton  Button
 	levSelButton Button
-	volButton    Button
+	volButton    VolButton
 )
 
 type MainMenu struct {
@@ -31,6 +31,7 @@ func newMainMenu(g *Game) {
 	g.stateMachine.state = MainMenu{
 		menuSprites: []GUI{},
 	}
+	SwitchVol(g)
 }
 
 func (m MainMenu) Init() {
@@ -44,7 +45,7 @@ func (m MainMenu) Init() {
 	playbutton= newButton("PlayButton.png", newRect(750, 100, 300, 200), ToPlasma)
 	aboutButton= newButton("aboutButton.png", newRect(770, 260, 300, 200), ToAbout)
 	levSelButton= newButton("levSelButton.png", newRect(700, 450, 300, 200), ToLevelSelect)
-	volButton= newButton("volButtonOn.png", newRect(100, 100, 165, 165), SwitchVol)
+	volButton= newVolButton("volButtonOn.png", newRect(100, 100, 165, 165), SwitchVol, *audioPlayer)
 	menuSprites = []GUI{protoStartBg, &startBg, &startP1, &startP2, &startP3, &startP4, fixedStart, playbutton, aboutButton, levSelButton, volButton}
 }
 
@@ -53,6 +54,8 @@ func (m MainMenu) Update(g *Game) {
 	for _, element := range menuSprites {
 		switch element.(type) {
 		case (Button):
+			element.update(g)
+		case (VolButton):
 			element.update(g)
 		default:
 			element.update()

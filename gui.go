@@ -3,12 +3,14 @@ package main
 import (
 	"fmt"
 	"image/color"
+
 	//"reflect"
 
 	//"math"
 	"strings"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/audio"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 )
@@ -30,6 +32,12 @@ type Button struct {
 	image *ebiten.Image
 	rect  Rectangle
 	cmd   ButtonFunc
+}
+
+type VolButton struct {
+	Button
+	player audio.Player
+	status string
 }
 
 type Signal struct {
@@ -295,6 +303,30 @@ func (b Button) draw(screen *ebiten.Image) {
 	screen.DrawImage(b.image, op)
 }
 
+func newVolButton(path string, rect Rectangle, cmd ButtonFunc, player audio.Player) VolButton {
+	btn := newButton(path, rect, cmd)
+	return VolButton{
+		Button: btn,
+		player: player,
+		status: "ON",
+	}
+}
+
+func (v VolButton) update(params ...interface{}) {
+	v.Button.update(params...)
+	//curr := int64(v.player.Position())
+	if v.status == "ON" && !v.player.IsPlaying() {
+		v.player.Rewind()
+	}
+
+}
+
+func (v VolButton) draw(screen *ebiten.Image) {
+	v.image = volButton.image
+	v.status = volButton.status
+	v.Button.draw(screen)
+}
+
 func newSignal(path string, rect Rectangle) Signal {
 	var sig_image, _, err = ebitenutil.NewImageFromFile(loadFile(path))
 
@@ -538,7 +570,7 @@ func (t *TFA) update(params ...interface{}) {
 		if t.rect.pos.y <= screenHeight && t.tfaType == "tfa1" {
 			t.rect.pos.y += 2 * (screenHeight / 750)
 		}
-		if t.rect.pos.y <= 300*screenHeight/750 && t.tfaType == "tfa2" {
+		if t.rect.pos.y <= 400*screenHeight/750 && t.tfaType == "tfa2" {
 			t.rect.pos.y += 2 * (screenHeight / 750)
 			t.rect.pos.x -= 1 * (screenWidth / 1250)
 		}

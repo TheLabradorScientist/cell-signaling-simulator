@@ -45,17 +45,17 @@ var (
 	info              string
 
 	// MENU SPRITES
-/* 	protoStartBg StillImage
-	startBg      Parallax
-	startP1      Parallax
-	startP2      Parallax
-	startP3      Parallax
-	startP4      Parallax
-	fixedStart   StillImage
-	playbutton   Button
-	aboutButton  Button
-	levSelButton Button
-	volButton    Button */
+	/* 	protoStartBg StillImage
+	   	startBg      Parallax
+	   	startP1      Parallax
+	   	startP2      Parallax
+	   	startP3      Parallax
+	   	startP4      Parallax
+	   	fixedStart   StillImage
+	   	playbutton   Button
+	   	aboutButton  Button
+	   	levSelButton Button
+	   	volButton    Button */
 
 	// ABOUT SPRITES
 	aboutBg           StillImage
@@ -158,11 +158,26 @@ func loadFile(image string) string {
 	return file.Name()
 }
 
+func loadFont(font string) string {
+	// Construct path to file
+	fontpath := filepath.Join("Assets", "Fonts", font)
+	// Open file
+	file, err := os.Open(fontpath)
+	if err != nil {
+		fmt.Println("Error opening file:", err)
+		return "Error"
+	}
+
+	defer file.Close()
+
+	return file.Name()
+}
+
 func loadMusic(music string) string {
 	// Construct path to file
-	imagepath := filepath.Join("Assets", "Music", music)
+	musicpath := filepath.Join("Assets", "Music", music)
 	// Open file
-	file, err := os.Open(imagepath)
+	file, err := os.Open(musicpath)
 	if err != nil {
 		fmt.Println("Error opening file:", err)
 		return "Error"
@@ -177,7 +192,7 @@ func (g *Game) init() {
 	ebiten.SetWindowPosition(100, 0)
 	ebiten.SetWindowSize(screenWidth, screenHeight)
 	ebiten.SetWindowResizingMode(ebiten.WindowResizingModeOnlyFullscreenEnabled)
-	
+
 	// Initialize audio context
 	audioContext = audio.NewContext(44100)
 
@@ -193,30 +208,28 @@ func (g *Game) init() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	SwitchVol(g)
 
 	var s_map = SceneConstructorMap{
 		"menu": newMainMenu,
 	}
-	
+
 	g.stateMachine = newStateMachine(s_map)
 	g.stateMachine.changeState(g, "menu")
 
 	infoButton = newInfoPage("infoButton.png", "infoPage.png", newRect(850, 0, 165, 165), "btn")
 	otherToMenuButton = newButton("menuButton.png", newRect(1000, 0, 300, 200), ToMenu)
-	
-/* 	protoStartBg = newStillImage("MenuBg.png", newRect(0, 0, 1250, 750))
-	startBg = newParallax("StartBg.png", newRect(0, 0, 1250, 750), 5)
-	startP1 = newParallax("parallax-Start2.png", newRect(0, 0, 1250, 750), 4)
-	startP2 = newParallax("parallax-Start3.png", newRect(0, 0, 1250, 750), 3)
-	startP3 = newParallax("parallax-Start4.png", newRect(0, 0, 1250, 750), 2)
-	startP4 = newParallax("parallax-Start5.png", newRect(0, 0, 1250, 750), 1)
-	volButton = newButton("volButtonOn.png", newRect(100, 100, 165, 165), SwitchVol)
-	fixedStart = newStillImage("fixed-Start.png", newRect(0, 0, 1250, 750))
-	playbutton = newButton("PlayButton.png", newRect(750, 100, 300, 200), ToPlasma)
-	aboutButton = newButton("aboutButton.png", newRect(770, 260, 300, 200), ToAbout)
-	levSelButton = newButton("levSelButton.png", newRect(700, 450, 300, 200), ToLevelSelect) */
 
+	/* 	protoStartBg = newStillImage("MenuBg.png", newRect(0, 0, 1250, 750))
+	   	startBg = newParallax("StartBg.png", newRect(0, 0, 1250, 750), 5)
+	   	startP1 = newParallax("parallax-Start2.png", newRect(0, 0, 1250, 750), 4)
+	   	startP2 = newParallax("parallax-Start3.png", newRect(0, 0, 1250, 750), 3)
+	   	startP3 = newParallax("parallax-Start4.png", newRect(0, 0, 1250, 750), 2)
+	   	startP4 = newParallax("parallax-Start5.png", newRect(0, 0, 1250, 750), 1)
+	   	volButton = newButton("volButtonOn.png", newRect(100, 100, 165, 165), SwitchVol)
+	   	fixedStart = newStillImage("fixed-Start.png", newRect(0, 0, 1250, 750))
+	   	playbutton = newButton("PlayButton.png", newRect(750, 100, 300, 200), ToPlasma)
+	   	aboutButton = newButton("aboutButton.png", newRect(770, 260, 300, 200), ToAbout)
+	   	levSelButton = newButton("levSelButton.png", newRect(700, 450, 300, 200), ToLevelSelect) */
 
 	aboutBg = newStillImage("AboutBg.png", newRect(0, 0, 1250, 750))
 
@@ -233,7 +246,6 @@ func (g *Game) init() {
 
 	nucleusBg = newStillImage("NucleusBg.png", newRect(0, 0, 1250, 750))
 	cytoBg_2 = newStillImage("CytoBg2.png", newRect(0, 0, 1250, 750))
-
 
 	aboutToMenuButton = newButton("menuButton.png", newRect(350, 450, 300, 200), ToMenu)
 	levToPlasmaButton = newButton("levToPlasmaBtn.png", newRect(520, 110, 300, 180), ToPlasma)
@@ -335,8 +347,8 @@ func (g *Game) Update() error {
 		screenWidth, screenHeight = 1250, 750
 	}
 
-	g.defaultFont = newFont("CourierPrime-Regular.ttf", 32*screenHeight/750)
-	g.codonFont = newFont("BlackOpsOne-Regular.ttf", 60*screenHeight/750)
+	g.defaultFont = newFont(loadFont("CourierPrime-Regular.ttf"), 32*screenHeight/750)
+	g.codonFont = newFont(loadFont("BlackOpsOne-Regular.ttf"), 60*screenHeight/750)
 
 	switch scene {
 	case "Main Menu":
