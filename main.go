@@ -23,6 +23,9 @@ import (
 
 var (
 	screenWidth, screenHeight = 1250, 750
+	maxWidth, maxHeight       = ebiten.ScreenSizeInFullscreen()
+	widthRatio                = maxWidth / screenWidth
+	heightRatio               = maxHeight / screenHeight
 )
 
 var (
@@ -30,77 +33,97 @@ var (
 )
 
 var (
-	err          error
-	scene        string = "Main Menu"
-	protoStartBg StillImage
+
+	// GENERAL SPRITES
+	err               error
+	scene             string = "Main Menu"
+	otherToMenuButton Button
+	audioPlayer       *audio.Player
+	template          = [5]string{}
+	reset             bool
+	infoButton        InfoPage
+	info              string
+
+	// MENU SPRITES
+/* 	protoStartBg StillImage
 	startBg      Parallax
 	startP1      Parallax
 	startP2      Parallax
 	startP3      Parallax
 	startP4      Parallax
 	fixedStart   StillImage
-	aboutBg      StillImage
-	levSelBg     StillImage
+	playbutton   Button
+	aboutButton  Button
+	levSelButton Button
+	volButton    Button */
 
-	plasmaMembrane  Parallax
-	plasmaMembrane2 Parallax
-	// ^ Note: add function to receptors that sets x and y to plasma membrane coord, -+ respective pos
-	protoPlasmaBg StillImage
-	plasmaBg      Parallax
-	protoCytoBg_1 StillImage
-	cytoBg_1      Parallax
-	cytoNuc_1     Parallax
-	nucleusBg     StillImage
-	cytoBg_2      StillImage
+	// ABOUT SPRITES
+	aboutBg           StillImage
+	aboutToMenuButton Button
 
-	playbutton         Button
-	volButton          Button
-	aboutButton        Button
-	aboutToMenuButton  Button
-	levSelButton       Button
+	// LEVEL SELECT SPRITES
+	levSelBg           StillImage
 	levToPlasmaButton  Button
 	levToCyto1Button   Button
 	levToNucleusButton Button
 	levToCyto2Button   Button
 	levToMenuButton    Button
-	otherToMenuButton  Button
 
-	audioPlayer *audio.Player
-
+	// PLASMA SPRITES
+	protoPlasmaBg  StillImage
+	plasmaBg       Parallax
+	plasmaMembrane Parallax
+	//plasmaMembrane2 	Parallax
+	// ^ Note: function to receptors that sets x and y to plasma membrane coord, -+ respective pos
 	seedSignal = rand.Intn(4) + 1
 	signal     Signal
 	receptorA  Receptor
 	receptorB  Receptor
 	receptorC  Receptor
 	receptorD  Receptor
+	temp_tk1A  Kinase
+	temp_tk1B  Kinase
+	temp_tk1C  Kinase
+	temp_tk1D  Kinase
 
-	template      = [5]string{}
+	// CYTO 1 SPRITES
+	protoCytoBg_1 StillImage
+	cytoBg_1      Parallax
+	cytoNuc_1     Parallax
 	tk1           Kinase
 	tk2           Kinase
 	tfa           TFA
+
+	// NUCLEUS SPRITES
+	nucleusBg     StillImage
 	rna           [5]Transcript
 	dna           [5]Template
 	currentFrag   = 0
-	temp_tk1A     Kinase
-	temp_tk1B     Kinase
-	temp_tk1C     Kinase
-	temp_tk1D     Kinase
 	temp_tfa      TFA
 	rnaPolymerase RNAPolymerase
-	ribosome      Ribosome
 	rightChoice   CodonChoice
 	wrongChoice1  CodonChoice
 	wrongChoice2  CodonChoice
-	mrna          [5]Template
-	protein       [5]Transcript
-	mrna_ptr      int
-	rightTrna     CodonChoice
-	wrongTrna1    CodonChoice
-	wrongTrna2    CodonChoice
-	reset         bool
-	infoButton    InfoPage
-	info          string
+
+	// Note to self: when updating DNA image, make the sprite like plasma membrane
+	// So it can scroll to the left and show different codons, with bases as separate sprites
+	// Also maybe try making RNA with theta and scrolling off to a upper-right diagonal
+
+	// CYTO 2 SPRITES
+	cytoBg_2   StillImage
+	ribosome   Ribosome
+	mrna       [5]Template
+	protein    [5]Transcript
+	mrna_ptr   int
+	rightTrna  CodonChoice
+	wrongTrna1 CodonChoice
+	wrongTrna2 CodonChoice
 )
+
+var menuSprites []GUI
+var aboutSprites []GUI
+var levSelSprites []GUI
+var plasmaSprites []GUI
 
 //const sampleRate = 48000
 
@@ -114,6 +137,7 @@ type Game struct {
 	switchedToCyto2       bool
 	switchedToAbout       bool
 	switchedToLevelSelect bool
+	stateMachine          StateMachine
 	//musicPlayer           *Player
 	//musicPlayerCh         chan *Player
 	//errCh                 chan error
@@ -149,21 +173,11 @@ func loadMusic(music string) string {
 	return file.Name()
 }
 
-func init() {
+func (g *Game) init() {
 	ebiten.SetWindowPosition(100, 0)
 	ebiten.SetWindowSize(screenWidth, screenHeight)
 	ebiten.SetWindowResizingMode(ebiten.WindowResizingModeOnlyFullscreenEnabled)
-	protoStartBg = newStillImage("MenuBg.png", newRect(0, 0, 1250, 750))
-	startBg = newParallax("StartBg.png", newRect(0, 0, 1250, 750), 5)
-	startP1 = newParallax("parallax-Start2.png", newRect(0, 0, 1250, 750), 4)
-	startP2 = newParallax("parallax-Start3.png", newRect(0, 0, 1250, 750), 3)
-	startP3 = newParallax("parallax-Start4.png", newRect(0, 0, 1250, 750), 2)
-	startP4 = newParallax("parallax-Start5.png", newRect(0, 0, 1250, 750), 1)
-	infoButton = newInfoPage("infoButton.png", "infoPage.png", newRect(850, 0, 165, 165), "btn")
-	otherToMenuButton = newButton("menuButton.png", newRect(1000, 0, 300, 200), ToMenu)
-
-	volButton = newButton("volButtonOn.png", newRect(1100, 100, 165, 165), SwitchVol)
-
+	
 	// Initialize audio context
 	audioContext = audio.NewContext(44100)
 
@@ -179,9 +193,33 @@ func init() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	SwitchVol(g)
 
+	var s_map = SceneConstructorMap{
+		"menu": newMainMenu,
+	}
+	
+	g.stateMachine = newStateMachine(s_map)
+	g.stateMachine.changeState(g, "menu")
+
+	infoButton = newInfoPage("infoButton.png", "infoPage.png", newRect(850, 0, 165, 165), "btn")
+	otherToMenuButton = newButton("menuButton.png", newRect(1000, 0, 300, 200), ToMenu)
+	
+/* 	protoStartBg = newStillImage("MenuBg.png", newRect(0, 0, 1250, 750))
+	startBg = newParallax("StartBg.png", newRect(0, 0, 1250, 750), 5)
+	startP1 = newParallax("parallax-Start2.png", newRect(0, 0, 1250, 750), 4)
+	startP2 = newParallax("parallax-Start3.png", newRect(0, 0, 1250, 750), 3)
+	startP3 = newParallax("parallax-Start4.png", newRect(0, 0, 1250, 750), 2)
+	startP4 = newParallax("parallax-Start5.png", newRect(0, 0, 1250, 750), 1)
+	volButton = newButton("volButtonOn.png", newRect(100, 100, 165, 165), SwitchVol)
 	fixedStart = newStillImage("fixed-Start.png", newRect(0, 0, 1250, 750))
+	playbutton = newButton("PlayButton.png", newRect(750, 100, 300, 200), ToPlasma)
+	aboutButton = newButton("aboutButton.png", newRect(770, 260, 300, 200), ToAbout)
+	levSelButton = newButton("levSelButton.png", newRect(700, 450, 300, 200), ToLevelSelect) */
+
+
 	aboutBg = newStillImage("AboutBg.png", newRect(0, 0, 1250, 750))
+
 	levSelBg = newStillImage("levSelBg.png", newRect(0, 0, 1250, 750))
 
 	protoPlasmaBg = newStillImage("PlasmaBg.png", newRect(0, 0, 1250, 750))
@@ -196,9 +234,7 @@ func init() {
 	nucleusBg = newStillImage("NucleusBg.png", newRect(0, 0, 1250, 750))
 	cytoBg_2 = newStillImage("CytoBg2.png", newRect(0, 0, 1250, 750))
 
-	playbutton = newButton("PlayButton.png", newRect(750, 100, 300, 200), ToPlasma)
-	aboutButton = newButton("aboutButton.png", newRect(770, 260, 300, 200), ToAbout)
-	levSelButton = newButton("levSelButton.png", newRect(700, 450, 300, 200), ToLevelSelect)
+
 	aboutToMenuButton = newButton("menuButton.png", newRect(350, 450, 300, 200), ToMenu)
 	levToPlasmaButton = newButton("levToPlasmaBtn.png", newRect(520, 110, 300, 180), ToPlasma)
 	levToCyto1Button = newButton("levToCyto1Btn.png", newRect(820, 110, 300, 180), ToCyto1)
@@ -281,12 +317,13 @@ func init() {
 	wrongTrna1 = newCodonChoice("codonButton.png", newRect(350, 150, 192, 111), translate(randomRNACodon(rightTrna.bases)))
 	wrongTrna2 = newCodonChoice("codonButton.png", newRect(650, 150, 192, 111), translate(randomRNACodon(rightTrna.bases)))
 
+	//menuSprites = []GUI{protoStartBg, &startBg, &startP1, &startP2, &startP3, &startP4, fixedStart, playbutton, aboutButton, levSelButton, volButton}
+	aboutSprites = []GUI{}
 }
 
 func (g *Game) Update() error {
 
-	g.defaultFont = newFont("CourierPrime-Regular.ttf", 32*screenHeight/750)
-	g.codonFont = newFont("BlackOpsOne-Regular.ttf", 60*screenHeight/750)
+	//g.stateMachine.update(g)
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyEscape) {
 		ebiten.SetFullscreen(false)
@@ -298,35 +335,48 @@ func (g *Game) Update() error {
 		screenWidth, screenHeight = 1250, 750
 	}
 
+	g.defaultFont = newFont("CourierPrime-Regular.ttf", 32*screenHeight/750)
+	g.codonFont = newFont("BlackOpsOne-Regular.ttf", 60*screenHeight/750)
+
 	switch scene {
 	case "Main Menu":
+		g.stateMachine.update(g)
 		//g.musicPlayer.Play()
-		ebiten.SetWindowTitle("Cell Signaling Pathway - Main Menu")
-		startBg.update()
-		startP1.update()
-		startP2.update()
-		startP3.update()
-		startP4.update()
-		aboutButton.on_click(g)
-		playbutton.on_click(g)
-		levSelButton.on_click(g)
-		volButton.on_click(g)
+		//ebiten.SetWindowTitle("Cell Signaling Pathway - Main Menu")
+		/*for _, element := range menuSprites {
+			//e := element.(type)
+			switch element.(type) {
+			case (Button):
+				element.update(g)
+			default:
+				element.update()
+			}
+		} */
+		/* 		startBg.update()
+		   		startP1.update()
+		   		startP2.update()
+		   		startP3.update()
+		   		startP4.update()
+		   		aboutButton.update(g)
+		   		playbutton.update(g)
+		   		levSelButton.update(g)
+		   		volButton.update(g) */
 	case "About":
 		ebiten.SetWindowTitle("Cell Signaling Pathway - About")
-		aboutToMenuButton.on_click(g)
+		aboutToMenuButton.update(g)
 	case "Level Selection":
 		ebiten.SetWindowTitle("Cell Signaling Pathway - Level Selection")
-		levToPlasmaButton.on_click(g)
-		levToCyto1Button.on_click(g)
-		levToNucleusButton.on_click(g)
-		levToCyto2Button.on_click(g)
-		levToMenuButton.on_click(g)
+		levToPlasmaButton.update(g)
+		levToCyto1Button.update(g)
+		levToNucleusButton.update(g)
+		levToCyto2Button.update(g)
+		levToMenuButton.update(g)
 	case "Signal Reception":
 		ebiten.SetWindowTitle("Cell Signaling Pathway - Signal Reception")
 		plasmaBg.update()
 		plasmaMembrane.update()
 		//plasmaMembrane2.update()
-		signal.on_click()
+		signal.update()
 		receptorA.update()
 		receptorB.update()
 		receptorC.update()
@@ -335,8 +385,8 @@ func (g *Game) Update() error {
 		temp_tk1B.update(temp_tk1C.rect)
 		temp_tk1C.update(temp_tk1D.rect)
 		temp_tk1D.update(temp_tk1A.rect)
-		otherToMenuButton.on_click(g)
-		infoButton.on_click()
+		otherToMenuButton.update(g)
+		infoButton.update()
 		info = updateInfo()
 		if receptorA.is_touching_signal {
 			if matchSR(signal.signalType, receptorA.receptorType) {
@@ -368,14 +418,14 @@ func (g *Game) Update() error {
 
 	case "Signal Transduction":
 		ebiten.SetWindowTitle("Cell Signaling Pathway - Signal Transduction")
-		otherToMenuButton.on_click(g)
+		otherToMenuButton.update(g)
 		cytoBg_1.update()
 		cytoNuc_1.update()
 		tk1.activate()
 		tk1.update(tk2.rect)
 		tk2.update(tfa.rect)
 		tfa.update()
-		infoButton.on_click()
+		infoButton.update()
 		info = updateInfo()
 
 		if tk1.is_clicked_on {
@@ -392,11 +442,11 @@ func (g *Game) Update() error {
 
 	case "Transcription":
 		ebiten.SetWindowTitle("Cell Signaling Pathway - Transcription")
-		otherToMenuButton.on_click(g)
+		otherToMenuButton.update(g)
 		temp_tfa.activate()
 		temp_tfa.update()
 		rnaPolymerase.update(temp_tfa.rect.pos.y)
-		infoButton.on_click()
+		infoButton.update()
 		info = updateInfo()
 
 		if reset {
@@ -414,8 +464,8 @@ func (g *Game) Update() error {
 
 	case "Translation":
 		ebiten.SetWindowTitle("Cell Signaling Pathway - Translation")
-		otherToMenuButton.on_click(g)
-		infoButton.on_click()
+		otherToMenuButton.update(g)
+		infoButton.update()
 		info = updateInfo()
 
 		if reset {
@@ -438,19 +488,24 @@ func (g *Game) Update() error {
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
+	//g.stateMachine.draw(g, screen)
 	switch scene {
 	case "Main Menu":
-		protoStartBg.draw(screen)
-		startBg.draw(screen)
-		startP1.draw(screen)
-		startP2.draw(screen)
-		startP3.draw(screen)
-		startP4.draw(screen)
-		fixedStart.draw(screen)
-		playbutton.draw(screen)
-		aboutButton.draw(screen)
-		levSelButton.draw(screen)
-		volButton.draw(screen)
+		g.stateMachine.draw(g, screen)
+		//for _, element := range menuSprites {
+		//	element.draw(screen)
+		//}
+		/* 		protoStartBg.draw(screen)
+		   		startBg.draw(screen)
+		   		startP1.draw(screen)
+		   		startP2.draw(screen)
+		   		startP3.draw(screen)
+		   		startP4.draw(screen)
+		   		fixedStart.draw(screen)
+		   		playbutton.draw(screen)
+		   		aboutButton.draw(screen)
+		   		levSelButton.draw(screen)
+		   		volButton.draw(screen) */
 
 		if g.switchedToPlasma {
 			scene = "Signal Reception"
@@ -670,21 +725,11 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
 
 func main() {
 	game := &Game{}
-
-	//audioContext := audio.NewContext(sampleRate)
-	//game.musicPlayer = nil
-	//game.musicPlayerCh = make(chan *Player)
-	//game.errCh = make(chan error)
-	//m, err := NewPlayer(game, audioContext)
-	//game.musicPlayer = m
-
-	// Start playing audio
-	SwitchVol(game)
+	game.init()
 
 	if err := ebiten.RunGame(game); err != nil {
 		log.Fatal(err)
 	}
-
 	if err != nil {
 		log.Fatal(err)
 	}

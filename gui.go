@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"image/color"
+	//"reflect"
 
 	//"math"
 	"strings"
@@ -13,6 +14,16 @@ import (
 )
 
 type ButtonFunc func(*Game)
+
+type GUI interface {
+	draw(screen *ebiten.Image)
+	update(params ...interface{})
+	//getStructType(GUI) reflect.Type
+}
+
+//func getStructType(g GUI) reflect.Type {
+//	return reflect.TypeOf(g)
+//}
 
 type Button struct {
 	//CommonDraw
@@ -131,6 +142,8 @@ func (s StillImage) draw(screen *ebiten.Image) {
 	screen.DrawImage(s.image, op)
 }
 
+func (s StillImage) update(params ...interface{}) {}
+
 func newInfoPage(path1 string, path2 string, rect Rectangle, stat string) InfoPage {
 	var btn_img, _, err1 = ebitenutil.NewImageFromFile(loadFile(path1))
 	var pg_img, _, err2 = ebitenutil.NewImageFromFile(loadFile(path2))
@@ -150,7 +163,7 @@ func newInfoPage(path1 string, path2 string, rect Rectangle, stat string) InfoPa
 	}
 }
 
-func (i *InfoPage) on_click() {
+func (i *InfoPage) update(params ...interface{}) {
 	var x_c, y_c = ebiten.CursorPosition()
 	var b_pos = newVector(x_c, y_c)
 	if rect_point_collision(i.rect, b_pos) && inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
@@ -190,7 +203,7 @@ func newParallax(path string, rect Rectangle, layer float64) Parallax {
 	}
 }
 
-func (p *Parallax) update() {
+func (p *Parallax) update(params ...interface{}) {
 	var x_c, y_c = ebiten.CursorPosition()
 	var l = int(p.layer)
 	switch scene {
@@ -251,11 +264,18 @@ func newButton(path string, rect Rectangle, cmd ButtonFunc) Button {
 	}
 }
 
-func (b Button) on_click(g *Game) {
-	var x_c, y_c = ebiten.CursorPosition()
-	var b_pos = newVector(x_c, y_c)
-	if rect_point_collision(b.rect, b_pos) && inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
-		b.cmd(g)
+// NEED TO FIX VOL BUTTON CHANGE IMAGE
+func (b Button) update(params ... interface{}) {
+	if len(params) > 0 {
+        g, ok := params[0].(*Game)
+        if !ok {
+            return
+        }
+		var x_c, y_c = ebiten.CursorPosition()
+		var b_pos = newVector(x_c, y_c)
+		if rect_point_collision(b.rect, b_pos) && inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
+			b.cmd(g)
+		}
 	}
 }
 
@@ -288,7 +308,7 @@ func newSignal(path string, rect Rectangle) Signal {
 	}
 }
 
-func (s *Signal) on_click() {
+func (s *Signal) update(params ...interface{}) {
 	var x_c, y_c = ebiten.CursorPosition()
 	var b_pos = newVector(x_c, y_c)
 
@@ -347,7 +367,7 @@ func (r Receptor) draw(screen *ebiten.Image) {
 	screen.DrawImage(r.image, op)
 }
 
-func (r *Receptor) update() {
+func (r *Receptor) update(params ...interface{}) {
 	var x_c, y_c = ebiten.CursorPosition()
 	switch r.receptorType {
 	case "receptorA":
@@ -401,50 +421,56 @@ func newKinase(path string, rect Rectangle, ktype string) Kinase {
 	}
 }
 
-func (k *Kinase) update(rect Rectangle) {
-	var x_c, y_c = ebiten.CursorPosition()
-	var b_pos = newVector(x_c, y_c)
-	if strings.Contains(k.kinaseType, "temp_tk1") {
-		if !k.is_moving {
-			var x_c, y_c = ebiten.CursorPosition()
-			switch k.kinaseType {
-			case "temp_tk1A":
-				k.rect.pos.x = (-5 * (x_c + 100) / (7 * 3)) + 75
-				k.rect.pos.y = (-1 * (y_c + 100) / (3 * 3)) + 625
-			case "temp_tk1B":
-				k.rect.pos.x = (-5 * (x_c + 100) / (7 * 3)) + 475
-				k.rect.pos.y = (-(y_c + 100) / (3 * 3)) + 575
-			case "temp_tk1C":
-				k.rect.pos.x = (-5 * (x_c + 100) / (7 * 3)) + 875
-				k.rect.pos.y = (-(y_c + 100) / (3 * 3)) + 575
-			case "temp_tk1D":
-				k.rect.pos.x = (-5 * (x_c + 100) / (7 * 3)) + 1275
-				k.rect.pos.y = (-1 * (y_c + 100) / (3 * 3)) + 625
+func (k *Kinase) update(params ... interface{}) {
+	if len(params) > 0 {
+        rect, ok := params[0].(Rectangle)
+        if !ok {
+            return
+        }
+		var x_c, y_c = ebiten.CursorPosition()
+		var b_pos = newVector(x_c, y_c)
+		if strings.Contains(k.kinaseType, "temp_tk1") {
+			if !k.is_moving {
+				var x_c, y_c = ebiten.CursorPosition()
+				switch k.kinaseType {
+				case "temp_tk1A":
+					k.rect.pos.x = (-5 * (x_c + 100) / (7 * 3)) + 75
+					k.rect.pos.y = (-1 * (y_c + 100) / (3 * 3)) + 625
+				case "temp_tk1B":
+					k.rect.pos.x = (-5 * (x_c + 100) / (7 * 3)) + 475
+					k.rect.pos.y = (-(y_c + 100) / (3 * 3)) + 575
+				case "temp_tk1C":
+					k.rect.pos.x = (-5 * (x_c + 100) / (7 * 3)) + 875
+					k.rect.pos.y = (-(y_c + 100) / (3 * 3)) + 575
+				case "temp_tk1D":
+					k.rect.pos.x = (-5 * (x_c + 100) / (7 * 3)) + 1275
+					k.rect.pos.y = (-1 * (y_c + 100) / (3 * 3)) + 625
+				}
+			} else if k.is_moving {
+				if k.rect.pos.y <= screenHeight {
+					k.descend()
+				}
 			}
-		} else if k.is_moving {
-			if k.rect.pos.y <= screenHeight {
+		} else if !k.is_clicked_on && k.is_moving {
+			if k.rect.pos.y <= 400*(screenHeight/750) && k.kinaseType == "tk2" {
 				k.descend()
+			} else if k.rect.pos.y <= 50*(screenHeight/750) && k.kinaseType == "tk1" {
+				k.descend()
+			} else {
+				if ebiten.IsFullscreen() {k.rect.pos.x += k.delta * widthRatio
+				} else {k.rect.pos.x += k.delta}
 			}
 		}
-	} else if !k.is_clicked_on && k.is_moving {
-		if k.rect.pos.y <= 400*(screenHeight/750) && k.kinaseType == "tk2" {
-			k.descend()
-		} else if k.rect.pos.y <= 50*(screenHeight/750) && k.kinaseType == "tk1" {
-			k.descend()
-		} else {
-			k.rect.pos.x += k.delta * (screenWidth / 1250)
+		if rect_point_collision(k.rect, b_pos) && ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) && aabb_collision(k.rect, rect) {
+			k.is_clicked_on = true
 		}
-	}
-	if rect_point_collision(k.rect, b_pos) && ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) && aabb_collision(k.rect, rect) {
-		k.is_clicked_on = true
-	}
-
-	if k.rect.pos.x+k.rect.width >= screenWidth {
-		k.delta = -3
-	} else if k.rect.pos.x <= 0 {
-		k.delta = 3
-	}
-
+	
+		if k.rect.pos.x+k.rect.width >= screenWidth {
+			k.delta = -3
+		} else if k.rect.pos.x <= 0 {
+			k.delta = 3
+		}
+	}	
 }
 
 func (k Kinase) draw(screen *ebiten.Image) {
@@ -474,7 +500,8 @@ func (k *Kinase) activate() {
 }
 
 func (k *Kinase) descend() {
-	k.rect.pos.y += 2 * (screenHeight / 750)
+	if ebiten.IsFullscreen() {k.rect.pos.y += 2*heightRatio
+	} else {k.rect.pos.y += 2}
 }
 
 func (k *Kinase) animate(newImage string) {
@@ -506,7 +533,7 @@ func newTFA(path string, rect Rectangle, tfaType string) TFA {
 	}
 }
 
-func (t *TFA) update() {
+func (t *TFA) update(params ...interface{}) {
 	if t.is_active {
 		if t.rect.pos.y <= screenHeight && t.tfaType == "tfa1" {
 			t.rect.pos.y += 2 * (screenHeight / 750)
@@ -552,11 +579,17 @@ func newRNAPolymerase(path string, rect Rectangle) RNAPolymerase {
 	}
 }
 
-func (r *RNAPolymerase) update(tfaPosY int) {
-	if tfaPosY >= 300 {
-		if r.rect.pos.x <= 25 {
-			r.rect.pos.y += 1 * (screenHeight / 750)
-			r.rect.pos.x += 2 * (screenWidth / 1250)
+func (r *RNAPolymerase) update(params ... interface{}) {
+	if len(params) > 0 {
+        tfaPosY, ok := params[0].(int)
+        if !ok {
+            return
+        }
+		if tfaPosY >= 300 {
+			if r.rect.pos.x <= 25 {
+				r.rect.pos.y += 1 * (screenHeight / 750)
+				r.rect.pos.x += 2 * (screenWidth / 1250)
+			}
 		}
 	}
 }
@@ -706,7 +739,7 @@ func (ribo *Ribosome) update_movement() bool {
 			ribo.rect.pos.y += 2 * (screenHeight / 750)
 			return false
 		} else if ribo.rect.pos.x < (165 * (mrna_ptr + 1)) {
-			ribo.rect.pos.x += 2
+			ribo.rect.pos.x += 2 * (screenWidth / 1250)
 			return false
 		} else {
 			return true
