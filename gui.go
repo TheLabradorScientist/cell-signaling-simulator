@@ -20,6 +20,7 @@ type ButtonFunc func(*Game)
 type GUI interface {
 	draw(screen *ebiten.Image)
 	update(params ...interface{})
+	scaleToScreen(screen *ebiten.Image)
 	//getStructType(GUI) reflect.Type
 }
 
@@ -27,10 +28,15 @@ type GUI interface {
 //	return reflect.TypeOf(g)
 //}
 
+type Sprite struct {
+	image *ebiten.Image
+	image_2 *ebiten.Image
+	rect Rectangle
+}
+
 type Button struct {
 	//CommonDraw
-	image *ebiten.Image
-	rect  Rectangle
+	Sprite
 	cmd   ButtonFunc
 }
 
@@ -41,22 +47,19 @@ type VolButton struct {
 }
 
 type Signal struct {
-	image      *ebiten.Image
-	rect       Rectangle
+	Sprite
 	is_dragged bool
 	signalType string
 }
 
 type Receptor struct {
-	image              *ebiten.Image
-	rect               Rectangle
+	Sprite
 	is_touching_signal bool
 	receptorType       string
 }
 
 type Kinase struct {
-	image         *ebiten.Image
-	rect          Rectangle
+	Sprite
 	is_moving     bool
 	is_clicked_on bool
 	delta         int
@@ -64,59 +67,49 @@ type Kinase struct {
 }
 
 type TFA struct {
-	image     *ebiten.Image
-	rect      Rectangle
+	Sprite
 	is_active bool
 	tfaType   string
 }
 
 type Transcript struct {
-	image *ebiten.Image
-	rect  Rectangle
+	Sprite
 	codon string
 }
 
 type Template struct {
-	image       *ebiten.Image
-	rect        Rectangle
+	Sprite
 	codon       string
 	fragment    int
 	is_complete bool
 }
 
 type RNAPolymerase struct {
-	image *ebiten.Image
-	rect  Rectangle
+	Sprite
 }
 
 type Nucleobase struct {
-	image    *ebiten.Image
-	rect     Rectangle
+	Sprite
 	baseType string
 }
 
 type CodonChoice struct {
-	image *ebiten.Image
-	rect  Rectangle
+	Sprite
 	bases string
 	// codonType string // Correct vs Incorrect
 }
 
 type Ribosome struct {
-	image *ebiten.Image
-	rect  Rectangle
+	Sprite
 }
 
 type Parallax struct {
-	image *ebiten.Image
-	rect  Rectangle
+	Sprite
 	layer float64
 }
 
 type InfoPage struct {
-	btn_image *ebiten.Image
-	pg_image  *ebiten.Image
-	rect      Rectangle
+	Sprite
 	status    string
 	// Functions: when screen switches, is drawn in btn status. When mouseButtonJustPressed + btn status,
 	// changes to pg status. When mouseButtonJustPressed + pg status, changes to button status.
@@ -125,48 +118,73 @@ type InfoPage struct {
 }
 
 type StillImage struct {
-	image *ebiten.Image
-	rect  Rectangle
+	Sprite
 }
 
-func newStillImage(path string, rect Rectangle) StillImage {
-	var still_image, _, err = ebitenutil.NewImageFromFile(loadFile(path))
-
-	if err != nil {
-		fmt.Println("Error parsing date:", err)
-	}
-	return StillImage{
-		image: still_image,
-		rect:  rect,
+func newSprite(params ...interface{}) Sprite {
+	if len(params) == 3 {
+        path1 := params[0].(string)
+		path2 := params[1].(string)
+		rect := params[2].(Rectangle)
+		var	img_1, _, err1 = ebitenutil.NewImageFromFile(loadFile(path1))
+		var img_2, _, err2 = ebitenutil.NewImageFromFile(loadFile(path2))
+		if err1 != nil {
+			fmt.Println("Error parsing date:", err)
+		}
+		if err2 != nil {
+			fmt.Println("Error parsing date:", err)
+		}
+		return Sprite{
+			image: img_1,
+			image_2: img_2,
+			rect: rect,
+		}
+	} else {
+        path := params[0].(string)
+		rect := params[1].(Rectangle)
+		var	img_1, _, err1 = ebitenutil.NewImageFromFile(loadFile(path))
+		if err1 != nil {
+			fmt.Println("Error parsing date:", err)
+		}
+		return Sprite{
+			image: img_1,
+			image_2: img_1,
+			rect: rect,
+		}
 	}
 }
 
-func (s StillImage) draw(screen *ebiten.Image) {
+func (s Sprite) scaleToScreen(screen *ebiten.Image) {
 	op := &ebiten.DrawImageOptions{}
-	op.GeoM.Translate(float64(s.rect.pos.x), float64(s.rect.pos.y))
 	scaleW := 0.5 * float64(screenWidth) / 1250
 	scaleH := 0.5 * float64(screenHeight) / 750
 	op.GeoM.Scale(scaleW, scaleH)
 	screen.DrawImage(s.image, op)
 }
 
+func (s Sprite) draw(screen *ebiten.Image) {
+	op := &ebiten.DrawImageOptions{}
+	op.GeoM.Translate(float64(s.rect.pos.x), float64(s.rect.pos.y))
+	screen.DrawImage(s.image, op)
+}
+
+func newStillImage(path string, rect Rectangle) StillImage {
+	sprite := newSprite(path, rect)
+	return StillImage{
+		Sprite: sprite,
+	}
+}
+
+func (s StillImage) draw(screen *ebiten.Image) {
+	s.Sprite.draw(screen)
+}
+
 func (s StillImage) update(params ...interface{}) {}
 
 func newInfoPage(path1 string, path2 string, rect Rectangle, stat string) InfoPage {
-	var btn_img, _, err1 = ebitenutil.NewImageFromFile(loadFile(path1))
-	var pg_img, _, err2 = ebitenutil.NewImageFromFile(loadFile(path2))
-
-	if err1 != nil {
-		fmt.Println("Error parsing date:", err)
-	}
-	if err2 != nil {
-		fmt.Println("Error parsing date:", err)
-	}
-
+	sprite := newSprite(path1, path2, rect)
 	return InfoPage{
-		btn_image: btn_img,
-		pg_image:  pg_img,
-		rect:      rect,
+		Sprite: sprite,
 		status:    stat,
 	}
 }
@@ -185,28 +203,23 @@ func (i *InfoPage) update(params ...interface{}) {
 	}
 }
 
-func (i InfoPage) draw(screen *ebiten.Image, g *Game) {
+func (i InfoPage) draw(screen *ebiten.Image) {
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Translate(float64(i.rect.pos.x), float64(i.rect.pos.y))
 	if i.status == "btn" {
-		screen.DrawImage(i.btn_image, op)
+		screen.DrawImage(i.Sprite.image, op)
 	}
 	if i.status == "pg" {
-		screen.DrawImage(i.pg_image, op)
+		screen.DrawImage(i.Sprite.image_2, op)
 		Purple := color.RGBA{50, 0, 50, 250}
-		g.defaultFont.drawFont(screen, info, 300, 200, color.RGBA(Purple))
+		defaultFont.drawFont(screen, info, 300, 200, color.RGBA(Purple))
 	}
 }
 
 func newParallax(path string, rect Rectangle, layer float64) Parallax {
-	var par_image, _, err = ebitenutil.NewImageFromFile(loadFile(path))
-
-	if err != nil {
-		fmt.Println("Error parsing date:", err)
-	}
+	sprite := newSprite(path, rect)
 	return Parallax{
-		image: par_image,
-		rect:  rect,
+		Sprite: sprite,
 		layer: layer,
 	}
 }
@@ -260,14 +273,9 @@ func (cd CommonDraw) draw(screen *ebiten.Image) {
 } */
 
 func newButton(path string, rect Rectangle, cmd ButtonFunc) Button {
-	var btn_image, _, err = ebitenutil.NewImageFromFile(loadFile(path))
-
-	if err != nil {
-		fmt.Println("Error parsing date:", err)
-	}
+	sprite := newSprite(path, rect)
 	return Button{
-		image: btn_image,
-		rect:  rect,
+		Sprite: sprite,
 		cmd:   cmd,
 	}
 }
@@ -328,14 +336,10 @@ func (v VolButton) draw(screen *ebiten.Image) {
 }
 
 func newSignal(path string, rect Rectangle) Signal {
-	var sig_image, _, err = ebitenutil.NewImageFromFile(loadFile(path))
+	sprite := newSprite(path, rect)
 
-	if err != nil {
-		fmt.Println("Error parsing date:", err)
-	}
 	return Signal{
-		image:      sig_image,
-		rect:       rect,
+		Sprite: sprite,
 		is_dragged: false,
 	}
 }
@@ -375,14 +379,9 @@ func (s Signal) draw(screen *ebiten.Image) {
 }
 
 func newReceptor(path string, rect Rectangle, rtype string) Receptor {
-	var rec_image, _, err = ebitenutil.NewImageFromFile(loadFile(path))
-
-	if err != nil {
-		fmt.Println("Error parsing date:", err)
-	}
+	sprite := newSprite(path, rect)
 	return Receptor{
-		image:              rec_image,
-		rect:               rect,
+		Sprite: sprite,
 		is_touching_signal: false,
 		receptorType:       rtype,
 	}
@@ -439,13 +438,9 @@ func (r *Receptor) animate(newImage string) {
 }
 
 func newKinase(path string, rect Rectangle, ktype string) Kinase {
-	var kin_image, _, err = ebitenutil.NewImageFromFile(loadFile(path))
-	if err != nil {
-		fmt.Println("Error parsing date:", err)
-	}
+	sprite := newSprite(path, rect)
 	return Kinase{
-		image:         kin_image,
-		rect:          rect,
+		Sprite: sprite,
 		is_moving:     false,
 		is_clicked_on: false,
 		delta:         3,
@@ -553,13 +548,12 @@ func (t *TFA) activate() {
 }
 
 func newTFA(path string, rect Rectangle, tfaType string) TFA {
-	var tfa_image, _, err = ebitenutil.NewImageFromFile(loadFile(path))
+	sprite := newSprite(path, rect)
 	if err != nil {
 		fmt.Println("Error parsing date:", err)
 	}
 	return TFA{
-		image:     tfa_image,
-		rect:      rect,
+		Sprite: sprite,
 		is_active: false,
 		tfaType:   tfaType,
 	}
@@ -601,13 +595,9 @@ func (t TFA) draw(screen *ebiten.Image) {
 }
 
 func newRNAPolymerase(path string, rect Rectangle) RNAPolymerase {
-	var RNAPolym_image, _, err = ebitenutil.NewImageFromFile(loadFile(path))
-	if err != nil {
-		fmt.Println("Error parsing date:", err)
-	}
+	sprite := newSprite(path, rect)
 	return RNAPolymerase{
-		image: RNAPolym_image,
-		rect:  rect,
+		Sprite: sprite,
 	}
 }
 
@@ -638,13 +628,9 @@ func (r RNAPolymerase) draw(screen *ebiten.Image) {
 }
 
 func newTranscript(path string, rect Rectangle, codon string) Transcript {
-	var transcript_image, _, err = ebitenutil.NewImageFromFile(loadFile(path))
-	if err != nil {
-		fmt.Println("Error parsing date:", err)
-	}
+	sprite := newSprite(path, rect)
 	return Transcript{
-		image: transcript_image,
-		rect:  rect,
+		Sprite: sprite,
 		codon: codon,
 	}
 }
@@ -661,13 +647,9 @@ func (transcr Transcript) draw(screen *ebiten.Image) {
 }
 
 func newTemplate(path string, rect Rectangle, codon string, fragment int) Template {
-	var template_image, _, err = ebitenutil.NewImageFromFile(loadFile(path))
-	if err != nil {
-		fmt.Println("Error parsing date:", err)
-	}
+	sprite := newSprite(path, rect)
 	return Template{
-		image:       template_image,
-		rect:        rect,
+		Sprite: sprite,
 		codon:       codon,
 		fragment:    fragment,
 		is_complete: false,
@@ -708,25 +690,16 @@ func nextMRNACodon(g *Game) {
 }
 
 func newRibosome(path string, rect Rectangle) Ribosome {
-	var ribo_image, _, err = ebitenutil.NewImageFromFile(loadFile(path))
-	if err != nil {
-		fmt.Println("Error parsing date:", err)
-	}
+	sprite := newSprite(path, rect)
 	return Ribosome{
-		image: ribo_image,
-		rect:  rect,
+		Sprite: sprite,
 	}
 }
 
 func newCodonChoice(path string, rect Rectangle, bases string) CodonChoice {
-	var cdn_image, _, err = ebitenutil.NewImageFromFile(loadFile(path))
-
-	if err != nil {
-		fmt.Println("Error parsing date:", err)
-	}
+	sprite := newSprite(path, rect)
 	return CodonChoice{
-		image: cdn_image,
-		rect:  rect,
+		Sprite: sprite,
 		bases: bases,
 	}
 }
@@ -794,13 +767,9 @@ func (ribo Ribosome) draw(screen *ebiten.Image) {
 }
 
 func newNucelobase(path string, rect Rectangle, btype string) Nucleobase {
-	var base_image, _, err = ebitenutil.NewImageFromFile((loadFile(path)))
-	if err != nil {
-		fmt.Println("Error parsing date:", err)
-	}
+	sprite := newSprite(path, rect)
 	return Nucleobase{
-		image:    base_image,
-		rect:     rect,
+		Sprite: sprite,
 		baseType: btype,
 	}
 }

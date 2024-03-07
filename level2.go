@@ -56,5 +56,5 @@ func (l Level2) Draw(g *Game, screen *ebiten.Image) {
 	l.tk1.draw(screen)
 	l.tk2.draw(screen)
 	l.tfa.draw(screen)
-	g.defaultFont.drawFont(screen, "WELCOME TO THE CYTOPLASM! \n Click when each kinase overlaps to follow \n the phosphorylation cascade!!", 100, 50, color.Black)
+	defaultFont.drawFont(screen, "WELCOME TO THE CYTOPLASM! \n Click when each kinase overlaps to follow \n the phosphorylation cascade!!", 100, 50, color.Black)
 }

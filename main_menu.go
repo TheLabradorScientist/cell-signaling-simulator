@@ -47,6 +47,7 @@ func (m MainMenu) Init() {
 	levSelButton= newButton("levSelButton.png", newRect(700, 450, 300, 200), ToLevelSelect)
 	volButton= newVolButton("volButtonOn.png", newRect(100, 100, 165, 165), SwitchVol, *audioPlayer)
 	menuSprites = []GUI{protoStartBg, &startBg, &startP1, &startP2, &startP3, &startP4, fixedStart, playbutton, aboutButton, levSelButton, volButton}
+	state_array = menuSprites
 }
 
 func (m MainMenu) Update(g *Game) {

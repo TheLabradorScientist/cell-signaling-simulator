@@ -121,5 +121,5 @@ func (l Level1) Draw(g *Game, screen *ebiten.Image) {
 	l.temp_tk1B.draw(screen)
 	l.temp_tk1C.draw(screen)
 	l.temp_tk1D.draw(screen)
-	g.defaultFont.drawFont(screen, "WELCOME TO THE PLASMA MEMBRANE! \n Drag the signal to the matching receptor \n to enter the cell!", 100, 50, color.White)
+	defaultFont.drawFont(screen, "WELCOME TO THE PLASMA MEMBRANE! \n Drag the signal to the matching receptor \n to enter the cell!", 100, 50, color.White)
 }

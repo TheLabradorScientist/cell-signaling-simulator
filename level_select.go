@@ -18,7 +18,6 @@ type LevelSelection struct {
 	levSelBg           *ebiten.Image
 }
 
-
 func newLevelSelection(g *Game) {
 	g.stateMachine.state = LevelSelection{
 		levToPlasmaButton:  newButton("levToPlasmaBtn.png", newRect(400, 125, 232, 129), ToPlasma),

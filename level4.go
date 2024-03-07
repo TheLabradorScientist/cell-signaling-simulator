@@ -82,44 +82,44 @@ func (l Level4) Draw(g *Game, screen *ebiten.Image) {
 	l.ribosome.draw(screen)
 
 	if l.mrna_ptr != -1 {
-		g.codonFont.drawFont(screen, l.mrna[l.mrna_ptr].codon, l.mrna[0].rect.pos.x+500, l.mrna[0].rect.pos.y+200, color.Black)
+		codonFont.drawFont(screen, l.mrna[l.mrna_ptr].codon, l.mrna[0].rect.pos.x+500, l.mrna[0].rect.pos.y+200, color.Black)
 	}
 
 	l.rightTrna.draw(screen)
 	l.wrongTrna1.draw(screen)
 	l.wrongTrna2.draw(screen)
 
-	g.codonFont.drawFont(screen, l.rightTrna.bases, l.rightTrna.rect.pos.x+25, l.rightTrna.rect.pos.y+90, color.Black)
-	g.codonFont.drawFont(screen, l.wrongTrna1.bases, l.wrongTrna1.rect.pos.x+25, l.wrongTrna1.rect.pos.y+90, color.Black)
-	g.codonFont.drawFont(screen, l.wrongTrna2.bases, l.wrongTrna2.rect.pos.x+25, l.wrongTrna2.rect.pos.y+90, color.Black)
+	codonFont.drawFont(screen, l.rightTrna.bases, l.rightTrna.rect.pos.x+25, l.rightTrna.rect.pos.y+90, color.Black)
+	codonFont.drawFont(screen, l.wrongTrna1.bases, l.wrongTrna1.rect.pos.x+25, l.wrongTrna1.rect.pos.y+90, color.Black)
+	codonFont.drawFont(screen, l.wrongTrna2.bases, l.wrongTrna2.rect.pos.x+25, l.wrongTrna2.rect.pos.y+90, color.Black)
 
-	g.defaultFont.drawFont(screen, "FINALLY, BACK TO THE CYTOPLASM! \n Match each codon from your mRNA template \n to its corresponding amino acid to synthesize your protein!!!!", 100, 50, color.Black)
+	defaultFont.drawFont(screen, "FINALLY, BACK TO THE CYTOPLASM! \n Match each codon from your mRNA template \n to its corresponding amino acid to synthesize your protein!!!!", 100, 50, color.Black)
 
 	switch l.mrna_ptr {
 	case 1:
 		l.protein[0].draw(screen)
-		g.codonFont.drawFont(screen, l.protein[0].codon, l.protein[0].rect.pos.x, l.protein[0].rect.pos.y, color.Black)
+		codonFont.drawFont(screen, l.protein[0].codon, l.protein[0].rect.pos.x, l.protein[0].rect.pos.y, color.Black)
 	case 2:
 		l.protein[0].draw(screen)
 		l.protein[1].draw(screen)
-		g.codonFont.drawFont(screen, l.protein[0].codon, l.protein[0].rect.pos.x, l.protein[0].rect.pos.y, color.Black)
-		g.codonFont.drawFont(screen, l.protein[1].codon, l.protein[1].rect.pos.x, l.protein[1].rect.pos.y, color.Black)
+		codonFont.drawFont(screen, l.protein[0].codon, l.protein[0].rect.pos.x, l.protein[0].rect.pos.y, color.Black)
+		codonFont.drawFont(screen, l.protein[1].codon, l.protein[1].rect.pos.x, l.protein[1].rect.pos.y, color.Black)
 	case 3:
 		l.protein[0].draw(screen)
 		l.protein[1].draw(screen)
 		l.protein[2].draw(screen)
-		g.codonFont.drawFont(screen, l.protein[0].codon, l.protein[0].rect.pos.x, l.protein[0].rect.pos.y, color.Black)
-		g.codonFont.drawFont(screen, l.protein[1].codon, l.protein[1].rect.pos.x, l.protein[1].rect.pos.y, color.Black)
-		g.codonFont.drawFont(screen, l.protein[2].codon, l.protein[2].rect.pos.x, l.protein[2].rect.pos.y, color.Black)
+		codonFont.drawFont(screen, l.protein[0].codon, l.protein[0].rect.pos.x, l.protein[0].rect.pos.y, color.Black)
+		codonFont.drawFont(screen, l.protein[1].codon, l.protein[1].rect.pos.x, l.protein[1].rect.pos.y, color.Black)
+		codonFont.drawFont(screen, l.protein[2].codon, l.protein[2].rect.pos.x, l.protein[2].rect.pos.y, color.Black)
 	case 4:
 		l.protein[0].draw(screen)
 		l.protein[1].draw(screen)
 		l.protein[2].draw(screen)
 		l.protein[3].draw(screen)
-		g.codonFont.drawFont(screen, l.protein[0].codon, l.protein[0].rect.pos.x, l.protein[0].rect.pos.y, color.Black)
-		g.codonFont.drawFont(screen, l.protein[1].codon, l.protein[1].rect.pos.x, l.protein[1].rect.pos.y, color.Black)
-		g.codonFont.drawFont(screen, l.protein[2].codon, l.protein[2].rect.pos.x, l.protein[2].rect.pos.y, color.Black)
-		g.codonFont.drawFont(screen, l.protein[3].codon, l.protein[3].rect.pos.x, l.protein[3].rect.pos.y, color.Black)
+		codonFont.drawFont(screen, l.protein[0].codon, l.protein[0].rect.pos.x, l.protein[0].rect.pos.y, color.Black)
+		codonFont.drawFont(screen, l.protein[1].codon, l.protein[1].rect.pos.x, l.protein[1].rect.pos.y, color.Black)
+		codonFont.drawFont(screen, l.protein[2].codon, l.protein[2].rect.pos.x, l.protein[2].rect.pos.y, color.Black)
+		codonFont.drawFont(screen, l.protein[3].codon, l.protein[3].rect.pos.x, l.protein[3].rect.pos.y, color.Black)
 	default:
 		break
 	}

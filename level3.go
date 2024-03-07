@@ -73,37 +73,37 @@ func (l Level3) Draw(g *Game, screen *ebiten.Image) {
 	}
 	l.dna[0].draw(screen)
 
-	g.defaultFont.drawFont(screen, "WELCOME TO THE NUCLEUS! \n Match each codon on the DNA template to the corresponding RNA \n codon to transcribe a new mRNA molecule!!!", 100, 50, color.White)
+	defaultFont.drawFont(screen, "WELCOME TO THE NUCLEUS! \n Match each codon on the DNA template to the corresponding RNA \n codon to transcribe a new mRNA molecule!!!", 100, 50, color.White)
 
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Translate(0, 300)
 	l.rnaPolymerase.draw(screen)
 	temp_tfa.draw(screen)
-	//g.codonFont.drawFont(screen, strings.Join(template[0:5], ""), dna[currentFrag].rect.pos.x+300, dna[currentFrag].rect.pos.y, color.Black)
+	//codonFont.drawFont(screen, strings.Join(template[0:5], ""), dna[currentFrag].rect.pos.x+300, dna[currentFrag].rect.pos.y, color.Black)
 	if l.currentFrag != -1 {
-		g.codonFont.drawFont(screen, l.dna[l.currentFrag].codon, l.dna[0].rect.pos.x+500, l.dna[0].rect.pos.y, color.Black)
+		codonFont.drawFont(screen, l.dna[l.currentFrag].codon, l.dna[0].rect.pos.x+500, l.dna[0].rect.pos.y, color.Black)
 	}
 	l.rightChoice.draw(screen)
 	l.wrongChoice1.draw(screen)
 	l.wrongChoice2.draw(screen)
-	g.codonFont.drawFont(screen, l.rightChoice.bases, l.rightChoice.rect.pos.x+25, l.rightChoice.rect.pos.y+90, color.Black)
-	g.codonFont.drawFont(screen, l.wrongChoice1.bases, l.wrongChoice1.rect.pos.x+25, l.wrongChoice1.rect.pos.y+90, color.Black)
-	g.codonFont.drawFont(screen, l.wrongChoice2.bases, l.wrongChoice2.rect.pos.x+25, l.wrongChoice2.rect.pos.y+90, color.Black)
+	codonFont.drawFont(screen, l.rightChoice.bases, l.rightChoice.rect.pos.x+25, l.rightChoice.rect.pos.y+90, color.Black)
+	codonFont.drawFont(screen, l.wrongChoice1.bases, l.wrongChoice1.rect.pos.x+25, l.wrongChoice1.rect.pos.y+90, color.Black)
+	codonFont.drawFont(screen, l.wrongChoice2.bases, l.wrongChoice2.rect.pos.x+25, l.wrongChoice2.rect.pos.y+90, color.Black)
 	switch l.currentFrag {
 	case 1:
-		g.codonFont.drawFont(screen, l.rna[0].codon, l.rna[0].rect.pos.x+500, l.rna[0].rect.pos.y+140, color.Black)
+		codonFont.drawFont(screen, l.rna[0].codon, l.rna[0].rect.pos.x+500, l.rna[0].rect.pos.y+140, color.Black)
 	case 2:
-		g.codonFont.drawFont(screen, l.rna[0].codon, l.rna[0].rect.pos.x+500, l.rna[0].rect.pos.y+140, color.Black)
-		g.codonFont.drawFont(screen, l.rna[1].codon, l.rna[0].rect.pos.x+650, l.rna[0].rect.pos.y+140, color.Black)
+		codonFont.drawFont(screen, l.rna[0].codon, l.rna[0].rect.pos.x+500, l.rna[0].rect.pos.y+140, color.Black)
+		codonFont.drawFont(screen, l.rna[1].codon, l.rna[0].rect.pos.x+650, l.rna[0].rect.pos.y+140, color.Black)
 	case 3:
-		g.codonFont.drawFont(screen, l.rna[0].codon, l.rna[0].rect.pos.x+500, l.rna[0].rect.pos.y+140, color.Black)
-		g.codonFont.drawFont(screen, l.rna[1].codon, l.rna[0].rect.pos.x+650, l.rna[0].rect.pos.y+140, color.Black)
-		g.codonFont.drawFont(screen, l.rna[2].codon, l.rna[0].rect.pos.x+800, l.rna[0].rect.pos.y+140, color.Black)
+		codonFont.drawFont(screen, l.rna[0].codon, l.rna[0].rect.pos.x+500, l.rna[0].rect.pos.y+140, color.Black)
+		codonFont.drawFont(screen, l.rna[1].codon, l.rna[0].rect.pos.x+650, l.rna[0].rect.pos.y+140, color.Black)
+		codonFont.drawFont(screen, l.rna[2].codon, l.rna[0].rect.pos.x+800, l.rna[0].rect.pos.y+140, color.Black)
 	case 4:
-		g.codonFont.drawFont(screen, l.rna[0].codon, l.rna[0].rect.pos.x+500, l.rna[0].rect.pos.y+140, color.Black)
-		g.codonFont.drawFont(screen, l.rna[1].codon, l.rna[0].rect.pos.x+650, l.rna[0].rect.pos.y+140, color.Black)
-		g.codonFont.drawFont(screen, l.rna[2].codon, l.rna[0].rect.pos.x+800, l.rna[0].rect.pos.y+140, color.Black)
-		g.codonFont.drawFont(screen, l.rna[3].codon, l.rna[0].rect.pos.x+950, l.rna[0].rect.pos.y+140, color.Black)
+		codonFont.drawFont(screen, l.rna[0].codon, l.rna[0].rect.pos.x+500, l.rna[0].rect.pos.y+140, color.Black)
+		codonFont.drawFont(screen, l.rna[1].codon, l.rna[0].rect.pos.x+650, l.rna[0].rect.pos.y+140, color.Black)
+		codonFont.drawFont(screen, l.rna[2].codon, l.rna[0].rect.pos.x+800, l.rna[0].rect.pos.y+140, color.Black)
+		codonFont.drawFont(screen, l.rna[3].codon, l.rna[0].rect.pos.x+950, l.rna[0].rect.pos.y+140, color.Black)
 	default:
 		break
 	}
