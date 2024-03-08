@@ -8,7 +8,7 @@ type SceneCreatorFunc func(g *Game)
 type SceneConstructorMap map[string]SceneCreatorFunc
 
 type State interface {
-	Init()
+	Init(*Game)
 	Update(*Game)
 	Draw(*Game, *ebiten.Image)
 }
@@ -27,7 +27,7 @@ func newStateMachine(s_map SceneConstructorMap) StateMachine {
 
 func (s StateMachine) changeState(g *Game, s_name string) {
 	s.s_map[s_name](g)
-	s.state.Init()
+	s.state.Init(g)
 }
 
 func (s StateMachine) update(g *Game) {
@@ -37,3 +37,9 @@ func (s StateMachine) update(g *Game) {
 func (s StateMachine) draw(g *Game, screen *ebiten.Image) {
 	s.state.Draw(g, screen)
 }
+
+// func (s StateMachine) Scale(screen *ebiten.Image) {
+// 	for _, element := range state_array {
+// 		element.scaleToScreen(screen)
+// 	} 
+// }

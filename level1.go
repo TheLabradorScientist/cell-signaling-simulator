@@ -5,7 +5,7 @@ package main
 import (
 	"image/color"
 	"log"
-	"math/rand"
+	//"math/rand"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
@@ -25,11 +25,11 @@ type Level1 struct {
 	temp_tk1D  Kinase
 }
 
-func newLevel1(g *Game) {
-	g.stateMachine.state = Level1{
-		seedSignal: rand.Intn(4) + 1,
-	}
-}
+//func newLevel1(g *Game) {
+//	g.stateMachine.state = Level1{
+//		seedSignal: rand.Intn(4) + 1,
+//	}
+//}
 
 func (l Level1) Init() {
 	l.plasmaBg, _, err = ebitenutil.NewImageFromFile(loadFile("PlasmaBg.png"))

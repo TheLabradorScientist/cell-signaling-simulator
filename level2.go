@@ -18,7 +18,7 @@ type Level2 struct {
 }
 
 func newLevel2(g *Game) {
-	g.stateMachine.state = Level2{}
+//	g.stateMachine.state = Level2{}
 }
 
 func (l Level2) Init() {

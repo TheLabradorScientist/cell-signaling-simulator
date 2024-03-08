@@ -29,7 +29,7 @@ func newLevelSelection(g *Game) {
 	}
 }
 
-func (l LevelSelection) Init() {
+func (l LevelSelection) Init(g *Game) {
 	l.levSelBg, _, err = ebitenutil.NewImageFromFile(loadFile("levSelBg.png"))
 	if err != nil {
 		log.Fatal(err)

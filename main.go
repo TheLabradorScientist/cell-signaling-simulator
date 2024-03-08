@@ -21,11 +21,15 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 )
 
+const (
+	baseScreenWidth, baseScreenHeight = 1250, 750
+)
+
 var (
 	screenWidth, screenHeight = 1250, 750
 	maxWidth, maxHeight       = ebiten.ScreenSizeInFullscreen()
-	widthRatio                = maxWidth / screenWidth
-	heightRatio               = maxHeight / screenHeight
+	widthRatio                = float64(maxWidth / baseScreenWidth)
+	heightRatio               = float64(maxHeight / baseScreenHeight)
 )
 
 var (
@@ -46,6 +50,7 @@ var (
 	state_array       []GUI
 	defaultFont       Font
 	codonFont         Font
+	scaleChange		  int
 
 	// MENU SPRITES
 	/* 	protoStartBg StillImage
@@ -193,6 +198,9 @@ func (g *Game) init() {
 	ebiten.SetWindowPosition(100, 0)
 	ebiten.SetWindowSize(screenWidth, screenHeight)
 	ebiten.SetWindowResizingMode(ebiten.WindowResizingModeOnlyFullscreenEnabled)
+	defaultFont = newFont(loadFont("CourierPrime-Regular.ttf"), 32)
+	codonFont = newFont(loadFont("BlackOpsOne-Regular.ttf"), 60)
+	scaleChange = 0
 
 	// Initialize audio context
 	audioContext = audio.NewContext(44100)
@@ -496,19 +504,17 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	if ebiten.IsFullscreen() {
 		// Use this if statement to set sizes of graphics to fullscreen scale, else normal scale.
 		if screenWidth != maxWidth && screenHeight != maxHeight {
-			for _, element := range state_array {
-				element.scaleToScreen(screen)
-			}
 			screenWidth, screenHeight = ebiten.ScreenSizeInFullscreen()
-			defaultFont = newFont(loadFont("CourierPrime-Regular.ttf"), 32*heightRatio)
-			codonFont = newFont(loadFont("BlackOpsOne-Regular.ttf"), 60*heightRatio)
+			//g.stateMachine.Scale(screen)
+			scaleChange = len(state_array)
+			defaultFont = newFont(loadFont("CourierPrime-Regular.ttf"), 32*int(heightRatio))
+			codonFont = newFont(loadFont("BlackOpsOne-Regular.ttf"), 60*int(heightRatio))
 		}
 	} else {
 		if screenWidth == maxWidth && screenHeight == maxHeight {
-			for _, element := range state_array {
-				element.scaleToScreen(screen)
-			}
 			screenWidth, screenHeight = 1250, 750
+			//g.stateMachine.Scale(screen)
+			scaleChange = len(state_array)
 			defaultFont = newFont(loadFont("CourierPrime-Regular.ttf"), 32)
 			codonFont = newFont(loadFont("BlackOpsOne-Regular.ttf"), 60)
 		}

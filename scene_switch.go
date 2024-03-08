@@ -3,8 +3,8 @@
 package main
 
 import (
-	"fmt"
-	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
+	//"fmt"
+	//"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
 func setAllSwitchedFalse(g *Game) {
@@ -54,25 +54,6 @@ func ToAbout(g *Game) {
 	g.switchedToAbout = true
 }
 
-func SwitchVol(g *Game) {
-	if audioPlayer.IsPlaying() {
-		audioPlayer.Pause()
-		var vol_image, _, err = ebitenutil.NewImageFromFile(loadFile("volButtonOff.png"))
-		if err != nil {
-			fmt.Println("Error parsing date:", err)
-		}
-		volButton.status = "OFF"
-		volButton.image = vol_image
-	} else { 
-		audioPlayer.Play() 
-		var vol_image, _, err = ebitenutil.NewImageFromFile(loadFile("volButtonOn.png"))
-		if err != nil {
-			fmt.Println("Error parsing date:", err)
-		}
-		volButton.status = "ON"
-		volButton.image = vol_image
-	}
-}
 /*
 func ToMenu(g *Game) {
 	g.stateMachine.changeState(g, "menu")
