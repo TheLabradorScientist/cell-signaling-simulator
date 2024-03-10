@@ -51,6 +51,7 @@ var (
 	defaultFont       Font
 	codonFont         Font
 	scaleChange		  int
+	curr_volBtn		  VolButton
 
 	// MENU SPRITES
 	/* 	protoStartBg StillImage
@@ -226,7 +227,7 @@ func (g *Game) init() {
 	g.stateMachine.changeState(g, "menu")
 
 	infoButton = newInfoPage("infoButton.png", "infoPage.png", newRect(850, 0, 165, 165), "btn")
-	otherToMenuButton = newButton("menuButton.png", newRect(1000, 0, 300, 200), ToMenu)
+	otherToMenuButton = newButton(newRect(1000, 0, 300, 200), ToMenu, "menuButton.png")
 
 	/* 	protoStartBg = newStillImage("MenuBg.png", newRect(0, 0, 1250, 750))
 	   	startBg = newParallax("StartBg.png", newRect(0, 0, 1250, 750), 5)
@@ -256,12 +257,13 @@ func (g *Game) init() {
 	nucleusBg = newStillImage("NucleusBg.png", newRect(0, 0, 1250, 750))
 	cytoBg_2 = newStillImage("CytoBg2.png", newRect(0, 0, 1250, 750))
 
-	aboutToMenuButton = newButton("menuButton.png", newRect(350, 450, 300, 200), ToMenu)
-	levToPlasmaButton = newButton("levToPlasmaBtn.png", newRect(520, 110, 300, 180), ToPlasma)
-	levToCyto1Button = newButton("levToCyto1Btn.png", newRect(820, 110, 300, 180), ToCyto1)
-	levToNucleusButton = newButton("levToNucleusBtn.png", newRect(520, 285, 300, 180), ToNucleus)
-	levToCyto2Button = newButton("levToCyto2Btn.png", newRect(820, 285, 300, 180), ToCyto2)
-	levToMenuButton = newButton("menuButton.png", newRect(250, 190, 300, 200), ToMenu)
+	aboutToMenuButton = newButton(newRect(350, 450, 300, 200), ToMenu, "menuButton.png")
+	
+	levToPlasmaButton = newButton(newRect(520, 110, 300, 180), ToPlasma, "levToPlasmaBtn.png")
+	levToCyto1Button = newButton(newRect(820, 110, 300, 180), ToCyto1, "levToCyto1Btn.png")
+	levToNucleusButton = newButton(newRect(520, 285, 300, 180), ToNucleus, "levToNucleusBtn.png")
+	levToCyto2Button = newButton(newRect(820, 285, 300, 180), ToCyto2, "levToCyto2Btn.png")
+	levToMenuButton = newButton(newRect(250, 190, 300, 200), ToMenu, "menuButton.png")
 
 	switch seedSignal {
 	case 1:

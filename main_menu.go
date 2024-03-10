@@ -23,38 +23,44 @@ type MainMenu struct {
 }
 
 func newMainMenu(g *Game) {
-	g.stateMachine.state = MainMenu{}
-	menuSprites = []GUI{}
+	g.stateMachine.state = MainMenu{
+	protoStartBg: newStillImage("MenuBg.png", newRect(0, 0, 1250, 750)),
+	startBg: newParallax("StartBg.png", newRect(0, 0, 1250, 750), 5.0),
+	startP1: newParallax("parallax-Start2.png", newRect(0, 0, 1250, 750), 4.0),
+	startP2: newParallax("parallax-Start3.png", newRect(0, 0, 1250, 750), 3.0),
+	startP3: newParallax("parallax-Start4.png", newRect(0, 0, 1250, 750), 2.0),
+	startP4: newParallax("parallax-Start5.png", newRect(0, 0, 1250, 750), 1.0),
+	fixedStart: newStillImage("fixed-Start.png", newRect(0, 0, 1250, 750)),
+	playbutton: newButton(newRect(750, 100, 300, 200), ToPlasma, "PlayButton.png"),
+	aboutButton: newButton(newRect(770, 260, 300, 200), ToAbout, "aboutButton.png"),
+	levSelButton: newButton(newRect(700, 450, 300, 200), ToLevelSelect, "levSelButton.png"),
+	volButton: newVolButton("volButtonOn.png", "volButtonOff.png", newRect(100, 100, 165, 165), SwitchVol, *audioPlayer),
+	}
 }
 
 func (m MainMenu) Init(g *Game) {
-	m.protoStartBg= newStillImage("MenuBg.png", newRect(0, 0, 1250, 750))
-	m.startBg= newParallax("StartBg.png", newRect(0, 0, 1250, 750), 5)
-	m.startP1= newParallax("parallax-Start2.png", newRect(0, 0, 1250, 750), 4)
-	m.startP2= newParallax("parallax-Start3.png", newRect(0, 0, 1250, 750), 3)
-	m.startP3= newParallax("parallax-Start4.png", newRect(0, 0, 1250, 750), 2)
-	m.startP4= newParallax("parallax-Start5.png", newRect(0, 0, 1250, 750), 1)
-	m.fixedStart= newStillImage("fixed-Start.png", newRect(0, 0, 1250, 750))
-	m.playbutton= newButton("PlayButton.png", newRect(750, 100, 300, 200), ToPlasma)
-	m.aboutButton= newButton("aboutButton.png", newRect(770, 260, 300, 200), ToAbout)
-	m.levSelButton= newButton("levSelButton.png", newRect(700, 450, 300, 200), ToLevelSelect)
-	m.volButton= newVolButton("volButtonOn.png", newRect(100, 100, 165, 165), m.volButton.SwitchVol, *audioPlayer)
-	menuSprites = []GUI{m.protoStartBg, &m.startBg, &m.startP1, &m.startP2, &m.startP3, &m.startP4, m.fixedStart, m.playbutton, m.aboutButton, m.levSelButton, m.volButton}
+
+	menuSprites = []GUI{&m.protoStartBg, &m.startBg, &m.startP1, &m.startP2, &m.startP3, &m.startP4, &m.fixedStart, &m.playbutton, &m.aboutButton, &m.levSelButton, &m.volButton}
+
 	state_array = menuSprites
-	m.volButton.SwitchVol(g)
+
+	curr_volBtn = m.volButton
+
+	SwitchVol(g)
 }
 
 func (m MainMenu) Update(g *Game) {
 	ebiten.SetWindowTitle("Cell Signaling Pathway - Main Menu")
-		for _, element := range menuSprites {
-		switch element.(type) {
+	for _, element := range menuSprites {
+		element.update(g)
+/*  		switch element.(type) {
 		case (Button):
 			element.update(g)
 		case (VolButton):
 			element.update(g)
 		default:
-			element.update()
-		}
+			//element.update()
+		}  */
 	}
 }
 
