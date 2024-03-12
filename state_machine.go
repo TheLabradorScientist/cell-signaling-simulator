@@ -38,8 +38,8 @@ func (s StateMachine) draw(g *Game, screen *ebiten.Image) {
 	s.state.Draw(g, screen)
 }
 
-func (s StateMachine) Scale(screen *ebiten.Image) {
-	for _, element := range state_array {
-		element.scaleToScreen(screen)
-	} 
-}
+// func (s StateMachine) Scale(screen *ebiten.Image) {
+// 	for _, element := range state_array {
+// 		element.scaleToScreen(screen)
+// 	} 
+// }

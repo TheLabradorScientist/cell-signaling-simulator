@@ -127,43 +127,46 @@ type StillImage struct {
 }
 
 func newSprite(params ...interface{}) Sprite {
-	if len(params) == 3 {
+	if len(params) == 4 {
 		path1 := params[0].(string)
 		path2 := params[1].(string)
 		rect := params[2].(Rectangle)
-		origImg, _, err1 := ebitenutil.NewImageFromFile(loadFile(path1))
-		origImg2, _, err2 := ebitenutil.NewImageFromFile(loadFile(path2))
+		scaleW, scaleH := params[3].(float64), params[3].(float64)
+		var origImg, _, err1 = ebitenutil.NewImageFromFile(loadFile(path1))
+		var origImg2, _, err2 = ebitenutil.NewImageFromFile(loadFile(path2))
 		if err1 != nil {
 			fmt.Println("Error parsing date:", err)
 		}
 		if err2 != nil {
 			fmt.Println("Error parsing date:", err)
 		}
-		img_1 := scaleImage(origImg, 0.5, 0.5)
-		img_2 := scaleImage(origImg2, 0.5, 0.5)
+		var img_1 = scaleImage(origImg, scaleW, scaleH)
+		var img_2 = scaleImage(origImg2, scaleW, scaleH)
 		return Sprite{
 			image:       img_1,
 			image_2:     img_2,
 			rect:        rect,
-			scaleW:      0.5,
-			scaleH:      0.5,
+			scaleW:      scaleW,
+			scaleH:      scaleH,
 			origImage:   origImg,
 			origImage_2: origImg2,
 		}
+
 	} else {
 		path := params[0].(string)
 		rect := params[1].(Rectangle)
-		origImg, _, err1 := ebitenutil.NewImageFromFile(loadFile(path))
+		scaleW, scaleH := params[2].(float64), params[2].(float64)
+		var origImg, _, err1 = ebitenutil.NewImageFromFile(loadFile(path))
 		if err1 != nil {
 			fmt.Println("Error parsing date:", err)
 		}
-		img_1 := scaleImage(origImg, 0.5, 0.5)
+		var img_1 = scaleImage(origImg, scaleW, scaleH)
 		return Sprite{
 			image:       img_1,
 			image_2:     img_1,
 			rect:        rect,
-			scaleW:      0.5,
-			scaleH:      0.5,
+			scaleW:      scaleW,
+			scaleH:      scaleH,
 			origImage:   origImg,
 			origImage_2: origImg,
 		}
@@ -172,14 +175,7 @@ func newSprite(params ...interface{}) Sprite {
 
 func (s *Sprite) scaleToScreen(screen *ebiten.Image) {
 	s.op = ebiten.GeoM{}
-	if ebiten.IsFullscreen() {
-		s.scaleW = 1
-		s.scaleH = 1
-	} else {
-		s.scaleW = 0.5
-		s.scaleH = 0.5
-	}
-	s.image = scaleImage(s.origImage, s.scaleW, s.scaleH)
+	s.image = scaleImage(s.origImage, s.scaleW*float64(screenWidth/baseScreenWidth), s.scaleH*float64(screenHeight/baseScreenHeight))
 	scaleChange--
 }
 
@@ -194,28 +190,24 @@ func scaleImage(img *ebiten.Image, scaleFactorW float64, scaleFactorH float64) *
 	return scaled
 }
 
-func (s *Sprite) draw(params ...interface{}) {
+func (s Sprite) draw(screen *ebiten.Image, params ...interface{}) {
+	op := &ebiten.DrawImageOptions{}
+	op.GeoM = s.op
+	op.GeoM.Translate(float64(s.rect.pos.x), float64(s.rect.pos.y))
+	if len(params) == 0 {
+		screen.DrawImage(s.image, op)
+	}
 	if len(params) == 1 {
-		screen := params[0].(*ebiten.Image)
-		op := &ebiten.DrawImageOptions{}
-		op.GeoM = s.op
-		op.GeoM.Translate(float64(s.rect.pos.x), float64(s.rect.pos.y))
-		if s.image != nil {screen.DrawImage(s.image, op)}
-	} else if len(params) == 2 {
-		screen := params[0].(*ebiten.Image)
-		layer := params[1].(float64)
-		op := &ebiten.DrawImageOptions{}
-		op.GeoM = s.op
+		layer := params[0].(float64)
 		scaleW := (layer + 0.5) / (layer)
 		scaleH := (layer + 0.5) / (layer)
 		op.GeoM.Scale(scaleW, scaleH)
-		op.GeoM.Translate(float64(s.rect.pos.x), float64(s.rect.pos.y))
-		if s.image != nil {screen.DrawImage(s.image, op)}
+		screen.DrawImage(s.image, op)
 	}
 }
 
 func newStillImage(path string, rect Rectangle) StillImage {
-	sprite := newSprite(path, rect)
+	sprite := newSprite(path, rect, 0.5)
 	return StillImage{
 		Sprite: sprite,
 	}
@@ -227,12 +219,12 @@ func (s StillImage) draw(screen *ebiten.Image) {
 
 func (s StillImage) update(params ...interface{}) {}
 
-func (s *StillImage) scaleToScreen(screen *ebiten.Image) { s.Sprite.scaleToScreen(screen) }
-func (b *Button) scaleToScreen(screen *ebiten.Image)     { b.Sprite.scaleToScreen(screen) }
-func (p *Parallax) scaleToScreen(screen *ebiten.Image)   { p.Sprite.scaleToScreen(screen) }
+func (s StillImage) scaleToScreen(screen *ebiten.Image) { s.Sprite.scaleToScreen(screen) }
+func (b Button) scaleToScreen(screen *ebiten.Image)     { b.Sprite.scaleToScreen(screen) }
+func (p Parallax) scaleToScreen(screen *ebiten.Image)   { p.Sprite.scaleToScreen(screen) }
 
 func newInfoPage(path1 string, path2 string, rect Rectangle, stat string) InfoPage {
-	sprite := newSprite(path1, path2, rect)
+	sprite := newSprite(path1, path2, rect, 1.0)
 	return InfoPage{
 		Sprite: sprite,
 		status: stat,
@@ -267,7 +259,7 @@ func (i InfoPage) draw(screen *ebiten.Image) {
 }
 
 func newParallax(path string, rect Rectangle, layer float64) Parallax {
-	sprite := newSprite(path, rect)
+	sprite := newSprite(path, rect, (layer+0.5)/(2*layer))
 	return Parallax{
 		Sprite: sprite,
 		layer:  layer,
@@ -276,36 +268,31 @@ func newParallax(path string, rect Rectangle, layer float64) Parallax {
 
 func (p *Parallax) update(params ...interface{}) {
 	var x_c, y_c = ebiten.CursorPosition()
-	var l = p.layer
+	var l = int(p.layer)
 	switch scene {
 	case "Main Menu":
-		p.rect.pos.x = int(-5 * (float64(x_c) + 100) / (7 * l))
-		p.rect.pos.y = int(-3 * (float64(y_c) + 100) / (5 * l))
+		p.rect.pos.x = -5 * (x_c+75) / (6 * l)
+		p.rect.pos.y = -5 * (y_c+100) / (7 * l)
 	case "Signal Reception":
-		p.rect.pos.x = int(-6 * (float64(x_c) + 100) / (7 * l))
-		p.rect.pos.y = int(-2 * (float64(y_c) + 100) / (3 * l))
+		p.rect.pos.x = -6 * (x_c + 100) / (7 * l)
+		p.rect.pos.y = -2 * (y_c + 100) / (3 * l)
 	case "Signal Transduction":
-		p.rect.pos.x = int(-5 * (float64(x_c) + 80) / (7 * l))
-		p.rect.pos.y = int(-3 * (float64(y_c) + 100) / (5 * l))
+		p.rect.pos.x = -5 * (x_c + 80) / (7 * l)
+		p.rect.pos.y = -3 * (y_c + 100) / (5 * l)
 	}
 	//p.rect.pos.x = (x_c - 625) / (2*l);
 	//p.rect.pos.y = (y_c - 375) / (2*l);
 }
 
-func (p *Parallax) draw(screen *ebiten.Image) {
+func (p Parallax) draw(screen *ebiten.Image) {
 	p.Sprite.draw(screen, p.layer)
 }
 
-func newButton(rect Rectangle, cmd ButtonFunc, paths...string) Button {
-	var path1, path2 string
-	path1 = paths[0]
-	if len(paths) == 2 {
-		path2 = paths[1]
-	} else {path2 = path1}
-	sprite := newSprite(path1, path2, rect)
+func newButton(path string, rect Rectangle, cmd ButtonFunc) Button {
+	sprite := newSprite(path, rect, 1.0)
 	return Button{
-		Sprite: sprite, 
-		cmd: cmd,
+		Sprite: sprite,
+		cmd:    cmd,
 	}
 }
 
@@ -328,8 +315,8 @@ func (b Button) draw(screen *ebiten.Image) {
 	b.Sprite.draw(screen)
 }
 
-func newVolButton(path1 string, path2 string, rect Rectangle, cmd ButtonFunc, player audio.Player) VolButton {
-	btn := newButton(rect, cmd, path1, path2)
+func newVolButton(path string, rect Rectangle, cmd ButtonFunc, player audio.Player) VolButton {
+	btn := newButton(path, rect, cmd)
 	return VolButton{
 		Button: btn,
 		player: player,
@@ -337,32 +324,34 @@ func newVolButton(path1 string, path2 string, rect Rectangle, cmd ButtonFunc, pl
 	}
 }
 
-func (v VolButton) update(params ...interface{}) {
+func (v *VolButton) update(params ...interface{}) {
 	v.Button.update(params...)
 	//curr := int64(v.player.Position())
 	if v.status == "ON" && !v.player.IsPlaying() {
 		v.player.Rewind()
 	}
-
 }
 
 func (v VolButton) draw(screen *ebiten.Image) {
 	v.Button.draw(screen)
 }
 
-func SwitchVol(g *Game) {
-	v := &curr_volBtn
-	if audioPlayer.IsPlaying() {
-		audioPlayer.Pause()
+func (v *VolButton) SwitchVol(g *Game) {
+	if v.player.IsPlaying() {
+		v.player.Pause()
+		sprite := newSprite("volButtonOff.png", v.rect, 1.0)
 		v.status = "OFF"
+		v.Sprite = sprite
 	} else {
-		audioPlayer.Play()
+		v.player.Play()
+		sprite := newSprite("volButtonOn.png", v.rect, 1.0)
 		v.status = "ON"
+		v.Sprite = sprite
 	}
 }
 
 func newSignal(path string, rect Rectangle) Signal {
-	sprite := newSprite(path, rect)
+	sprite := newSprite(path, rect, 1.0)
 
 	return Signal{
 		Sprite:     sprite,
@@ -405,7 +394,7 @@ func (s Signal) draw(screen *ebiten.Image) {
 }
 
 func newReceptor(path string, rect Rectangle, rtype string) Receptor {
-	sprite := newSprite(path, rect)
+	sprite := newSprite(path, rect, 1.0)
 	return Receptor{
 		Sprite:             sprite,
 		is_touching_signal: false,
@@ -464,7 +453,7 @@ func (r *Receptor) animate(newImage string) {
 }
 
 func newKinase(path string, rect Rectangle, ktype string) Kinase {
-	sprite := newSprite(path, rect)
+	sprite := newSprite(path, rect, 1.0)
 	return Kinase{
 		Sprite:        sprite,
 		is_moving:     false,
@@ -580,7 +569,7 @@ func (t *TFA) activate() {
 }
 
 func newTFA(path string, rect Rectangle, tfaType string) TFA {
-	sprite := newSprite(path, rect)
+	sprite := newSprite(path, rect, 1.0)
 	if err != nil {
 		fmt.Println("Error parsing date:", err)
 	}
@@ -627,7 +616,7 @@ func (t TFA) draw(screen *ebiten.Image) {
 }
 
 func newRNAPolymerase(path string, rect Rectangle) RNAPolymerase {
-	sprite := newSprite(path, rect)
+	sprite := newSprite(path, rect, 1.0)
 	return RNAPolymerase{
 		Sprite: sprite,
 	}
@@ -660,7 +649,7 @@ func (r RNAPolymerase) draw(screen *ebiten.Image) {
 }
 
 func newTranscript(path string, rect Rectangle, codon string) Transcript {
-	sprite := newSprite(path, rect)
+	sprite := newSprite(path, rect, 1.0)
 	return Transcript{
 		Sprite: sprite,
 		codon:  codon,
@@ -679,7 +668,7 @@ func (transcr Transcript) draw(screen *ebiten.Image) {
 }
 
 func newTemplate(path string, rect Rectangle, codon string, fragment int) Template {
-	sprite := newSprite(path, rect)
+	sprite := newSprite(path, rect, 1.0)
 	return Template{
 		Sprite:      sprite,
 		codon:       codon,
@@ -722,14 +711,14 @@ func nextMRNACodon(g *Game) {
 }
 
 func newRibosome(path string, rect Rectangle) Ribosome {
-	sprite := newSprite(path, rect)
+	sprite := newSprite(path, rect, 1.0)
 	return Ribosome{
 		Sprite: sprite,
 	}
 }
 
 func newCodonChoice(path string, rect Rectangle, bases string) CodonChoice {
-	sprite := newSprite(path, rect)
+	sprite := newSprite(path, rect, 1.0)
 	return CodonChoice{
 		Sprite: sprite,
 		bases:  bases,
@@ -799,7 +788,7 @@ func (ribo Ribosome) draw(screen *ebiten.Image) {
 }
 
 func newNucelobase(path string, rect Rectangle, btype string) Nucleobase {
-	sprite := newSprite(path, rect)
+	sprite := newSprite(path, rect, 1.0)
 	return Nucleobase{
 		Sprite:   sprite,
 		baseType: btype,

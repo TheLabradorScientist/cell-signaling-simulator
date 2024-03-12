@@ -18,7 +18,7 @@ type LevelSelection struct {
 	levSelBg           *ebiten.Image
 }
 
-/* func newLevelSelection(g *Game) {
+func newLevelSelection(g *Game) {
 	g.stateMachine.state = LevelSelection{
 		levToPlasmaButton:  newButton("levToPlasmaBtn.png", newRect(400, 125, 232, 129), ToPlasma),
 		levToCyto1Button:   newButton("levToCyto1Btn.png", newRect(750, 125, 232, 129), ToCyto1),
@@ -27,7 +27,7 @@ type LevelSelection struct {
 		levToMenuButton:    newButton("menuButton.png", newRect(775, 400, 232, 129), ToMenu),
 		levSelBg:           nil,
 	}
-} */
+}
 
 func (l LevelSelection) Init(g *Game) {
 	l.levSelBg, _, err = ebitenutil.NewImageFromFile(loadFile("levSelBg.png"))
