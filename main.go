@@ -50,7 +50,6 @@ var (
 	state_array       []GUI
 	defaultFont       Font
 	codonFont         Font
-	scaleChange		  int
 
 	// MENU SPRITES
 	/* 	protoStartBg StillImage
@@ -66,8 +65,8 @@ var (
 	   	volButton    Button */
 
 	// ABOUT SPRITES
-	aboutBg           StillImage
-	aboutToMenuButton Button
+	//aboutBg           StillImage
+	//aboutToMenuButton Button
 
 	// LEVEL SELECT SPRITES
 	levSelBg           StillImage
@@ -143,7 +142,7 @@ type Game struct {
 	switchedToCyto2       bool
 	switchedToAbout       bool
 	switchedToLevelSelect bool
-	stateMachine          StateMachine
+	stateMachine          *StateMachine
 	//musicPlayer           *Player
 	//musicPlayerCh         chan *Player
 	//errCh                 chan error
@@ -200,8 +199,7 @@ func (g *Game) init() {
 	ebiten.SetWindowResizingMode(ebiten.WindowResizingModeOnlyFullscreenEnabled)
 	defaultFont = newFont(loadFont("CourierPrime-Regular.ttf"), 32)
 	codonFont = newFont(loadFont("BlackOpsOne-Regular.ttf"), 60)
-	scaleChange = 0
-
+	//maxWidth, maxHeight       = g.Layout(maxWidth, maxHeight)
 	// Initialize audio context
 	audioContext = audio.NewContext(44100)
 
@@ -219,7 +217,7 @@ func (g *Game) init() {
 	}
 
 	var s_map = SceneConstructorMap{
-		"menu": newMainMenu,
+		"menu": newMainMenu, "about": newAbout,
 	}
 
 	g.stateMachine = newStateMachine(s_map)
@@ -240,7 +238,7 @@ func (g *Game) init() {
 	   	aboutButton = newButton("aboutButton.png", newRect(770, 260, 300, 200), ToAbout)
 	   	levSelButton = newButton("levSelButton.png", newRect(700, 450, 300, 200), ToLevelSelect) */
 
-	aboutBg = newStillImage("AboutBg.png", newRect(0, 0, 1250, 750))
+	//aboutBg = newStillImage("AboutBg.png", newRect(0, 0, 1250, 750))
 
 	levSelBg = newStillImage("levSelBg.png", newRect(0, 0, 1250, 750))
 
@@ -256,7 +254,7 @@ func (g *Game) init() {
 	nucleusBg = newStillImage("NucleusBg.png", newRect(0, 0, 1250, 750))
 	cytoBg_2 = newStillImage("CytoBg2.png", newRect(0, 0, 1250, 750))
 
-	aboutToMenuButton = newButton("menuButton.png", newRect(350, 450, 300, 200), ToMenu)
+	//aboutToMenuButton = newButton("menuButton.png", newRect(350, 450, 300, 200), ToMenu)
 	levToPlasmaButton = newButton("levToPlasmaBtn.png", newRect(520, 110, 300, 180), ToPlasma)
 	levToCyto1Button = newButton("levToCyto1Btn.png", newRect(820, 110, 300, 180), ToCyto1)
 	levToNucleusButton = newButton("levToNucleusBtn.png", newRect(520, 285, 300, 180), ToNucleus)
@@ -339,7 +337,10 @@ func (g *Game) init() {
 	wrongTrna2 = newCodonChoice("codonButton.png", newRect(650, 150, 192, 111), translate(randomRNACodon(rightTrna.bases)))
 
 	//menuSprites = []GUI{protoStartBg, &startBg, &startP1, &startP2, &startP3, &startP4, fixedStart, playbutton, aboutButton, levSelButton, volButton}
-	aboutSprites = []GUI{}
+	//aboutSprites = []GUI{&aboutBg, &aboutToMenuButton}
+	levSelSprites = []GUI{&levSelBg, &levToPlasmaButton, &levToCyto1Button, &levToNucleusButton, &levToCyto2Button, &levToMenuButton}
+	plasmaSprites = []GUI{&protoPlasmaBg, &plasmaBg, &plasmaMembrane, &signal, &receptorA, &receptorB, &receptorC, &receptorD, &temp_tk1A, &temp_tk1B, &temp_tk1C, &temp_tk1D}
+
 }
 
 func (g *Game) Update() error {
@@ -374,8 +375,7 @@ func (g *Game) Update() error {
 		   		levSelButton.update(g)
 		   		volButton.update(g) */
 	case "About":
-		ebiten.SetWindowTitle("Cell Signaling Pathway - About")
-		aboutToMenuButton.update(g)
+		g.stateMachine.update(g)
 	case "Level Selection":
 		ebiten.SetWindowTitle("Cell Signaling Pathway - Level Selection")
 		levToPlasmaButton.update(g)
@@ -504,17 +504,15 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	if ebiten.IsFullscreen() {
 		// Use this if statement to set sizes of graphics to fullscreen scale, else normal scale.
 		if screenWidth != maxWidth && screenHeight != maxHeight {
-			screenWidth, screenHeight = ebiten.ScreenSizeInFullscreen()
-			//g.stateMachine.Scale(screen)
-			scaleChange = len(state_array)
+			screenWidth, screenHeight = maxWidth, maxHeight
+			g.stateMachine.Scale(screen)
 			defaultFont = newFont(loadFont("CourierPrime-Regular.ttf"), 32*int(heightRatio))
 			codonFont = newFont(loadFont("BlackOpsOne-Regular.ttf"), 60*int(heightRatio))
 		}
 	} else {
-		if screenWidth == maxWidth && screenHeight == maxHeight {
-			screenWidth, screenHeight = 1250, 750
-			//g.stateMachine.Scale(screen)
-			scaleChange = len(state_array)
+		if screenWidth != baseScreenWidth && screenHeight != baseScreenHeight {
+			screenWidth, screenHeight = baseScreenWidth, baseScreenHeight
+			g.stateMachine.Scale(screen)
 			defaultFont = newFont(loadFont("CourierPrime-Regular.ttf"), 32)
 			codonFont = newFont(loadFont("BlackOpsOne-Regular.ttf"), 60)
 		}
@@ -549,15 +547,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			scene = "About"
 		}
 	case "About":
-		aboutBg.draw(screen)
-		aboutToMenuButton.draw(screen)
-		m := "WELCOME TO THE CELL\nSIGNALING PATHWAY\nSIMULATOR!\n"
-		m += "This simulator will\nguide you through the\ncomplete cell signaling\n"
-		m += "pathway from reception\nthrough translation!\nClick the play "
-		m += "button\nor select a level\nto begin."
-		Red := color.RGBA{50, 5, 5, 250}
-		defaultFont.drawFont(screen, m, screenWidth*3/5, screenHeight*1/3, color.RGBA(Red))
-
+		g.stateMachine.draw(g, screen)
 		if g.switchedToMenu {
 			scene = "Main Menu"
 		}

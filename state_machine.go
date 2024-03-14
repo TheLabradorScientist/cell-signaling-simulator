@@ -18,28 +18,28 @@ type StateMachine struct {
 	s_map SceneConstructorMap
 }
 
-func newStateMachine(s_map SceneConstructorMap) StateMachine {
-	return StateMachine{
-		state: MainMenu{},
+func newStateMachine(s_map SceneConstructorMap) *StateMachine {
+	return &StateMachine{
+		state: nil,
 		s_map: s_map,
 	}
 }
 
-func (s StateMachine) changeState(g *Game, s_name string) {
+func (s *StateMachine) changeState(g *Game, s_name string) {
 	s.s_map[s_name](g)
 	s.state.Init(g)
 }
 
-func (s StateMachine) update(g *Game) {
+func (s *StateMachine) update(g *Game) {
 	s.state.Update(g)
 }
 
-func (s StateMachine) draw(g *Game, screen *ebiten.Image) {
+func (s *StateMachine) draw(g *Game, screen *ebiten.Image) {
 	s.state.Draw(g, screen)
 }
 
-// func (s StateMachine) Scale(screen *ebiten.Image) {
-// 	for _, element := range state_array {
-// 		element.scaleToScreen(screen)
-// 	} 
-// }
+func (s *StateMachine) Scale(screen *ebiten.Image) {
+	for _, element := range state_array {
+		element.scaleToScreen(screen)
+	} 
+}

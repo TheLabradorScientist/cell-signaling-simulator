@@ -1,5 +1,3 @@
-//MUST UPDATE ALL FUNCTIONS WITH NEW CODE
-
 package main
 
 import (
@@ -8,26 +6,29 @@ import (
 	//"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
+//Sprites in Main Menu
 type MainMenu struct {
-	protoStartBg StillImage
-	startBg      Parallax
-	startP1      Parallax
-	startP2      Parallax
-	startP3      Parallax
-	startP4      Parallax
-	fixedStart   StillImage
-	playbutton   Button
-	aboutButton  Button
-	levSelButton Button
-	volButton    VolButton
+	protoStartBg 	StillImage
+	startBg      	Parallax
+	startP1      	Parallax
+	startP2      	Parallax
+	startP3      	Parallax
+	startP4      	Parallax
+	fixedStart   	StillImage
+	playbutton   	Button
+	aboutButton  	Button
+	levSelButton 	Button
+	volButton    	VolButton
 }
 
+//Initialize state with address of MainMenu, initialize menuSprites array
 func newMainMenu(g *Game) {
-	g.stateMachine.state = MainMenu{}
+	g.stateMachine.state = &MainMenu{}
 	menuSprites = []GUI{}
 }
 
-func (m MainMenu) Init(g *Game) {
+
+func (m *MainMenu) Init(g *Game) {
 	m.protoStartBg= newStillImage("MenuBg.png", newRect(0, 0, 1250, 750))
 	m.startBg= newParallax("StartBg.png", newRect(0, 0, 1250, 750), 5)
 	m.startP1= newParallax("parallax-Start2.png", newRect(0, 0, 1250, 750), 4)
@@ -41,21 +42,17 @@ func (m MainMenu) Init(g *Game) {
 	m.volButton= newVolButton("volButtonOn.png", newRect(100, 100, 165, 165), m.volButton.SwitchVol, *audioPlayer)
 	menuSprites = []GUI{&m.protoStartBg, &m.startBg, &m.startP1, &m.startP2, &m.startP3, &m.startP4, &m.fixedStart, &m.playbutton, &m.aboutButton, &m.levSelButton, &m.volButton}
 	state_array = menuSprites
-	m.volButton.SwitchVol(g)
 }
 
-func (m MainMenu) Update(g *Game) {
+func (m *MainMenu) Update(g *Game) {
 	ebiten.SetWindowTitle("Cell Signaling Pathway - Main Menu")
 	for _, element := range menuSprites {
 		element.update(g)
 	}
 }
 
-func (m MainMenu) Draw(g *Game, screen *ebiten.Image) {
+func (m *MainMenu) Draw(g *Game, screen *ebiten.Image) {
 	for _, element := range menuSprites {
-		if scaleChange > 0 {
-			element.scaleToScreen(screen)
-		}
 		element.draw(screen)
 	}
 }

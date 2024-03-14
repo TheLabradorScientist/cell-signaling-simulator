@@ -26,6 +26,7 @@ func ToPlasma(g *Game) {
 func ToMenu(g *Game) {
 	setAllSwitchedFalse(g)
 	g.switchedToMenu = true
+	g.stateMachine.changeState(g, "menu")
 }
 
 func ToCyto1(g *Game) {
@@ -52,6 +53,7 @@ func ToLevelSelect(g *Game) {
 func ToAbout(g *Game) {
 	setAllSwitchedFalse(g)
 	g.switchedToAbout = true
+	g.stateMachine.changeState(g, "about")
 }
 
 /*
