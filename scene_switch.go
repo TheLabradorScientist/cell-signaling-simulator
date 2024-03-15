@@ -21,6 +21,7 @@ func setAllSwitchedFalse(g *Game) {
 func ToPlasma(g *Game) {
 	setAllSwitchedFalse(g)
 	g.switchedToPlasma = true
+	g.stateMachine.changeState(g, "signal reception")
 }
 
 func ToMenu(g *Game) {
@@ -40,7 +41,7 @@ func ToNucleus(g *Game) {
 }
 
 func ToCyto2(g *Game) {
-	setAllSwitchedFalse(g)
+	setAllSwitchedFalse(g)	
 	g.switchedToCyto2 = true
 }
 

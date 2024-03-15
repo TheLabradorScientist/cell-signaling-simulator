@@ -38,7 +38,7 @@ func newMainMenu(g *Game) {
 			aboutButton:  newButton("aboutButton.png", newRect(770, 260, 300, 200), ToAbout),
 			levSelButton: newButton("levSelButton.png", newRect(700, 450, 300, 200), ToLevelSelect),
 		}
-		menuStruct.volButton = newVolButton("volButtonOn.png", newRect(100, 100, 165, 165), menuStruct.volButton.SwitchVol, *audioPlayer)
+		menuStruct.volButton = newVolButton("volButtonOn.png", newRect(100, 100, 165, 165), menuStruct.volButton.Toggle, *audioPlayer)
 		menuSprites = []GUI{
 			&menuStruct.protoStartBg, &menuStruct.startBg, &menuStruct.startP1, &menuStruct.startP2,
 			&menuStruct.startP3, &menuStruct.startP4, &menuStruct.fixedStart, &menuStruct.playbutton,

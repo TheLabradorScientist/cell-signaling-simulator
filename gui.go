@@ -276,6 +276,7 @@ func (i InfoPage) draw(screen *ebiten.Image) {
 	if i.status == "pg" {
 		Purple := color.RGBA{50, 0, 50, 250}
 		defaultFont.drawFont(screen, info, 300, 200, color.RGBA(Purple))
+		fmt.Print(info)
 	}
 }
 
@@ -358,16 +359,23 @@ func (v VolButton) draw(screen *ebiten.Image) {
 	v.Button.draw(screen)
 }
 
-func (v *VolButton) SwitchVol(g *Game) {
+func (v *VolButton) Toggle(g *Game) {
 	if v.player.IsPlaying() {
+		v.SwitchVol("OFF")
+	} else {
+		v.SwitchVol("ON")
+	}
+}
+
+func (v *VolButton) SwitchVol(onOff string) {
+	v.status = onOff
+	if v.status == "OFF" {
 		v.player.Pause()
 		sprite := newSprite("volButtonOff.png", v.rect, 1.0)
-		v.status = "OFF"
 		v.Sprite = sprite
 	} else {
 		v.player.Play()
 		sprite := newSprite("volButtonOn.png", v.rect, 1.0)
-		v.status = "ON"
 		v.Sprite = sprite
 	}
 }
@@ -390,17 +398,26 @@ func (s *Signal) update(params ...interface{}) {
 			s.is_dragged = true
 		}
 	} else if s.is_dragged {
-		if s.rect.pos.y <= receptorB.rect.pos.y && b_pos.y <= receptorB.rect.pos.y-50 {
+		if s.rect.pos.y <= receptionStruct.receptorB.rect.pos.y && b_pos.y <= receptionStruct.receptorB.rect.pos.y-50 {
 			s.rect.pos.y = b_pos.y - (s.rect.height / 2)
 		} else {
-			if s.rect.pos.y > receptorB.rect.pos.y {
+			if s.rect.pos.y > receptionStruct.receptorB.rect.pos.y {
 				s.rect.pos.y -= 1
-			} else if s.rect.pos.y < receptorB.rect.pos.y {
+			} else if s.rect.pos.y < receptionStruct.receptorB.rect.pos.y {
 				s.rect.pos.y += 1
 			}
 		}
 		s.rect.pos = newVector(b_pos.x-s.rect.width/2, s.rect.pos.y)
 
+	}
+}
+
+func (s *Signal) bind(r Receptor) {
+	s.is_dragged = false
+	if r.receptorType == "receptorA" || r.receptorType == "receptorD" {
+		s.rect.pos.x, s.rect.pos.y = r.rect.pos.x+80, r.rect.pos.y
+	} else {
+		s.rect.pos.x, s.rect.pos.y = r.rect.pos.x+60, r.rect.pos.y
 	}
 }
 
@@ -445,7 +462,7 @@ func (r *Receptor) update(params ...interface{}) {
 		//r.rect.pos.x = plasmaMembrane.rect.pos.x + 1400
 		//r.rect.pos.y = plasmaMembrane.rect.pos.y + 400
 	}
-	if aabb_collision(signal.rect, r.rect) {
+	if aabb_collision(receptionStruct.signal.rect, r.rect) {
 		r.is_touching_signal = true
 	} else {
 		r.is_touching_signal = false
@@ -469,57 +486,56 @@ func newKinase(path string, rect Rectangle, ktype string) Kinase {
 }
 
 func (k *Kinase) update(params ...interface{}) {
-	if len(params) > 0 {
+	var x_c, y_c = ebiten.CursorPosition()
+	var b_pos = newVector(x_c, y_c)
+	if strings.Contains(k.kinaseType, "temp_tk1") {
+		if !k.is_moving {
+			var x_c, y_c = ebiten.CursorPosition()
+			switch k.kinaseType {
+			case "temp_tk1A":
+				k.rect.pos.x = ((-5 * (x_c + 100) / (9 * 1)) + (screenWidth*1/6)) * screenWidth / baseScreenWidth
+				k.rect.pos.y = ((-1 * (y_c + 100) / (5 * 1)) + 650) * screenHeight / baseScreenHeight
+			case "temp_tk1B":
+				k.rect.pos.x = ((-5 * (x_c + 100) / (9 * 1)) + (screenWidth*3/6)) * screenWidth / baseScreenWidth
+				k.rect.pos.y = ((-1 * (y_c + 100) / (5 * 1)) + 600) * screenHeight / baseScreenHeight
+			case "temp_tk1C":
+				k.rect.pos.x = ((-5 * (x_c + 100) / (9 * 1)) + (screenWidth*6/6)) * screenWidth / baseScreenWidth
+				k.rect.pos.y = ((-1 * (y_c + 100) / (5 * 1)) + 600) * screenHeight / baseScreenHeight
+			case "temp_tk1D":
+				k.rect.pos.x = ((-5 * (x_c + 100) / (9 * 1)) + (screenWidth*8/6)) * screenWidth / baseScreenWidth
+				k.rect.pos.y = ((-1 * (y_c + 100) / (5 * 1)) + 650) * screenHeight / baseScreenHeight
+			}
+		} else if k.is_moving {
+			if k.rect.pos.y <= screenHeight {
+				k.descend()
+			}
+		}
+	} else if !k.is_clicked_on && k.is_moving {
+		if k.rect.pos.y <= 400*(screenHeight/750) && k.kinaseType == "tk2" {
+			k.descend()
+		} else if k.rect.pos.y <= 50*(screenHeight/750) && k.kinaseType == "tk1" {
+			k.descend()
+		} else {
+			if ebiten.IsFullscreen() {
+				k.rect.pos.x += k.delta * int(widthRatio)
+			} else {
+				k.rect.pos.x += k.delta
+			}
+		}
+	}
+	if len(params) > 0 && k.kinaseType != "temp_tk1" {
 		rect, ok := params[0].(Rectangle)
 		if !ok {
 			return
 		}
-		var x_c, y_c = ebiten.CursorPosition()
-		var b_pos = newVector(x_c, y_c)
-		if strings.Contains(k.kinaseType, "temp_tk1") {
-			if !k.is_moving {
-				var x_c, y_c = ebiten.CursorPosition()
-				switch k.kinaseType {
-				case "temp_tk1A":
-					k.rect.pos.x = ((-5 * (x_c + 100) / (9 * 1)) + (screenWidth*1/6)) * screenWidth / baseScreenWidth
-					k.rect.pos.y = ((-1 * (y_c + 100) / (5 * 1)) + 650) * screenHeight / baseScreenHeight
-				case "temp_tk1B":
-					k.rect.pos.x = ((-5 * (x_c + 100) / (9 * 1)) + (screenWidth*3/6)) * screenWidth / baseScreenWidth
-					k.rect.pos.y = ((-1 * (y_c + 100) / (5 * 1)) + 600) * screenHeight / baseScreenHeight
-				case "temp_tk1C":
-					k.rect.pos.x = ((-5 * (x_c + 100) / (9 * 1)) + (screenWidth*6/6)) * screenWidth / baseScreenWidth
-					k.rect.pos.y = ((-1 * (y_c + 100) / (5 * 1)) + 600) * screenHeight / baseScreenHeight
-				case "temp_tk1D":
-					k.rect.pos.x = ((-5 * (x_c + 100) / (9 * 1)) + (screenWidth*8/6)) * screenWidth / baseScreenWidth
-					k.rect.pos.y = ((-1 * (y_c + 100) / (5 * 1)) + 650) * screenHeight / baseScreenHeight
-				}
-			} else if k.is_moving {
-				if k.rect.pos.y <= screenHeight {
-					k.descend()
-				}
-			}
-		} else if !k.is_clicked_on && k.is_moving {
-			if k.rect.pos.y <= 400*(screenHeight/750) && k.kinaseType == "tk2" {
-				k.descend()
-			} else if k.rect.pos.y <= 50*(screenHeight/750) && k.kinaseType == "tk1" {
-				k.descend()
-			} else {
-				if ebiten.IsFullscreen() {
-					k.rect.pos.x += k.delta * int(widthRatio)
-				} else {
-					k.rect.pos.x += k.delta
-				}
-			}
-		}
 		if rect_point_collision(k.rect, b_pos) && ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) && aabb_collision(k.rect, rect) {
 			k.is_clicked_on = true
 		}
-
-		if k.rect.pos.x+k.rect.width >= screenWidth {
-			k.delta = -3
-		} else if k.rect.pos.x <= 0 {
-			k.delta = 3
-		}
+	}
+	if k.rect.pos.x+k.rect.width >= screenWidth {
+		k.delta = -3
+	} else if k.rect.pos.x <= 0 {
+		k.delta = 3
 	}
 }
 
