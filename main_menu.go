@@ -1,9 +1,7 @@
 package main
 
 import (
-	//"log"
 	"github.com/hajimehoshi/ebiten/v2"
-	//"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
 // Sprites in Main Menu

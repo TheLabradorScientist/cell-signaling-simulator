@@ -276,7 +276,6 @@ func (i InfoPage) draw(screen *ebiten.Image) {
 	if i.status == "pg" {
 		Purple := color.RGBA{50, 0, 50, 250}
 		defaultFont.drawFont(screen, info, 300, 200, color.RGBA(Purple))
-		fmt.Print(info)
 	}
 }
 
