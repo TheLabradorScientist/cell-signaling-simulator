@@ -21,13 +21,15 @@ func setAllSwitchedFalse(g *Game) {
 func ToPlasma(g *Game) {
 	setAllSwitchedFalse(g)
 	g.switchedToPlasma = true
-	g.stateMachine.changeState(g, "signal reception")
+	scene = "Signal Reception"
+	g.stateMachine.changeState(g, scene)
 }
 
 func ToMenu(g *Game) {
 	setAllSwitchedFalse(g)
 	g.switchedToMenu = true
-	g.stateMachine.changeState(g, "menu")
+	scene = "Main Menu"
+	g.stateMachine.changeState(g, scene)
 }
 
 func ToCyto1(g *Game) {
@@ -48,33 +50,19 @@ func ToCyto2(g *Game) {
 func ToLevelSelect(g *Game) {
 	setAllSwitchedFalse(g)	
 	g.switchedToLevelSelect = true
-	g.stateMachine.changeState(g, "level selection")
+	scene = "Level Selection"
+	g.stateMachine.changeState(g, scene)
 }
 
 
 func ToAbout(g *Game) {
 	setAllSwitchedFalse(g)
 	g.switchedToAbout = true
-	g.stateMachine.changeState(g, "about")
+	scene = "About"
+	g.stateMachine.changeState(g, "About")
 }
 
 /*
-func ToMenu(g *Game) {
-	g.stateMachine.changeState(g, "menu")
-}
-
-func ToLevel1(g *Game) {
-	g.stateMachine.changeState(g, "level1")
-}
-
-func ToInfo(g *Game) {
-	g.stateMachine.changeState(g, "info")
-}
-
-func ToLevelSelect(g *Game) {
-	g.stateMachine.changeState(g, "level_select")
-}
-
 func ToLevel2(g *Game) {
 	g.stateMachine.changeState(g, "level2")
 }

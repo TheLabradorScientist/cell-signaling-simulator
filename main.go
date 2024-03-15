@@ -5,10 +5,8 @@ import (
 	"fmt"
 	"image/color"
 	_ "image/png"
-	"math/rand"
-
 	"log"
-	//"math/rand"
+	"math/rand"
 	"os"
 	"path/filepath"
 
@@ -47,24 +45,7 @@ var (
 	state_array       []GUI
 	defaultFont       Font
 	codonFont         Font
-	seedSignal		  int
-
-	// PLASMA SPRITES
-/* 	protoPlasmaBg  StillImage
-	plasmaBg       Parallax
-	plasmaMembrane Parallax
-	//plasmaMembrane2 	Parallax
-	// ^ Note: function to receptors that sets x and y to plasma membrane coord, -+ respective pos
-	seedSignal = rand.Intn(4) + 1
-	signal     Signal
-	receptorA  Receptor
-	receptorB  Receptor
-	receptorC  Receptor
-	receptorD  Receptor
-	temp_tk1A  Kinase
-	temp_tk1B  Kinase
-	temp_tk1C  Kinase
-	temp_tk1D  Kinase */
+	seedSignal        int
 
 	// CYTO 1 SPRITES
 	protoCytoBg_1 StillImage
@@ -104,7 +85,6 @@ var menuSprites []GUI
 var aboutSprites []GUI
 var levSelSprites []GUI
 var plasmaSprites []GUI
-
 
 type Game struct {
 	switchedToPlasma      bool
@@ -186,19 +166,19 @@ func (g *Game) init() {
 	}
 
 	var s_map = SceneConstructorMap{
-		"menu": newMainMenu, "about": newAbout, "level selection": newLevelSelection, "signal reception": newReceptionLevel,
+		"Main Menu": newMainMenu, "About": newAbout, "Level Selection": newLevelSelection, "Signal Reception": newReceptionLevel,
 	}
 
 	g.stateMachine = newStateMachine(s_map)
-	g.stateMachine.changeState(g, "menu")
+	g.stateMachine.changeState(g, "Main Menu")
 
 	seedSignal = rand.Intn(4) + 1
 	infoButton = newInfoPage("infoButton.png", "infoPage.png", newRect(850, 0, 165, 165), "btn")
 	otherToMenuButton = newButton("menuButton.png", newRect(1000, 0, 300, 200), ToMenu)
 
-/* 	protoPlasmaBg = newStillImage("PlasmaBg.png", newRect(0, 0, 1250, 750))
-	plasmaBg = newParallax("ParallaxPlasma.png", newRect(100, 100, 1250, 750), 4)
-	plasmaMembrane = newParallax("plasmaMembrane.png", newRect(100, 300, 1250, 750), 2) */
+	/* 	protoPlasmaBg = newStillImage("PlasmaBg.png", newRect(0, 0, 1250, 750))
+	   	plasmaBg = newParallax("ParallaxPlasma.png", newRect(100, 100, 1250, 750), 4)
+	   	plasmaMembrane = newParallax("plasmaMembrane.png", newRect(100, 300, 1250, 750), 2) */
 	//plasmaMembrane2 = newParallax("plasmaMembrane.png", newRect(0, 200, 1250, 750), 2)
 
 	protoCytoBg_1 = newStillImage("CytoBg1.png", newRect(0, 0, 1250, 750))
@@ -208,7 +188,7 @@ func (g *Game) init() {
 	nucleusBg = newStillImage("NucleusBg.png", newRect(0, 0, 1250, 750))
 	cytoBg_2 = newStillImage("CytoBg2.png", newRect(0, 0, 1250, 750))
 
- 	switch seedSignal {
+	switch seedSignal {
 	case 1:
 		template = [5]string{"TAC", randomDNACodon(), randomDNACodon(), randomDNACodon(), "ACT"}
 	case 2:
@@ -220,16 +200,16 @@ func (g *Game) init() {
 		// PLACEHOLDER IN CASE WE DO NOT GET TIME TO CODE RANDOM CODONS
 		//template = [5]string{"TAC", "GTC", "CGG", "ACA", "ACT"}
 	}
-/*
-	receptorA = newReceptor("inact_receptorA.png", newRect(50, 400, 100, 100), "receptorA")
-	receptorB = newReceptor("inact_receptorB.png", newRect(350, 400, 100, 100), "receptorB")
-	receptorC = newReceptor("inact_receptorC.png", newRect(650, 400, 100, 100), "receptorC")
-	receptorD = newReceptor("inact_receptorD.png", newRect(950, 400, 100, 100), "receptorD")
+	/*
+		receptorA = newReceptor("inact_receptorA.png", newRect(50, 400, 100, 100), "receptorA")
+		receptorB = newReceptor("inact_receptorB.png", newRect(350, 400, 100, 100), "receptorB")
+		receptorC = newReceptor("inact_receptorC.png", newRect(650, 400, 100, 100), "receptorC")
+		receptorD = newReceptor("inact_receptorD.png", newRect(950, 400, 100, 100), "receptorD")
 
-	temp_tk1A = newKinase("inact_TK1.png", newRect(50, 600, 150, 150), "temp_tk1A")
-	temp_tk1B = newKinase("inact_TK1.png", newRect(350, 600, 150, 150), "temp_tk1B")
-	temp_tk1C = newKinase("inact_TK1.png", newRect(650, 600, 150, 150), "temp_tk1C")
-	temp_tk1D = newKinase("inact_TK1.png", newRect(950, 600, 150, 150), "temp_tk1D") */
+		temp_tk1A = newKinase("inact_TK1.png", newRect(50, 600, 150, 150), "temp_tk1A")
+		temp_tk1B = newKinase("inact_TK1.png", newRect(350, 600, 150, 150), "temp_tk1B")
+		temp_tk1C = newKinase("inact_TK1.png", newRect(650, 600, 150, 150), "temp_tk1C")
+		temp_tk1D = newKinase("inact_TK1.png", newRect(950, 600, 150, 150), "temp_tk1D") */
 
 	tk1 = newKinase("act_TK1.png", newRect(500, -100, 150, 150), "tk1")
 	tk2 = newKinase("inact_TK2.png", newRect(250, 175, 150, 150), "tk2")
@@ -291,53 +271,53 @@ func (g *Game) Update() error {
 	case "Signal Reception":
 		g.stateMachine.update(g)
 		/*
-		ebiten.SetWindowTitle("Cell Signaling Pathway - Signal Reception")
-		plasmaBg.update()
-		plasmaMembrane.update()
-		//plasmaMembrane2.update()
-		signal.update()
-		receptorA.update()
-		receptorB.update()
-		receptorC.update()
-		receptorD.update()
-		temp_tk1A.update(temp_tk1B.rect)
-		temp_tk1B.update(temp_tk1C.rect)
-		temp_tk1C.update(temp_tk1D.rect)
-		temp_tk1D.update(temp_tk1A.rect)
-		otherToMenuButton.update(g)
-		infoButton.update()
-		info = updateInfo()
-		if receptorA.is_touching_signal {
-			if matchSR(signal.signalType, receptorA.receptorType) {
-				receptorA.animate("act_receptorA.png")
-				signal.bind(receptorA)
-				temp_tk1A.activate()
+			ebiten.SetWindowTitle("Cell Signaling Pathway - Signal Reception")
+			plasmaBg.update()
+			plasmaMembrane.update()
+			//plasmaMembrane2.update()
+			signal.update()
+			receptorA.update()
+			receptorB.update()
+			receptorC.update()
+			receptorD.update()
+			temp_tk1A.update(temp_tk1B.rect)
+			temp_tk1B.update(temp_tk1C.rect)
+			temp_tk1C.update(temp_tk1D.rect)
+			temp_tk1D.update(temp_tk1A.rect)
+			otherToMenuButton.update(g)
+			infoButton.update()
+			info = updateInfo()
+			if receptorA.is_touching_signal {
+				if matchSR(signal.signalType, receptorA.receptorType) {
+					receptorA.animate("act_receptorA.png")
+					signal.bind(receptorA)
+					temp_tk1A.activate()
+				}
 			}
-		}
-		if receptorB.is_touching_signal {
-			if matchSR(signal.signalType, receptorB.receptorType) {
-				receptorB.animate("act_receptorB.png")
-				signal.bind(receptorB)
-				temp_tk1B.activate()
+			if receptorB.is_touching_signal {
+				if matchSR(signal.signalType, receptorB.receptorType) {
+					receptorB.animate("act_receptorB.png")
+					signal.bind(receptorB)
+					temp_tk1B.activate()
+				}
 			}
-		}
-		if receptorC.is_touching_signal {
-			if matchSR(signal.signalType, receptorC.receptorType) {
-				receptorC.animate("act_receptorC.png")
-				signal.bind(receptorC)
-				temp_tk1C.activate()
+			if receptorC.is_touching_signal {
+				if matchSR(signal.signalType, receptorC.receptorType) {
+					receptorC.animate("act_receptorC.png")
+					signal.bind(receptorC)
+					temp_tk1C.activate()
+				}
 			}
-		}
-		if receptorD.is_touching_signal {
-			if matchSR(signal.signalType, receptorD.receptorType) {
-				receptorD.animate("act_receptorD.png")
-				signal.bind(receptorD)
-				temp_tk1D.activate()
+			if receptorD.is_touching_signal {
+				if matchSR(signal.signalType, receptorD.receptorType) {
+					receptorD.animate("act_receptorD.png")
+					signal.bind(receptorD)
+					temp_tk1D.activate()
+				}
 			}
-		}
-		if temp_tk1A.rect.pos.y >= screenHeight || temp_tk1B.rect.pos.y >= screenHeight || temp_tk1C.rect.pos.y >= screenHeight || temp_tk1D.rect.pos.y >= screenHeight {
-			ToCyto1(g)
-		}*/
+			if temp_tk1A.rect.pos.y >= screenHeight || temp_tk1B.rect.pos.y >= screenHeight || temp_tk1C.rect.pos.y >= screenHeight || temp_tk1D.rect.pos.y >= screenHeight {
+				ToCyto1(g)
+			}*/
 
 	case "Signal Transduction":
 		ebiten.SetWindowTitle("Cell Signaling Pathway - Signal Transduction")
@@ -469,28 +449,28 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		}
 	case "Signal Reception":
 		g.stateMachine.draw(g, screen)
-/* 		protoPlasmaBg.draw(screen)
-		plasmaBg.draw(screen)
-		plasmaMembrane.draw(screen)
-		receptorA.draw(screen)
-		receptorB.draw(screen)
-		receptorC.draw(screen)
-		receptorD.draw(screen)
-		//plasmaMembrane2.draw(screen)
-		signal.draw(screen)
-		temp_tk1A.draw(screen)
-		temp_tk1B.draw(screen)
-		temp_tk1C.draw(screen)
-		temp_tk1D.draw(screen)
-		otherToMenuButton.draw(screen)
-		m := "WELCOME TO THE PLASMA MEMBRANE!"
-		m += "\nDrag the signal to the matching receptor\nto enter the cell!"
-		Pink := color.RGBA{220, 100, 100, 50}
-		defaultFont.drawFont(screen, m, 100, 50, color.RGBA(Pink))
-		if signal.is_dragged {
-			signal.draw(screen)
-		}
-		infoButton.draw(screen) */
+		/* 		protoPlasmaBg.draw(screen)
+		   		plasmaBg.draw(screen)
+		   		plasmaMembrane.draw(screen)
+		   		receptorA.draw(screen)
+		   		receptorB.draw(screen)
+		   		receptorC.draw(screen)
+		   		receptorD.draw(screen)
+		   		//plasmaMembrane2.draw(screen)
+		   		signal.draw(screen)
+		   		temp_tk1A.draw(screen)
+		   		temp_tk1B.draw(screen)
+		   		temp_tk1C.draw(screen)
+		   		temp_tk1D.draw(screen)
+		   		otherToMenuButton.draw(screen)
+		   		m := "WELCOME TO THE PLASMA MEMBRANE!"
+		   		m += "\nDrag the signal to the matching receptor\nto enter the cell!"
+		   		Pink := color.RGBA{220, 100, 100, 50}
+		   		defaultFont.drawFont(screen, m, 100, 50, color.RGBA(Pink))
+		   		if signal.is_dragged {
+		   			signal.draw(screen)
+		   		}
+		   		infoButton.draw(screen) */
 		if g.switchedToMenu {
 			scene = "Main Menu"
 		}
@@ -637,7 +617,9 @@ func (g *Game) Draw(screen *ebiten.Image) {
 func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
 	if ebiten.IsFullscreen() {
 		return outsideWidth, outsideHeight
-	} else {return baseScreenWidth, baseScreenHeight}
+	} else {
+		return baseScreenWidth, baseScreenHeight
+	}
 }
 
 func main() {
