@@ -1,56 +1,55 @@
-//MUST UPDATE ALL FUNCTIONS WITH NEW CODE
-
 package main
 
 import (
-	"log"
-
+	//"log"
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
+	//"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
+// Sprites in Level Selection
 type LevelSelection struct {
+	levSelBg           StillImage
 	levToPlasmaButton  Button
 	levToCyto1Button   Button
 	levToNucleusButton Button
 	levToCyto2Button   Button
 	levToMenuButton    Button
-	levSelBg           *ebiten.Image
 }
 
+var levSelStruct *LevelSelection
+
+// Initialize level selection struct and levSelSprites array if not initialized, then set state to levSelStruct
 func newLevelSelection(g *Game) {
-	g.stateMachine.state = LevelSelection{
-		levToPlasmaButton:  newButton("levToPlasmaBtn.png", newRect(400, 125, 232, 129), ToPlasma),
-		levToCyto1Button:   newButton("levToCyto1Btn.png", newRect(750, 125, 232, 129), ToCyto1),
-		levToNucleusButton: newButton("levToNucleusBtn.png", newRect(400, 250, 232, 129), ToNucleus),
-		levToCyto2Button:   newButton("levToCyto2Btn.png", newRect(750, 250, 232, 129), ToCyto2),
-		levToMenuButton:    newButton("menuButton.png", newRect(775, 400, 232, 129), ToMenu),
-		levSelBg:           nil,
+	if len(levSelSprites) == 0 {
+		levSelStruct = &LevelSelection{
+			levSelBg: newStillImage("levSelBg.png", newRect(0, 0, 1250, 750)),
+			levToPlasmaButton: newButton("levToPlasmaBtn.png", newRect(520, 110, 300, 180), ToPlasma),
+			levToCyto1Button: newButton("levToCyto1Btn.png", newRect(820, 110, 300, 180), ToCyto1),
+			levToNucleusButton: newButton("levToNucleusBtn.png", newRect(520, 285, 300, 180), ToNucleus),
+			levToCyto2Button: newButton("levToCyto2Btn.png", newRect(820, 285, 300, 180), ToCyto2),
+			levToMenuButton: newButton("menuButton.png", newRect(250, 190, 300, 200), ToMenu),
+		}
+		levSelSprites = []GUI{
+			&levSelStruct.levSelBg, &levSelStruct.levToPlasmaButton, &levSelStruct.levToCyto1Button,
+			&levSelStruct.levToNucleusButton, &levSelStruct.levToCyto2Button, &levSelStruct.levToMenuButton,	
+		}
 	}
+	g.stateMachine.state = levSelStruct
 }
 
-func (l LevelSelection) Init(g *Game) {
-	l.levSelBg, _, err = ebitenutil.NewImageFromFile(loadFile("levSelBg.png"))
-	if err != nil {
-		log.Fatal(err)
-	}
-}
-
-func (l LevelSelection) Update(g *Game) {
+func (l *LevelSelection) Init(g *Game) {
 	ebiten.SetWindowTitle("Cell Signaling Pathway - Level Selection")
-	ebiten.SetWindowSize(screenWidth, screenHeight)
-	l.levToPlasmaButton.update(g)
-	l.levToCyto1Button.update(g)
-	l.levToNucleusButton.update(g)
-	l.levToCyto2Button.update(g)
-	l.levToMenuButton.update(g)
+	state_array = levSelSprites
 }
 
-func (l LevelSelection) Draw(g *Game, screen *ebiten.Image) {
-	screen.DrawImage(l.levSelBg, nil)
-	l.levToPlasmaButton.draw(screen)
-	l.levToCyto1Button.draw(screen)
-	l.levToNucleusButton.draw(screen)
-	l.levToCyto2Button.draw(screen)
-	l.levToMenuButton.draw(screen)
+func (l *LevelSelection) Update(g *Game) {
+	for _, element := range levSelSprites {
+		element.update(g)
+	}
+}
+
+func (l *LevelSelection) Draw(g *Game, screen *ebiten.Image) {
+	for _, element := range levSelSprites {
+		element.draw(screen)
+	}
 }

@@ -1,0 +1,27 @@
+"filename", "language", "Go", "Go Checksum File", "JavaScript", "HTML", "Go Module File", "YAML", "comment", "blank", "total"
+"/Users/ashnaguha/Desktop/cell-signaling-pathway-simulator/.goreleaser.yaml", "YAML", 0, 0, 0, 0, 0, 30, 10, 7, 47
+"/Users/ashnaguha/Desktop/cell-signaling-pathway-simulator/about.go", "Go", 40, 0, 0, 0, 0, 0, 4, 8, 52
+"/Users/ashnaguha/Desktop/cell-signaling-pathway-simulator/animations.go", "Go", 1, 0, 0, 0, 0, 0, 0, 2, 3
+"/Users/ashnaguha/Desktop/cell-signaling-pathway-simulator/codon_chart.go", "Go", 100, 0, 0, 0, 0, 0, 0, 13, 113
+"/Users/ashnaguha/Desktop/cell-signaling-pathway-simulator/font.go", "Go", 37, 0, 0, 0, 0, 0, 5, 7, 49
+"/Users/ashnaguha/Desktop/cell-signaling-pathway-simulator/geom.go", "Go", 39, 0, 0, 0, 0, 0, 6, 7, 52
+"/Users/ashnaguha/Desktop/cell-signaling-pathway-simulator/go.mod", "Go Module File", 0, 0, 0, 0, 19, 0, 0, 5, 24
+"/Users/ashnaguha/Desktop/cell-signaling-pathway-simulator/go.sum", "Go Checksum File", 0, 84, 0, 0, 0, 0, 0, 1, 85
+"/Users/ashnaguha/Desktop/cell-signaling-pathway-simulator/gui.go", "Go", 649, 0, 0, 0, 0, 0, 37, 92, 778
+"/Users/ashnaguha/Desktop/cell-signaling-pathway-simulator/index.html", "HTML", 0, 0, 0, 2, 0, 0, 0, 0, 2
+"/Users/ashnaguha/Desktop/cell-signaling-pathway-simulator/infoPages.go", "Go", 32, 0, 0, 0, 0, 0, 0, 2, 34
+"/Users/ashnaguha/Desktop/cell-signaling-pathway-simulator/level1.go", "Go", 105, 0, 0, 0, 0, 0, 9, 12, 126
+"/Users/ashnaguha/Desktop/cell-signaling-pathway-simulator/level2.go", "Go", 50, 0, 0, 0, 0, 0, 2, 9, 61
+"/Users/ashnaguha/Desktop/cell-signaling-pathway-simulator/level3.go", "Go", 92, 0, 0, 0, 0, 0, 5, 14, 111
+"/Users/ashnaguha/Desktop/cell-signaling-pathway-simulator/level4.go", "Go", 101, 0, 0, 0, 0, 0, 5, 21, 127
+"/Users/ashnaguha/Desktop/cell-signaling-pathway-simulator/level_select.go", "Go", 44, 0, 0, 0, 0, 0, 4, 8, 56
+"/Users/ashnaguha/Desktop/cell-signaling-pathway-simulator/main.go", "Go", 541, 0, 0, 0, 0, 0, 98, 91, 730
+"/Users/ashnaguha/Desktop/cell-signaling-pathway-simulator/main_menu.go", "Go", 54, 0, 0, 0, 0, 0, 4, 8, 66
+"/Users/ashnaguha/Desktop/cell-signaling-pathway-simulator/scene_switch.go", "Go", 43, 0, 0, 0, 0, 0, 32, 13, 88
+"/Users/ashnaguha/Desktop/cell-signaling-pathway-simulator/signal_reception.go", "Go", 10, 0, 0, 0, 0, 0, 1, 2, 13
+"/Users/ashnaguha/Desktop/cell-signaling-pathway-simulator/state_machine.go", "Go", 36, 0, 0, 0, 0, 0, 0, 9, 45
+"/Users/ashnaguha/Desktop/cell-signaling-pathway-simulator/wasm_exec.js", "JavaScript", 0, 0, 466, 0, 0, 0, 36, 60, 562
+"/Users/ashnaguha/Desktop/cell-signaling-pathway-simulator/web.html", "HTML", 0, 0, 0, 15, 0, 0, 0, 1, 16
+"/Users/ashnaguha/Desktop/cell-signaling-pathway-simulator/webTest.go", "Go", 38, 0, 0, 0, 0, 0, 1, 8, 47
+"/Users/ashnaguha/Desktop/cell-signaling-pathway-simulator/wrapper.js", "JavaScript", 0, 0, 6, 0, 0, 0, 0, 2, 8
+"Total", "-", 2012, 84, 472, 17, 19, 30, 259, 402, 3295

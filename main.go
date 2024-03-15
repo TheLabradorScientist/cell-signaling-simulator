@@ -69,12 +69,12 @@ var (
 	//aboutToMenuButton Button
 
 	// LEVEL SELECT SPRITES
-	levSelBg           StillImage
+/* 	levSelBg           StillImage
 	levToPlasmaButton  Button
 	levToCyto1Button   Button
 	levToNucleusButton Button
 	levToCyto2Button   Button
-	levToMenuButton    Button
+	levToMenuButton    Button */
 
 	// PLASMA SPRITES
 	protoPlasmaBg  StillImage
@@ -217,7 +217,7 @@ func (g *Game) init() {
 	}
 
 	var s_map = SceneConstructorMap{
-		"menu": newMainMenu, "about": newAbout,
+		"menu": newMainMenu, "about": newAbout, "level selection": newLevelSelection,
 	}
 
 	g.stateMachine = newStateMachine(s_map)
@@ -240,7 +240,7 @@ func (g *Game) init() {
 
 	//aboutBg = newStillImage("AboutBg.png", newRect(0, 0, 1250, 750))
 
-	levSelBg = newStillImage("levSelBg.png", newRect(0, 0, 1250, 750))
+	//levSelBg = newStillImage("levSelBg.png", newRect(0, 0, 1250, 750))
 
 	protoPlasmaBg = newStillImage("PlasmaBg.png", newRect(0, 0, 1250, 750))
 	plasmaBg = newParallax("ParallaxPlasma.png", newRect(100, 100, 1250, 750), 4)
@@ -255,12 +255,12 @@ func (g *Game) init() {
 	cytoBg_2 = newStillImage("CytoBg2.png", newRect(0, 0, 1250, 750))
 
 	//aboutToMenuButton = newButton("menuButton.png", newRect(350, 450, 300, 200), ToMenu)
-	levToPlasmaButton = newButton("levToPlasmaBtn.png", newRect(520, 110, 300, 180), ToPlasma)
+	/* levToPlasmaButton = newButton("levToPlasmaBtn.png", newRect(520, 110, 300, 180), ToPlasma)
 	levToCyto1Button = newButton("levToCyto1Btn.png", newRect(820, 110, 300, 180), ToCyto1)
 	levToNucleusButton = newButton("levToNucleusBtn.png", newRect(520, 285, 300, 180), ToNucleus)
 	levToCyto2Button = newButton("levToCyto2Btn.png", newRect(820, 285, 300, 180), ToCyto2)
 	levToMenuButton = newButton("menuButton.png", newRect(250, 190, 300, 200), ToMenu)
-
+ */
 	switch seedSignal {
 	case 1:
 		signal = newSignal("signalA.png", newRect(500, 100, 100, 100))
@@ -338,7 +338,7 @@ func (g *Game) init() {
 
 	//menuSprites = []GUI{protoStartBg, &startBg, &startP1, &startP2, &startP3, &startP4, fixedStart, playbutton, aboutButton, levSelButton, volButton}
 	//aboutSprites = []GUI{&aboutBg, &aboutToMenuButton}
-	levSelSprites = []GUI{&levSelBg, &levToPlasmaButton, &levToCyto1Button, &levToNucleusButton, &levToCyto2Button, &levToMenuButton}
+	//levSelSprites = []GUI{&levSelBg, &levToPlasmaButton, &levToCyto1Button, &levToNucleusButton, &levToCyto2Button, &levToMenuButton}
 	plasmaSprites = []GUI{&protoPlasmaBg, &plasmaBg, &plasmaMembrane, &signal, &receptorA, &receptorB, &receptorC, &receptorD, &temp_tk1A, &temp_tk1B, &temp_tk1C, &temp_tk1D}
 
 }
@@ -354,35 +354,10 @@ func (g *Game) Update() error {
 	switch scene {
 	case "Main Menu":
 		g.stateMachine.update(g)
-		//g.musicPlayer.Play()
-		//ebiten.SetWindowTitle("Cell Signaling Pathway - Main Menu")
-		/*for _, element := range menuSprites {
-			//e := element.(type)
-			switch element.(type) {
-			case (Button):
-				element.update(g)
-			default:
-				element.update()
-			}
-		} */
-		/* 		startBg.update()
-		   		startP1.update()
-		   		startP2.update()
-		   		startP3.update()
-		   		startP4.update()
-		   		aboutButton.update(g)
-		   		playbutton.update(g)
-		   		levSelButton.update(g)
-		   		volButton.update(g) */
 	case "About":
 		g.stateMachine.update(g)
 	case "Level Selection":
-		ebiten.SetWindowTitle("Cell Signaling Pathway - Level Selection")
-		levToPlasmaButton.update(g)
-		levToCyto1Button.update(g)
-		levToNucleusButton.update(g)
-		levToCyto2Button.update(g)
-		levToMenuButton.update(g)
+		g.stateMachine.update(g)
 	case "Signal Reception":
 		ebiten.SetWindowTitle("Cell Signaling Pathway - Signal Reception")
 		plasmaBg.update()
@@ -503,8 +478,8 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 	if ebiten.IsFullscreen() {
 		// Use this if statement to set sizes of graphics to fullscreen scale, else normal scale.
-		if screenWidth != maxWidth && screenHeight != maxHeight {
-			screenWidth, screenHeight = maxWidth, maxHeight
+		if screenWidth == baseScreenWidth && screenHeight == baseScreenHeight {
+			screenWidth, screenHeight = ebiten.ScreenSizeInFullscreen()
 			g.stateMachine.Scale(screen)
 			defaultFont = newFont(loadFont("CourierPrime-Regular.ttf"), 32*int(heightRatio))
 			codonFont = newFont(loadFont("BlackOpsOne-Regular.ttf"), 60*int(heightRatio))
@@ -553,12 +528,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		}
 
 	case "Level Selection":
-		levSelBg.draw(screen)
-		levToPlasmaButton.draw(screen)
-		levToCyto1Button.draw(screen)
-		levToNucleusButton.draw(screen)
-		levToCyto2Button.draw(screen)
-		levToMenuButton.draw(screen)
+		g.stateMachine.draw(g, screen)
 
 		if g.switchedToMenu {
 			scene = "Main Menu"

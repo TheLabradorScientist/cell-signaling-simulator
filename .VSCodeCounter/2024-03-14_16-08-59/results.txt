@@ -1,0 +1,54 @@
+Date : 2024-03-14 16:08:59
+Directory : /Users/ashnaguha/Desktop/cell-signaling-pathway-simulator
+Total : 25 files,  2634 codes, 259 comments, 402 blanks, all 3295 lines
+
+Languages
++------------------+------------+------------+------------+------------+------------+
+| language         | files      | code       | comment    | blank      | total      |
++------------------+------------+------------+------------+------------+------------+
+| Go               |         18 |      2,012 |        213 |        326 |      2,551 |
+| JavaScript       |          2 |        472 |         36 |         62 |        570 |
+| Go Checksum File |          1 |         84 |          0 |          1 |         85 |
+| YAML             |          1 |         30 |         10 |          7 |         47 |
+| Go Module File   |          1 |         19 |          0 |          5 |         24 |
+| HTML             |          2 |         17 |          0 |          1 |         18 |
++------------------+------------+------------+------------+------------+------------+
+
+Directories
++-------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| path                                                                          | files      | code       | comment    | blank      | total      |
++-------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| .                                                                             |         25 |      2,634 |        259 |        402 |      3,295 |
++-------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+
+Files
++-------------------------------------------------------------------------------+------------------+------------+------------+------------+------------+
+| filename                                                                      | language         | code       | comment    | blank      | total      |
++-------------------------------------------------------------------------------+------------------+------------+------------+------------+------------+
+| /Users/ashnaguha/Desktop/cell-signaling-pathway-simulator/.goreleaser.yaml    | YAML             |         30 |         10 |          7 |         47 |
+| /Users/ashnaguha/Desktop/cell-signaling-pathway-simulator/about.go            | Go               |         40 |          4 |          8 |         52 |
+| /Users/ashnaguha/Desktop/cell-signaling-pathway-simulator/animations.go       | Go               |          1 |          0 |          2 |          3 |
+| /Users/ashnaguha/Desktop/cell-signaling-pathway-simulator/codon_chart.go      | Go               |        100 |          0 |         13 |        113 |
+| /Users/ashnaguha/Desktop/cell-signaling-pathway-simulator/font.go             | Go               |         37 |          5 |          7 |         49 |
+| /Users/ashnaguha/Desktop/cell-signaling-pathway-simulator/geom.go             | Go               |         39 |          6 |          7 |         52 |
+| /Users/ashnaguha/Desktop/cell-signaling-pathway-simulator/go.mod              | Go Module File   |         19 |          0 |          5 |         24 |
+| /Users/ashnaguha/Desktop/cell-signaling-pathway-simulator/go.sum              | Go Checksum File |         84 |          0 |          1 |         85 |
+| /Users/ashnaguha/Desktop/cell-signaling-pathway-simulator/gui.go              | Go               |        649 |         37 |         92 |        778 |
+| /Users/ashnaguha/Desktop/cell-signaling-pathway-simulator/index.html          | HTML             |          2 |          0 |          0 |          2 |
+| /Users/ashnaguha/Desktop/cell-signaling-pathway-simulator/infoPages.go        | Go               |         32 |          0 |          2 |         34 |
+| /Users/ashnaguha/Desktop/cell-signaling-pathway-simulator/level1.go           | Go               |        105 |          9 |         12 |        126 |
+| /Users/ashnaguha/Desktop/cell-signaling-pathway-simulator/level2.go           | Go               |         50 |          2 |          9 |         61 |
+| /Users/ashnaguha/Desktop/cell-signaling-pathway-simulator/level3.go           | Go               |         92 |          5 |         14 |        111 |
+| /Users/ashnaguha/Desktop/cell-signaling-pathway-simulator/level4.go           | Go               |        101 |          5 |         21 |        127 |
+| /Users/ashnaguha/Desktop/cell-signaling-pathway-simulator/level_select.go     | Go               |         44 |          4 |          8 |         56 |
+| /Users/ashnaguha/Desktop/cell-signaling-pathway-simulator/main.go             | Go               |        541 |         98 |         91 |        730 |
+| /Users/ashnaguha/Desktop/cell-signaling-pathway-simulator/main_menu.go        | Go               |         54 |          4 |          8 |         66 |
+| /Users/ashnaguha/Desktop/cell-signaling-pathway-simulator/scene_switch.go     | Go               |         43 |         32 |         13 |         88 |
+| /Users/ashnaguha/Desktop/cell-signaling-pathway-simulator/signal_reception.go | Go               |         10 |          1 |          2 |         13 |
+| /Users/ashnaguha/Desktop/cell-signaling-pathway-simulator/state_machine.go    | Go               |         36 |          0 |          9 |         45 |
+| /Users/ashnaguha/Desktop/cell-signaling-pathway-simulator/wasm_exec.js        | JavaScript       |        466 |         36 |         60 |        562 |
+| /Users/ashnaguha/Desktop/cell-signaling-pathway-simulator/web.html            | HTML             |         15 |          0 |          1 |         16 |
+| /Users/ashnaguha/Desktop/cell-signaling-pathway-simulator/webTest.go          | Go               |         38 |          1 |          8 |         47 |
+| /Users/ashnaguha/Desktop/cell-signaling-pathway-simulator/wrapper.js          | JavaScript       |          6 |          0 |          2 |          8 |
+| Total                                                                         |                  |      2,634 |        259 |        402 |      3,295 |
++-------------------------------------------------------------------------------+------------------+------------+------------+------------+------------+

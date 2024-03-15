@@ -186,11 +186,17 @@ func newSprite(params ...interface{}) Sprite {
 	}
 }
 
-// Method of Sprite struct, calls scaleImage() on sprite image using
-// 		sprite op and scaling factors * current screen-size ratio
+// 	Method of Sprite struct, calls scaleImage() on sprite image using
+// 	sprite geometry (op) and scaling factors
 func (s *Sprite) scaleToScreen(screen *ebiten.Image) {
 	s.op = ebiten.GeoM{}
-	s.image = scaleImage(s.origImage, s.scaleW*float64(screenWidth/baseScreenWidth), s.scaleH*float64(screenHeight/baseScreenHeight))
+	if ebiten.IsFullscreen() {
+		s.image = scaleImage(s.origImage, 1.15*s.scaleW*float64(widthRatio), 1.2*s.scaleH*float64(heightRatio))
+		//s.image = scaleImage(s.origImage, s.scaleW*float64(widthRatio), s.scaleH*float64(heightRatio))
+	} else { 
+		s.image = scaleImage(s.origImage, s.scaleW, s.scaleH)
+	}
+	// NEVER TRY THIS CODE- IT BREAKS THE COMPUTER!!! - s.image = scaleImage(s.origImage, s.scaleW*float64(baseScreenWidth/screenWidth), s.scaleH*float64(baseScreenHeight/screenHeight))
 }
 
 // General function for scaling any image using the parameters for scaling factors
@@ -487,7 +493,7 @@ func (k *Kinase) update(params ...interface{}) {
 					k.rect.pos.x = ((-5 * (x_c + 100) / (9 * 1)) + (screenWidth*8/6)) * screenWidth / baseScreenWidth
 					k.rect.pos.y = ((-1 * (y_c + 100) / (5 * 1)) + 650) * screenHeight / baseScreenHeight
 				}
-						} else if k.is_moving {
+			} else if k.is_moving {
 				if k.rect.pos.y <= screenHeight {
 					k.descend()
 				}
@@ -538,7 +544,7 @@ func (k *Kinase) activate() {
 
 func (k *Kinase) descend() {
 	if ebiten.IsFullscreen() {
-		k.rect.pos.y += 2 * int(heightRatio)
+		k.rect.pos.y += 3
 	} else {
 		k.rect.pos.y += 2
 	}

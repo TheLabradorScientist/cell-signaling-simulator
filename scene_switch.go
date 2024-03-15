@@ -47,6 +47,7 @@ func ToCyto2(g *Game) {
 func ToLevelSelect(g *Game) {
 	setAllSwitchedFalse(g)	
 	g.switchedToLevelSelect = true
+	g.stateMachine.changeState(g, "level selection")
 }
 
 
