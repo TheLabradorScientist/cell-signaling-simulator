@@ -5,7 +5,6 @@ import (
 	"image/color"
 
 	//"reflect"
-
 	//"math"
 	"strings"
 
@@ -27,7 +26,6 @@ type GUI interface {
 //func getStructType(g GUI) reflect.Type {
 //	return reflect.TypeOf(g)
 //}
-
 
 //	Create Sprite struct with fields for image, second image (optional),
 //	rectangle, scale factors, matrix draw option, + original images
@@ -441,22 +439,22 @@ func (r *Receptor) update(params ...interface{}) {
 	var x_c, y_c = ebiten.CursorPosition()
 	switch r.receptorType {
 	case "receptorA":
-		r.rect.pos.x = ((-5 * (x_c + 100) / (9 * 1)) + (screenWidth*1/6)) * screenWidth / baseScreenWidth
+		r.rect.pos.x = ((-5 * (x_c + 100) / (9 * 1)) + (screenWidth*1/7)) * screenWidth / baseScreenWidth
 		r.rect.pos.y = ((-1 * (y_c + 100) / (5 * 1)) + 450) * screenHeight / baseScreenHeight
 		//r.rect.pos.x = plasmaMembrane.rect.pos.x + 50
 		//r.rect.pos.y = plasmaMembrane.rect.pos.y + 400
 	case "receptorB":
-		r.rect.pos.x = ((-5 * (x_c + 100) / (9 * 1)) + (screenWidth*3/6)) * screenWidth / baseScreenWidth
+		r.rect.pos.x = ((-5 * (x_c + 100) / (9 * 1)) + (screenWidth*4/7)) * screenWidth / baseScreenWidth
 		r.rect.pos.y = ((-1 * (y_c + 100) / (5 * 1)) + 400) * screenHeight / baseScreenHeight
 		//r.rect.pos.x = plasmaMembrane.rect.pos.x + 500
 		//r.rect.pos.y = plasmaMembrane.rect.pos.y + 400
 	case "receptorC":
-		r.rect.pos.x = ((-5 * (x_c + 100) / (9 * 1)) + (screenWidth*6/6)) * screenWidth / baseScreenWidth
+		r.rect.pos.x = ((-5 * (x_c + 100) / (9 * 1)) + (screenWidth*7/7)) * screenWidth / baseScreenWidth
 		r.rect.pos.y = ((-1 * (y_c + 100) / (5 * 1)) + 400) * screenHeight / baseScreenHeight
 		//r.rect.pos.x = plasmaMembrane.rect.pos.x + 950
 		//r.rect.pos.y = plasmaMembrane.rect.pos.y + 400
 	case "receptorD":
-		r.rect.pos.x = ((-5 * (x_c + 100) / (9 * 1)) + (screenWidth*8/6)) * screenWidth / baseScreenWidth
+		r.rect.pos.x = ((-5 * (x_c + 100) / (9 * 1)) + (screenWidth*9/7)) * screenWidth / baseScreenWidth
 		r.rect.pos.y = ((-1 * (y_c + 100) / (5 * 1)) + 450) * screenHeight / baseScreenHeight
 		//r.rect.pos.x = plasmaMembrane.rect.pos.x + 1400
 		//r.rect.pos.y = plasmaMembrane.rect.pos.y + 400

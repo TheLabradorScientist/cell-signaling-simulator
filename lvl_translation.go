@@ -27,7 +27,7 @@ type Level4 struct {
 }
 
 func newLevel4(g *Game) {
-//	g.stateMachine.state = Level4{}
+	// g.stateMachine.state = Level4{}
 }
 
 func (l Level4) Init() {
@@ -58,7 +58,7 @@ func (l Level4) Init() {
 }
 
 func (l Level4) Update(g *Game) {
-	ebiten.SetWindowTitle("Cell Signaling Pathway - Translation")
+	//ebiten.SetWindowTitle("Cell Signaling Pathway - Translation")
 	if l.reset {
 		l.rightTrna.bases = translate(l.mrna[mrna_ptr].codon)
 		l.wrongTrna1.bases = translate(randomRNACodon(l.rightTrna.bases))

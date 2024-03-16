@@ -38,7 +38,7 @@ func newLevelSelection(g *Game) {
 }
 
 func (l *LevelSelection) Init(g *Game) {
-	ebiten.SetWindowTitle("Cell Signaling Pathway - Level Selection")
+	//ebiten.SetWindowTitle("Cell Signaling Pathway - Level Selection")
 	state_array = levSelSprites
 }
 

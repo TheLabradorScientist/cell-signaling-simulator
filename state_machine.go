@@ -29,6 +29,7 @@ func (s *StateMachine) changeState(g *Game, s_name string) {
 	s.s_map[s_name](g)
 	s.state.Init(g)
 	info = updateInfo()
+	g.switchedScene = true
 }
 
 func (s *StateMachine) update(g *Game) {

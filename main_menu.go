@@ -46,7 +46,7 @@ func newMainMenu(g *Game) {
 }
 
 func (m *MainMenu) Init(g *Game) {
-	ebiten.SetWindowTitle("Cell Signaling Pathway - Main Menu")
+	//ebiten.SetWindowTitle("Cell Signaling Pathway - Main Menu")
 	state_array = menuSprites
 }
 

@@ -32,7 +32,7 @@ func (l Level2) Init() {
 }
 
 func (l Level2) Update(g *Game) {
-	ebiten.SetWindowTitle("Cell Signaling Pathway - Signal Transduction")
+	//ebiten.SetWindowTitle("Cell Signaling Pathway - Signal Transduction")
 	ebiten.SetWindowSize(screenWidth, screenHeight)
 	l.tk1.activate()
 	l.tk1.update(l.tk2.rect)

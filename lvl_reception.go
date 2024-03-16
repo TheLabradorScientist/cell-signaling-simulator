@@ -80,7 +80,7 @@ func newReceptionLevel(g *Game) {
 }
 
 func (r *ReceptionLevel) Init(g *Game) {
-	ebiten.SetWindowTitle("Cell Signaling Pathway - Signal Reception")
+	//ebiten.SetWindowTitle("Cell Signaling Pathway - Signal Reception")
 	state_array = plasmaSprites
 }
 

@@ -48,7 +48,7 @@ func (l Level3) Init() {
 }
 
 func (l Level3) Update(g *Game) {
-	ebiten.SetWindowTitle("Cell Signaling Pathway - Transcription")
+	//ebiten.SetWindowTitle("Cell Signaling Pathway - Transcription")
 	temp_tfa.activate()
 	temp_tfa.update()
 	l.rnaPolymerase.update(temp_tfa.rect.pos.y)

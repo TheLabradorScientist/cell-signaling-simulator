@@ -87,6 +87,7 @@ var levSelSprites []GUI
 var plasmaSprites []GUI
 
 type Game struct {
+	switchedScene		  bool
 	switchedToPlasma      bool
 	switchedToMenu        bool
 	switchedToCyto1       bool
@@ -151,6 +152,7 @@ func (g *Game) init() {
 	//maxWidth, maxHeight       = g.Layout(maxWidth, maxHeight)
 	// Initialize audio context
 	audioContext = audio.NewContext(44100)
+	g.switchedScene = true
 
 	mp3Bytes, err := os.ReadFile(loadMusic("Signaling_of_the_Cell_MenuScreen.mp3"))
 	if err != nil {
@@ -254,7 +256,8 @@ func (g *Game) init() {
 }
 
 func (g *Game) Update() error {
-
+	
+	ebiten.SetWindowTitle("CSPS - " + scene)
 	//g.stateMachine.update(g)
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyEscape) {
@@ -270,57 +273,8 @@ func (g *Game) Update() error {
 		g.stateMachine.update(g)
 	case "Signal Reception":
 		g.stateMachine.update(g)
-		/*
-			ebiten.SetWindowTitle("Cell Signaling Pathway - Signal Reception")
-			plasmaBg.update()
-			plasmaMembrane.update()
-			//plasmaMembrane2.update()
-			signal.update()
-			receptorA.update()
-			receptorB.update()
-			receptorC.update()
-			receptorD.update()
-			temp_tk1A.update(temp_tk1B.rect)
-			temp_tk1B.update(temp_tk1C.rect)
-			temp_tk1C.update(temp_tk1D.rect)
-			temp_tk1D.update(temp_tk1A.rect)
-			otherToMenuButton.update(g)
-			infoButton.update()
-			info = updateInfo()
-			if receptorA.is_touching_signal {
-				if matchSR(signal.signalType, receptorA.receptorType) {
-					receptorA.animate("act_receptorA.png")
-					signal.bind(receptorA)
-					temp_tk1A.activate()
-				}
-			}
-			if receptorB.is_touching_signal {
-				if matchSR(signal.signalType, receptorB.receptorType) {
-					receptorB.animate("act_receptorB.png")
-					signal.bind(receptorB)
-					temp_tk1B.activate()
-				}
-			}
-			if receptorC.is_touching_signal {
-				if matchSR(signal.signalType, receptorC.receptorType) {
-					receptorC.animate("act_receptorC.png")
-					signal.bind(receptorC)
-					temp_tk1C.activate()
-				}
-			}
-			if receptorD.is_touching_signal {
-				if matchSR(signal.signalType, receptorD.receptorType) {
-					receptorD.animate("act_receptorD.png")
-					signal.bind(receptorD)
-					temp_tk1D.activate()
-				}
-			}
-			if temp_tk1A.rect.pos.y >= screenHeight || temp_tk1B.rect.pos.y >= screenHeight || temp_tk1C.rect.pos.y >= screenHeight || temp_tk1D.rect.pos.y >= screenHeight {
-				ToCyto1(g)
-			}*/
-
 	case "Signal Transduction":
-		ebiten.SetWindowTitle("Cell Signaling Pathway - Signal Transduction")
+		//ebiten.SetWindowTitle("Cell Signaling Pathway - Signal Transduction")
 		otherToMenuButton.update(g)
 		cytoBg_1.update()
 		cytoNuc_1.update()
@@ -344,7 +298,7 @@ func (g *Game) Update() error {
 		}
 
 	case "Transcription":
-		ebiten.SetWindowTitle("Cell Signaling Pathway - Transcription")
+		//ebiten.SetWindowTitle("Cell Signaling Pathway - Transcription")
 		otherToMenuButton.update(g)
 		temp_tfa.activate()
 		temp_tfa.update()
@@ -366,7 +320,7 @@ func (g *Game) Update() error {
 		}
 
 	case "Translation":
-		ebiten.SetWindowTitle("Cell Signaling Pathway - Translation")
+		//ebiten.SetWindowTitle("Cell Signaling Pathway - Translation")
 		otherToMenuButton.update(g)
 		infoButton.update()
 		info = updateInfo()
@@ -409,6 +363,11 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		}
 	}
 
+	if g.switchedScene {
+		g.stateMachine.Scale(screen)
+		g.switchedScene = false
+	}
+
 	//g.stateMachine.draw(g, screen)
 	switch scene {
 	case "Main Menu":
@@ -449,28 +408,6 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		}
 	case "Signal Reception":
 		g.stateMachine.draw(g, screen)
-		/* 		protoPlasmaBg.draw(screen)
-		   		plasmaBg.draw(screen)
-		   		plasmaMembrane.draw(screen)
-		   		receptorA.draw(screen)
-		   		receptorB.draw(screen)
-		   		receptorC.draw(screen)
-		   		receptorD.draw(screen)
-		   		//plasmaMembrane2.draw(screen)
-		   		signal.draw(screen)
-		   		temp_tk1A.draw(screen)
-		   		temp_tk1B.draw(screen)
-		   		temp_tk1C.draw(screen)
-		   		temp_tk1D.draw(screen)
-		   		otherToMenuButton.draw(screen)
-		   		m := "WELCOME TO THE PLASMA MEMBRANE!"
-		   		m += "\nDrag the signal to the matching receptor\nto enter the cell!"
-		   		Pink := color.RGBA{220, 100, 100, 50}
-		   		defaultFont.drawFont(screen, m, 100, 50, color.RGBA(Pink))
-		   		if signal.is_dragged {
-		   			signal.draw(screen)
-		   		}
-		   		infoButton.draw(screen) */
 		if g.switchedToMenu {
 			scene = "Main Menu"
 		}
