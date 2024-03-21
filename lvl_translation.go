@@ -10,7 +10,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
-type Level4 struct {
+type TranslationLevel struct {
 	cytoBg_2     *ebiten.Image
 	ribosome     Ribosome
 	rightChoice  CodonChoice
@@ -26,11 +26,11 @@ type Level4 struct {
 	reset        bool
 }
 
-func newLevel4(g *Game) {
-	// g.stateMachine.state = Level4{}
+func newTranslationLevel(g *Game) {
+	// g.stateMachine.state = TranslationLevel{}
 }
 
-func (l Level4) Init() {
+func (l TranslationLevel) Init() {
 	l.reset = false
 	l.cytoBg_2, _, err = ebitenutil.NewImageFromFile(loadFile("CytoBg2.png"))
 	if err != nil {
@@ -45,8 +45,8 @@ func (l Level4) Init() {
 	}
 
 	l.rightChoice = newCodonChoice("codonButton.png", newRect(50, 150, 192, 111), transcribe(dna[0].codon))
-	l.wrongChoice1 = newCodonChoice("codonButton.png", newRect(350, 150, 192, 111), randomRNACodon(rightChoice.bases))
-	l.wrongChoice2 = newCodonChoice("codonButton.png", newRect(650, 150, 192, 111), randomRNACodon(rightChoice.bases))
+	l.wrongChoice1 = newCodonChoice("codonButton.png", newRect(350, 150, 192, 111), randomRNACodon(transcriptionStruct.rightChoice.bases))
+	l.wrongChoice2 = newCodonChoice("codonButton.png", newRect(650, 150, 192, 111), randomRNACodon(transcriptionStruct.rightChoice.bases))
 
 	l.ribosome = newRibosome("ribosome.png", newRect(0, 300, 404, 367))
 
@@ -57,7 +57,7 @@ func (l Level4) Init() {
 	l.wrongTrna2 = newCodonChoice("codonButton.png", newRect(650, 150, 192, 111), translate(randomRNACodon(rightTrna.bases)))
 }
 
-func (l Level4) Update(g *Game) {
+func (l TranslationLevel) Update(g *Game) {
 	//ebiten.SetWindowTitle("Cell Signaling Pathway - Translation")
 	if l.reset {
 		l.rightTrna.bases = translate(l.mrna[mrna_ptr].codon)
@@ -72,7 +72,7 @@ func (l Level4) Update(g *Game) {
 	}
 }
 
-func (l Level4) Draw(g *Game, screen *ebiten.Image) {
+func (l TranslationLevel) Draw(g *Game, screen *ebiten.Image) {
 	screen.DrawImage(l.cytoBg_2, nil)
 	// for x := 0; x < 5; x++ {
 	// 	protein[x].draw(screen)

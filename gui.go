@@ -321,8 +321,7 @@ func newButton(path string, rect Rectangle, cmd ButtonFunc) Button {
 	}
 }
 
-// NEED TO FIX VOL BUTTON CHANGE IMAGE
-func (b Button) update(params ...interface{}) {
+func (b *Button) update(params ...interface{}) {
 	if len(params) > 0 {
 		g, ok := params[0].(*Game)
 		if !ok {
@@ -331,6 +330,7 @@ func (b Button) update(params ...interface{}) {
 		var x_c, y_c = ebiten.CursorPosition()
 		var b_pos = newVector(x_c, y_c)
 		if rect_point_collision(b.rect, b_pos) && inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
+			fmt.Println(b.cmd)
 			b.cmd(g)
 		}
 	}
