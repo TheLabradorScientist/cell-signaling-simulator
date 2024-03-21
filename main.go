@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"image/color"
 	_ "image/png"
 	"log"
 	"math/rand"
@@ -21,19 +20,14 @@ const (
 )
 
 var (
+	// GLOBAL VARIABLES
 	screenWidth, screenHeight = 1250, 750
 	maxWidth, maxHeight       = ebiten.ScreenSizeInFullscreen()
 	widthRatio                = float64(maxWidth / baseScreenWidth)
 	heightRatio               = float64(maxHeight / baseScreenHeight)
-)
 
-var (
 	audioContext *audio.Context
-)
 
-var (
-
-	// GENERAL SPRITES
 	err               error
 	scene             string = "Main Menu"
 	otherToMenuButton Button
@@ -48,24 +42,14 @@ var (
 	seedSignal        int
 
 
-	// CYTO 2 SPRITES
-	cytoBg_2   StillImage
-	ribosome   Ribosome
-	mrna       [5]Template
-	protein    [5]Transcript
-	mrna_ptr   int
-	rightTrna  tRNA
-	wrongTrna1 tRNA
-	wrongTrna2 tRNA
+	menuSprites []GUI
+	aboutSprites []GUI
+	levSelSprites []GUI
+	plasmaSprites []GUI
+	cyto1Sprites []GUI
+	nucleusSprites []GUI
+	cyto2Sprites []GUI
 )
-
-var menuSprites []GUI
-var aboutSprites []GUI
-var levSelSprites []GUI
-var plasmaSprites []GUI
-var cyto1Sprites []GUI
-var nucleusSprites []GUI
-var cyto2Sprites []GUI
 
 type Game struct {
 	switchedScene         bool
@@ -121,11 +105,15 @@ func (g *Game) init() {
 	ebiten.SetWindowPosition(100, 0)
 	ebiten.SetWindowSize(screenWidth, screenHeight)
 	ebiten.SetWindowResizingMode(ebiten.WindowResizingModeOnlyFullscreenEnabled)
+	
 	defaultFont = newFont(loadFont("CourierPrime-Regular.ttf"), 32)
 	codonFont = newFont(loadFont("BlackOpsOne-Regular.ttf"), 60)
+
 	//	maxWidth, maxHeight       = g.Layout(maxWidth, maxHeight)
+
 	// 	Initialize audio context
 	audioContext = audio.NewContext(44100)
+
 	g.switchedScene = true
 
 	mp3Bytes, err := os.ReadFile(loadMusic("Signaling_of_the_Cell_MenuScreen.mp3"))
@@ -148,14 +136,11 @@ func (g *Game) init() {
 	}
 
 	g.stateMachine = newStateMachine(s_map)
-
-	g.stateMachine.changeState(g, "Main Menu")
+	ToMenu(g)
 
 	seedSignal = rand.Intn(4) + 1
 	infoButton = newInfoPage("infoButton.png", "infoPage.png", newRect(850, 0, 165, 165), "btn")
 	otherToMenuButton = newButton("menuButton.png", newRect(1000, 0, 300, 200), ToMenu)
-
-	cytoBg_2 = newStillImage("CytoBg2.png", newRect(0, 0, 1250, 750))
 
 	switch seedSignal {
 	case 1:
@@ -166,8 +151,6 @@ func (g *Game) init() {
 		template = [5]string{"TAC", randomDNACodon(), randomDNACodon(), randomDNACodon(), "ATC"}
 	case 4:
 		template = [5]string{"TAC", randomDNACodon(), randomDNACodon(), randomDNACodon(), "ATT"}
-		// PLACEHOLDER IN CASE WE DO NOT GET TIME TO CODE RANDOM CODONS
-		//template = [5]string{"TAC", "GTC", "CGG", "ACA", "ACT"}
 	}
 
 	for x := 0; x < 5; x++ {
@@ -186,65 +169,18 @@ func (g *Game) init() {
 	for x := 0; x < 5; x++ {
 		protein[x] = newTranscript("aminoAcid.png", newRect(50+(150*x), 400, 150, 150), translate(mrna[x].codon))
 	}
-
-	reset = false
-
-	ribosome = newRibosome("ribosome.png", newRect(40, 300, 404, 367))
-
-	mrna_ptr = 0
-
-	rightTrna = newTRNA("codonButton.png", newRect(50, 150, 192, 111), translate(mrna[0].codon))
-	wrongTrna1 = newTRNA("codonButton.png", newRect(350, 150, 192, 111), translate(randomRNACodon(rightTrna.bases)))
-	wrongTrna2 = newTRNA("codonButton.png", newRect(650, 150, 192, 111), translate(randomRNACodon(rightTrna.bases)))
-
 }
 
 func (g *Game) Update() error {
 
 	ebiten.SetWindowTitle("CSPS - " + scene)
-	//g.stateMachine.update(g)
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyEscape) {
 		ebiten.SetFullscreen(false)
 	}
 
-	switch scene {
-	case "Main Menu":
-		g.stateMachine.update(g)
-	case "About":
-		g.stateMachine.update(g)
-	case "Level Selection":
-		g.stateMachine.update(g)
-	case "Signal Reception":
-		g.stateMachine.update(g)
-	case "Signal Transduction":
-		g.stateMachine.update(g)
-	case "Transcription":
-		g.stateMachine.update(g)
+	g.stateMachine.update(g)
 
-	case "Translation":
-		otherToMenuButton.update(g)
-		infoButton.update()
-		info = updateInfo()
-
-		curr := &mrna[mrna_ptr]
-
-		if reset {
-			rightTrna.bases = translate(curr.codon)
-			wrongTrna1.bases = translate(randomRNACodon(rightTrna.bases))
-			wrongTrna2.bases = translate(randomRNACodon(rightTrna.bases))
-			reset = false
-		}
-		if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
-			rightTrna.update(curr)
-		}
-
-		if ribosome.update_movement() {
-			nextMRNACodon(g)
-		} else {
-			ribosome.update_movement()
-		}
-	}
 	return nil
 }
 
@@ -272,87 +208,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		g.switchedScene = false
 	}
 
-	//g.stateMachine.draw(g, screen)
-	switch scene {
-	case "Main Menu":
-		g.stateMachine.draw(g, screen)
-
-	case "About":
-		g.stateMachine.draw(g, screen)
-
-	case "Level Selection":
-		g.stateMachine.draw(g, screen)
-
-	case "Signal Reception":
-		g.stateMachine.draw(g, screen)
-
-	case "Signal Transduction":
-		g.stateMachine.draw(g, screen)
-		
-	case "Transcription":
-		g.stateMachine.draw(g, screen)
-
-	case "Translation":
-		cytoBg_2.draw(screen)
-
-		mrna[0].draw(screen)
-
-		if mrna_ptr != -1 {
-			codonFont.drawFont(screen, mrna[mrna_ptr].codon, mrna[0].rect.pos.x+500, mrna[0].rect.pos.y+200, color.Black)
-		}
-
-		rightTrna.draw(screen)
-		wrongTrna1.draw(screen)
-		wrongTrna2.draw(screen)
-
-		codonFont.drawFont(screen, rightTrna.bases, rightTrna.rect.pos.x+25, rightTrna.rect.pos.y+90, color.Black)
-		codonFont.drawFont(screen, wrongTrna1.bases, wrongTrna1.rect.pos.x+25, wrongTrna1.rect.pos.y+90, color.Black)
-		codonFont.drawFont(screen, wrongTrna2.bases, wrongTrna2.rect.pos.x+25, wrongTrna2.rect.pos.y+90, color.Black)
-
-		defaultFont.drawFont(screen, "FINALLY, BACK TO THE CYTOPLASM! \n Match each codon from your mRNA template \n to its corresponding amino acid to synthesize your protein!!!!", 100, 50, color.Black)
-
-		switch mrna_ptr {
-		case 0:
-			protein[0].draw(screen)
-			codonFont.drawFont(screen, protein[0].codon, protein[0].rect.pos.x, protein[0].rect.pos.y, color.Black)
-		case 1:
-			protein[0].draw(screen)
-			protein[1].draw(screen)
-			codonFont.drawFont(screen, protein[0].codon, protein[0].rect.pos.x, protein[0].rect.pos.y, color.Black)
-			codonFont.drawFont(screen, protein[1].codon, protein[1].rect.pos.x, protein[1].rect.pos.y, color.Black)
-		case 2:
-			protein[0].draw(screen)
-			protein[1].draw(screen)
-			protein[2].draw(screen)
-			codonFont.drawFont(screen, protein[0].codon, protein[0].rect.pos.x, protein[0].rect.pos.y, color.Black)
-			codonFont.drawFont(screen, protein[1].codon, protein[1].rect.pos.x, protein[1].rect.pos.y, color.Black)
-			codonFont.drawFont(screen, protein[2].codon, protein[2].rect.pos.x, protein[2].rect.pos.y, color.Black)
-		case 3:
-			protein[0].draw(screen)
-			protein[1].draw(screen)
-			protein[2].draw(screen)
-			protein[3].draw(screen)
-			codonFont.drawFont(screen, protein[0].codon, protein[0].rect.pos.x, protein[0].rect.pos.y, color.Black)
-			codonFont.drawFont(screen, protein[1].codon, protein[1].rect.pos.x, protein[1].rect.pos.y, color.Black)
-			codonFont.drawFont(screen, protein[2].codon, protein[2].rect.pos.x, protein[2].rect.pos.y, color.Black)
-			codonFont.drawFont(screen, protein[3].codon, protein[3].rect.pos.x, protein[3].rect.pos.y, color.Black)
-		case 4:
-			protein[0].draw(screen)
-			protein[1].draw(screen)
-			protein[2].draw(screen)
-			protein[3].draw(screen)
-			codonFont.drawFont(screen, protein[0].codon, protein[0].rect.pos.x, protein[0].rect.pos.y, color.Black)
-			codonFont.drawFont(screen, protein[1].codon, protein[1].rect.pos.x, protein[1].rect.pos.y, color.Black)
-			codonFont.drawFont(screen, protein[2].codon, protein[2].rect.pos.x, protein[2].rect.pos.y, color.Black)
-			codonFont.drawFont(screen, protein[3].codon, protein[3].rect.pos.x, protein[3].rect.pos.y, color.Black)
-		default:
-			break
-		}
-
-		ribosome.draw(screen)
-		infoButton.draw(screen)
-		otherToMenuButton.draw(screen)
-	}
+	g.stateMachine.draw(g, screen)
 
 }
 

@@ -1,8 +1,5 @@
 package main
 
-import (
-)
-
 func ToPlasma(g *Game) {
 	scene = "Signal Reception"
 	g.stateMachine.changeState(g, scene)
@@ -25,6 +22,7 @@ func ToNucleus(g *Game) {
 
 func ToCyto2(g *Game) {
 	scene = "Translation"
+	g.stateMachine.changeState(g, scene)
 }
 
 func ToLevelSelect(g *Game) {
@@ -43,4 +41,5 @@ func (g *Game) reset() {
 	// Set length of all sprite arrays to 0
 	// Set seed signal to random integer 
 	// Set template to random codons
+	
 }

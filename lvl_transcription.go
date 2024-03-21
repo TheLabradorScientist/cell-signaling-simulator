@@ -41,7 +41,7 @@ func newTranscriptionLevel(g *Game) {
 			temp_tfa: newTFA("act_TFA.png", newRect(400, -100, 150, 150), "tfa2"),
 			rnaPolymerase: newRNAPolymerase("rnaPolym.png", newRect(-350, 100, 340, 265)),
 		
-			message: "WWELCOME TO THE NUCLEUS!\n" +
+			message: "WELCOME TO THE NUCLEUS!\n" +
 			"Match each codon on the DNA template to the complementary\n" +
 			"RNA codon to transcribe a new mRNA molecule!!!",
 		}
@@ -57,9 +57,7 @@ func newTranscriptionLevel(g *Game) {
 		transcriptionStruct.otherToMenuButton = otherToMenuButton
 
 		nucleusSprites = []GUI{
-			&transcriptionStruct.nucleusBg, //&transcriptionStruct.rna,
-			//&transcriptionStruct.dna, 
-			&transcriptionStruct.temp_tfa,
+			&transcriptionStruct.nucleusBg, &transcriptionStruct.temp_tfa,
 			&transcriptionStruct.rnaPolymerase, &transcriptionStruct.rightChoice,
 			&transcriptionStruct.wrongChoice1, &transcriptionStruct.wrongChoice2,
 			&transcriptionStruct.infoButton, &transcriptionStruct.otherToMenuButton,
@@ -71,15 +69,15 @@ func newTranscriptionLevel(g *Game) {
 func (t *TranscriptionLevel) Init(g *Game) {
 	currentFrag = 0
 	reset = false
-	state_array = plasmaSprites
+	state_array = nucleusSprites
 }
 
 func (t *TranscriptionLevel) Update(g *Game) {
 		t.otherToMenuButton.update(g)
+		t.infoButton.update()
 		t.temp_tfa.activate()
 		t.temp_tfa.update()
 		t.rnaPolymerase.update(t.temp_tfa.rect.pos.y)
-		t.infoButton.update()
 
 		curr := &dna[currentFrag]
 
@@ -105,18 +103,14 @@ func (t *TranscriptionLevel) Draw(g *Game, screen *ebiten.Image) {
 	t.nucleusBg.draw(screen)
 	for x := 0; x < 5; x++ {
 		rna[x].draw(screen)
-	}
+	} 
 
 	dna[0].draw(screen)
-
-	defaultFont.drawFont(screen, t.message, 100, 50, color.White)
 
 	t.rnaPolymerase.draw(screen)
 	t.temp_tfa.draw(screen)
 	//codonFont.drawFont(screen, strings.Join(template[0:5], ""), dna[currentFrag].rect.pos.x+300, dna[currentFrag].rect.pos.y, color.Black)
-	if currentFrag != -1 {
-		codonFont.drawFont(screen, dna[currentFrag].codon, dna[0].rect.pos.x+500, dna[0].rect.pos.y, color.Black)
-	}
+
 	t.rightChoice.draw(screen)
 	t.wrongChoice1.draw(screen)
 	t.wrongChoice2.draw(screen)
@@ -124,11 +118,14 @@ func (t *TranscriptionLevel) Draw(g *Game, screen *ebiten.Image) {
 	t.infoButton.draw(screen)
 	t.otherToMenuButton.draw(screen)
 
-	codonFont.drawFont(screen, t.rightChoice.bases, t.rightChoice.rect.pos.x+25, t.rightChoice.rect.pos.y+90, color.Black)
-	codonFont.drawFont(screen, t.wrongChoice1.bases, t.wrongChoice1.rect.pos.x+25, t.wrongChoice1.rect.pos.y+90, color.Black)
-	codonFont.drawFont(screen, t.wrongChoice2.bases, t.wrongChoice2.rect.pos.x+25, t.wrongChoice2.rect.pos.y+90, color.Black)
 	for x := 0; x < currentFrag; x++ {
 		codonFont.drawFont(screen, rna[x].codon, rna[0].rect.pos.x+500+(150*x), rna[0].rect.pos.y+140, color.Black)
 	}
+
+	if currentFrag != -1 {
+		codonFont.drawFont(screen, dna[currentFrag].codon, dna[0].rect.pos.x+500, dna[0].rect.pos.y, color.Black)
+	}
+
+	defaultFont.drawFont(screen, t.message, 100, 50, color.White)
 
 }

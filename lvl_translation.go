@@ -1,126 +1,116 @@
-//MUST UPDATE ALL FUNCTIONS WITH NEW CODE
-
 package main
 
 import (
 	"image/color"
-	"log"
 
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
+	"github.com/hajimehoshi/ebiten/v2/inpututil"
+)
+
+var (
+	mrna_ptr = 0
+	mrna     [5]Template
+	protein  [5]Transcript
 )
 
 type TranslationLevel struct {
-	cytoBg_2     *ebiten.Image
-	ribosome     Ribosome
-	rightChoice  CodonChoice
-	wrongChoice1 CodonChoice
-	wrongChoice2 CodonChoice
-	dna          [5]Template
-	mrna         [5]Template
-	protein      [5]Transcript
-	mrna_ptr     int
-	rightTrna    CodonChoice
-	wrongTrna1   CodonChoice
-	wrongTrna2   CodonChoice
-	reset        bool
+	// CYTO 2 SPRITES
+	cytoBg_2          StillImage
+	ribosome          Ribosome
+	rightTrna         tRNA
+	wrongTrna1        tRNA
+	wrongTrna2        tRNA
+	infoButton        InfoPage
+	otherToMenuButton Button
+	message           string
 }
+
+var translationStruct *TranslationLevel
 
 func newTranslationLevel(g *Game) {
-	// g.stateMachine.state = TranslationLevel{}
+	if len(cyto2Sprites) == 0 {
+		translationStruct = &TranslationLevel{
+			cytoBg_2: newStillImage("CytoBg2.png", newRect(0, 0, 1250, 750)),
+
+			ribosome: newRibosome("ribosome.png", newRect(40, 300, 404, 367)),
+
+			message: "FINALLY, BACK TO THE CYTOPLASM! \n" +
+				"Match each codon from your mRNA template \n" +
+				"to its corresponding amino acid to synthesize your protein!!!!",
+		}
+
+		for x := 0; x < 5; x++ {
+			mrna[x] = newTemplate("RNA.png", newRect(0, 400, 150, 150), transcribe(dna[x].codon), x)
+		}
+		for x := 0; x < 5; x++ {
+			protein[x] = newTranscript("aminoAcid.png", newRect(50+(150*x), 400, 150, 150), translate(mrna[x].codon))
+		}
+		translationStruct.rightTrna = newTRNA("codonButton.png", newRect(50, 150, 192, 111), translate(mrna[0].codon))
+		translationStruct.wrongTrna1 = newTRNA("codonButton.png", newRect(350, 150, 192, 111), translate(randomRNACodon(translationStruct.rightTrna.bases)))
+		translationStruct.wrongTrna2 = newTRNA("codonButton.png", newRect(650, 150, 192, 111), translate(randomRNACodon(translationStruct.rightTrna.bases)))
+		translationStruct.infoButton = infoButton
+		translationStruct.otherToMenuButton = otherToMenuButton
+
+		cyto2Sprites = []GUI{
+			&translationStruct.cytoBg_2,
+			&translationStruct.ribosome, &translationStruct.rightTrna,
+			&translationStruct.wrongTrna1, &translationStruct.wrongTrna2,
+			&translationStruct.infoButton, &translationStruct.otherToMenuButton,
+		}
+	}
+	g.stateMachine.state = translationStruct
 }
 
-func (l TranslationLevel) Init() {
-	l.reset = false
-	l.cytoBg_2, _, err = ebitenutil.NewImageFromFile(loadFile("CytoBg2.png"))
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	for x := 0; x < 5; x++ {
-		l.mrna[x] = newTemplate("RNA.png", newRect(0, 400, 150, 150), transcribe(l.dna[x].codon), x)
-	}
-	for x := 0; x < 5; x++ {
-		l.protein[x] = newTranscript("aminoAcid.png", newRect(50+(150*x), 400, 150, 150), translate(l.mrna[x].codon))
-	}
-
-	l.rightChoice = newCodonChoice("codonButton.png", newRect(50, 150, 192, 111), transcribe(dna[0].codon))
-	l.wrongChoice1 = newCodonChoice("codonButton.png", newRect(350, 150, 192, 111), randomRNACodon(transcriptionStruct.rightChoice.bases))
-	l.wrongChoice2 = newCodonChoice("codonButton.png", newRect(650, 150, 192, 111), randomRNACodon(transcriptionStruct.rightChoice.bases))
-
-	l.ribosome = newRibosome("ribosome.png", newRect(0, 300, 404, 367))
-
-	l.mrna_ptr = 0
-
-	l.rightTrna = newCodonChoice("codonButton.png", newRect(50, 150, 192, 111), translate(mrna[0].codon))
-	l.wrongTrna1 = newCodonChoice("codonButton.png", newRect(350, 150, 192, 111), translate(randomRNACodon(rightTrna.bases)))
-	l.wrongTrna2 = newCodonChoice("codonButton.png", newRect(650, 150, 192, 111), translate(randomRNACodon(rightTrna.bases)))
+func (t *TranslationLevel) Init(g *Game) {
+	mrna_ptr = 0
+	reset = false
+	state_array = cyto2Sprites
 }
 
-func (l TranslationLevel) Update(g *Game) {
-	//ebiten.SetWindowTitle("Cell Signaling Pathway - Translation")
-	if l.reset {
-		l.rightTrna.bases = translate(l.mrna[mrna_ptr].codon)
-		l.wrongTrna1.bases = translate(randomRNACodon(l.rightTrna.bases))
-		l.wrongTrna2.bases = translate(randomRNACodon(l.rightTrna.bases))
-		l.reset = false
-	}
-	//l.mrna[l.mrna_ptr].is_complete = l.rightTrna.update2(l.mrna[l.mrna_ptr].codon)
+func (t *TranslationLevel) Update(g *Game) {
+	t.otherToMenuButton.update(g)
+	t.infoButton.update()
 
-	if l.mrna[l.mrna_ptr].is_complete {
-		nextMRNACodon(g)
+	curr := &mrna[mrna_ptr]
+
+	if reset {
+		t.rightTrna.bases = translate(curr.codon)
+		t.wrongTrna1.bases = translate(randomRNACodon(t.rightTrna.bases))
+		t.wrongTrna2.bases = translate(randomRNACodon(t.rightTrna.bases))
+		reset = false
 	}
+	if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
+		t.rightTrna.update(curr)
+	}
+
+	t.ribosome.update(g)
 }
 
-func (l TranslationLevel) Draw(g *Game, screen *ebiten.Image) {
-	screen.DrawImage(l.cytoBg_2, nil)
-	// for x := 0; x < 5; x++ {
-	// 	protein[x].draw(screen)
-	// }
+func (t *TranslationLevel) Draw(g *Game, screen *ebiten.Image) {
+	t.cytoBg_2.draw(screen)
 
-	l.mrna[0].draw(screen)
-	l.ribosome.draw(screen)
+	mrna[0].draw(screen)
 
-	if l.mrna_ptr != -1 {
-		codonFont.drawFont(screen, l.mrna[l.mrna_ptr].codon, l.mrna[0].rect.pos.x+500, l.mrna[0].rect.pos.y+200, color.Black)
+	t.rightTrna.draw(screen)
+	t.wrongTrna1.draw(screen)
+	t.wrongTrna2.draw(screen)
+
+	t.infoButton.draw(screen)
+	t.otherToMenuButton.draw(screen)
+
+	// Draw amino acids before ribosome moves without drawing amino acid for STOP.
+	for x := 0; x <= mrna_ptr; x++ {
+		if x < 4 {
+			protein[x].draw(screen)
+			codonFont.drawFont(screen, protein[x].codon, protein[x].rect.pos.x, protein[x].rect.pos.y, color.Black)
+		}
 	}
 
-	l.rightTrna.draw(screen)
-	l.wrongTrna1.draw(screen)
-	l.wrongTrna2.draw(screen)
-
-	codonFont.drawFont(screen, l.rightTrna.bases, l.rightTrna.rect.pos.x+25, l.rightTrna.rect.pos.y+90, color.Black)
-	codonFont.drawFont(screen, l.wrongTrna1.bases, l.wrongTrna1.rect.pos.x+25, l.wrongTrna1.rect.pos.y+90, color.Black)
-	codonFont.drawFont(screen, l.wrongTrna2.bases, l.wrongTrna2.rect.pos.x+25, l.wrongTrna2.rect.pos.y+90, color.Black)
-
-	defaultFont.drawFont(screen, "FINALLY, BACK TO THE CYTOPLASM! \n Match each codon from your mRNA template \n to its corresponding amino acid to synthesize your protein!!!!", 100, 50, color.Black)
-
-	switch l.mrna_ptr {
-	case 1:
-		l.protein[0].draw(screen)
-		codonFont.drawFont(screen, l.protein[0].codon, l.protein[0].rect.pos.x, l.protein[0].rect.pos.y, color.Black)
-	case 2:
-		l.protein[0].draw(screen)
-		l.protein[1].draw(screen)
-		codonFont.drawFont(screen, l.protein[0].codon, l.protein[0].rect.pos.x, l.protein[0].rect.pos.y, color.Black)
-		codonFont.drawFont(screen, l.protein[1].codon, l.protein[1].rect.pos.x, l.protein[1].rect.pos.y, color.Black)
-	case 3:
-		l.protein[0].draw(screen)
-		l.protein[1].draw(screen)
-		l.protein[2].draw(screen)
-		codonFont.drawFont(screen, l.protein[0].codon, l.protein[0].rect.pos.x, l.protein[0].rect.pos.y, color.Black)
-		codonFont.drawFont(screen, l.protein[1].codon, l.protein[1].rect.pos.x, l.protein[1].rect.pos.y, color.Black)
-		codonFont.drawFont(screen, l.protein[2].codon, l.protein[2].rect.pos.x, l.protein[2].rect.pos.y, color.Black)
-	case 4:
-		l.protein[0].draw(screen)
-		l.protein[1].draw(screen)
-		l.protein[2].draw(screen)
-		l.protein[3].draw(screen)
-		codonFont.drawFont(screen, l.protein[0].codon, l.protein[0].rect.pos.x, l.protein[0].rect.pos.y, color.Black)
-		codonFont.drawFont(screen, l.protein[1].codon, l.protein[1].rect.pos.x, l.protein[1].rect.pos.y, color.Black)
-		codonFont.drawFont(screen, l.protein[2].codon, l.protein[2].rect.pos.x, l.protein[2].rect.pos.y, color.Black)
-		codonFont.drawFont(screen, l.protein[3].codon, l.protein[3].rect.pos.x, l.protein[3].rect.pos.y, color.Black)
-	default:
-		break
+	if mrna_ptr != -1 {
+		codonFont.drawFont(screen, mrna[mrna_ptr].codon, mrna[0].rect.pos.x+500, mrna[0].rect.pos.y+200, color.Black)
 	}
+
+	t.ribosome.draw(screen)
+
+	defaultFont.drawFont(screen, t.message, 100, 50, color.Black)
 }

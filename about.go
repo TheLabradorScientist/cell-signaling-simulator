@@ -33,7 +33,6 @@ func newAbout(g *Game) {
 }
 
 func (a *About) Init(g *Game) {
-	//ebiten.SetWindowTitle("Cell Signaling Pathway - About")
 	state_array = aboutSprites
 }
 

@@ -1,10 +1,8 @@
 package main
 
 import (
-	//"log"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
-	//"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
 // Sprites in Level Selection
@@ -39,7 +37,7 @@ func newLevelSelection(g *Game) {
 }
 
 func (l *LevelSelection) Init(g *Game) {
-		state_array = levSelSprites
+	state_array = levSelSprites
 }
 
 func (l *LevelSelection) Update(g *Game) {

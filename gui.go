@@ -330,7 +330,6 @@ func (b *Button) update(params ...interface{}) {
 		var x_c, y_c = ebiten.CursorPosition()
 		var b_pos = newVector(x_c, y_c)
 		if rect_point_collision(b.rect, b_pos) && inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
-			fmt.Println(b.cmd)
 			b.cmd(g)
 		}
 	}
@@ -756,43 +755,31 @@ func (t tRNA) draw(screen *ebiten.Image) {
 }
 
 func (c CodonChoice) draw(screen *ebiten.Image) {
-	op := &ebiten.DrawImageOptions{}
-	op.GeoM.Translate(float64(c.rect.pos.x), float64(c.rect.pos.y))
-	scaleW := float64(screenWidth) / 1250
-	scaleH := float64(screenHeight) / 750
-	op.GeoM.Scale(scaleW, scaleH)
-	c.rect.width *= int(scaleW)
-	c.rect.height *= int(scaleH)
-	screen.DrawImage(c.image, op)
+	c.Sprite.draw(screen)
+	codonFont.drawFont(screen, c.bases, c.rect.pos.x+25, c.rect.pos.y+90, color.Black)
 }
 
-func (ribo *Ribosome) update_movement() bool {
-	if mrna[mrna_ptr].is_complete {
-		if mrna_ptr == 4 && ribo.rect.pos.x < screenWidth+50 {
-			ribo.rect.pos.x += 4 * (screenWidth / 1250)
-			ribo.rect.pos.y += 2 * (screenHeight / 750)
-			return false
-		} else if ribo.rect.pos.x < (165 * (mrna_ptr + 1)) {
-			ribo.rect.pos.x += 2 * (screenWidth / 1250)
-			return false
-		} else {
-			return true
+// Updates movement of ribosome
+func (ribo *Ribosome) update(params ...interface{}) {
+	if len(params) > 0 {
+		g, ok := params[0].(*Game)
+		if !ok {
+			return
+		}
+		// Checks if current mRNA codon is complete
+		if mrna[mrna_ptr].is_complete {
+			if mrna_ptr == 4 && ribo.rect.pos.x < screenWidth+50 {
+				ribo.rect.pos.x += 5 * (screenWidth / 1250)
+				ribo.rect.pos.y += 3 * (screenHeight / 750)
+			} else if ribo.rect.pos.x < (160 * (mrna_ptr + 1)) {
+				ribo.rect.pos.x += 5 * (screenWidth / 1250)
+			} else {nextMRNACodon(g)}
 		}
 	}
-
-	//ribo.rect.pos.x += screenWidth / 7
-	return false
 }
 
 func (ribo Ribosome) draw(screen *ebiten.Image) {
-	op := &ebiten.DrawImageOptions{}
-	op.GeoM.Translate(float64(ribo.rect.pos.x), float64(ribo.rect.pos.y))
-	scaleW := float64(screenWidth) / 1250
-	scaleH := float64(screenHeight) / 750
-	op.GeoM.Scale(scaleW, scaleH)
-	ribo.rect.width *= int(scaleW)
-	ribo.rect.height *= int(scaleH)
-	screen.DrawImage(ribo.image, op)
+	ribo.Sprite.draw(screen)
 }
 
 func newNucelobase(path string, rect Rectangle, btype string) Nucleobase {
