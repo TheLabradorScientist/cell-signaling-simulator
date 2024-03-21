@@ -1,60 +1,77 @@
-//MUST UPDATE ALL FUNCTIONS WITH NEW CODE
-
 package main
 
 import (
 	"image/color"
-	"log"
 
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
-type Level2 struct {
-	cytoBg_1 *ebiten.Image
-	tk1      Kinase
-	tk2      Kinase
-	tfa      TFA
+type TransductionLevel struct {
+	// CYTO 1 SPRITES
+	protoCytoBg_1     StillImage
+	cytoBg_1          Parallax
+	cytoNuc_1         Parallax
+	tk1               Kinase
+	tk2               Kinase
+	tfa               TFA
+	infoButton        InfoPage
+	otherToMenuButton Button
+	message           string
 }
 
-func newLevel2(g *Game) {
-//	g.stateMachine.state = Level2{}
+var transductionStruct *TransductionLevel
+
+func newTransductionLevel(g *Game) {
+	if len(cyto1Sprites) == 0 {
+		transductionStruct = &TransductionLevel{
+			protoCytoBg_1: newStillImage("CytoBg1.png", newRect(0, 0, 1250, 750)),
+			cytoBg_1:      newParallax("ParallaxCyto1.png", newRect(100, 100, 1250, 750), 4),
+			cytoNuc_1:     newParallax("ParallaxCyto1.5.png", newRect(100, 100, 1250, 750), 3),
+
+			tk1: newKinase("act_TK1.png", newRect(500, -100, 150, 150), "tk1"),
+			tk2: newKinase("inact_TK2.png", newRect(250, 175, 150, 150), "tk2"),
+			tfa: newTFA("inact_TFA.png", newRect(700, 500, 150, 150), "tfa1"),
+
+			message: "WELCOME TO THE CYTOPLASM! \n" +
+				"Click when each kinase overlaps to follow \n the phosphorylation cascade!!",
+		}
+		transductionStruct.infoButton = infoButton
+		transductionStruct.otherToMenuButton = otherToMenuButton
+
+		cyto1Sprites = []GUI{
+			&transductionStruct.protoCytoBg_1, &transductionStruct.cytoBg_1,
+			&transductionStruct.cytoNuc_1, &transductionStruct.tk1, &transductionStruct.tk2,
+			&transductionStruct.tfa, &transductionStruct.infoButton, &transductionStruct.otherToMenuButton,
+		}
+	}
+	g.stateMachine.state = transductionStruct
 }
 
-func (l Level2) Init() {
-	l.cytoBg_1, _, err = ebitenutil.NewImageFromFile(loadFile("CytoBg1.png"))
-	if err != nil {
-		log.Fatal(err)
-	}
-	l.tk1 = newKinase("act_TK1.png", newRect(500, -100, 150, 150), "tk1")
-	l.tk2 = newKinase("inact_TK2.png", newRect(250, 175, 150, 150), "tk2")
-	l.tfa = newTFA("inact_TFA.png", newRect(700, 500, 150, 150), "tfa1")
+func (t *TransductionLevel) Init(g *Game) {
+	state_array = cyto1Sprites
 }
 
-func (l Level2) Update(g *Game) {
-	//ebiten.SetWindowTitle("Cell Signaling Pathway - Signal Transduction")
-	ebiten.SetWindowSize(screenWidth, screenHeight)
-	l.tk1.activate()
-	l.tk1.update(l.tk2.rect)
-	l.tk2.update(l.tfa.rect)
-	l.tfa.update()
-	if l.tk1.is_clicked_on {
-		l.tk2.activate()
-		l.tk1.is_clicked_on = false
+func (t *TransductionLevel) Update(g *Game) {
+	t.tk1.activate()
+	for _, element := range cyto1Sprites {
+		element.update(g)
 	}
-	if l.tk2.is_clicked_on {
-		l.tfa.activate()
-		l.tk2.is_clicked_on = false
+	if t.tk1.is_clicked_on {
+		t.tk2.activate()
+		t.tk1.is_clicked_on = false
 	}
-	if l.tfa.rect.pos.y > 750 {
+	if t.tk2.is_clicked_on {
+		t.tfa.activate()
+		t.tk2.is_clicked_on = false
+	}
+	if t.tfa.rect.pos.y > screenHeight {
 		ToNucleus(g)
 	}
 }
 
-func (l Level2) Draw(g *Game, screen *ebiten.Image) {
-	screen.DrawImage(l.cytoBg_1, nil)
-	l.tk1.draw(screen)
-	l.tk2.draw(screen)
-	l.tfa.draw(screen)
-	defaultFont.drawFont(screen, "WELCOME TO THE CYTOPLASM! \n Click when each kinase overlaps to follow \n the phosphorylation cascade!!", 100, 50, color.Black)
+func (t *TransductionLevel) Draw(g *Game, screen *ebiten.Image) {
+	for _, element := range cyto1Sprites {
+		element.draw(screen)
+	}
+	defaultFont.drawFont(screen, t.message, 100, 50, color.Black)
 }

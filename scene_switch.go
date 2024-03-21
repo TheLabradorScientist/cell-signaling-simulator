@@ -35,6 +35,8 @@ func ToMenu(g *Game) {
 func ToCyto1(g *Game) {
 	setAllSwitchedFalse(g)
 	g.switchedToCyto1 = true
+	scene = "Signal Transduction"
+	g.stateMachine.changeState(g, scene)
 }
 
 func ToNucleus(g *Game) {
@@ -59,9 +61,15 @@ func ToAbout(g *Game) {
 	setAllSwitchedFalse(g)
 	g.switchedToAbout = true
 	scene = "About"
-	g.stateMachine.changeState(g, "About")
+	g.stateMachine.changeState(g, scene)
 }
 
+
+func (g *Game) reset() {
+	// Set length of all sprite arrays to 0
+	// Set seed signal to random integer 
+	// Set template to random codons
+}
 /*
 func ToLevel2(g *Game) {
 	g.stateMachine.changeState(g, "level2")

@@ -105,6 +105,11 @@ type CodonChoice struct {
 	// codonType string // Correct vs Incorrect
 }
 
+type tRNA struct {
+	CodonChoice
+	// delta (method for moving amino acid to correct spot)
+}
+
 type Ribosome struct {
 	Sprite
 }
@@ -129,7 +134,7 @@ type StillImage struct {
 
 // Create new sprite with variadic parameters for multiple images
 func newSprite(params ...interface{}) Sprite {
-	// if 5 parameters passed, two images are needed
+	// if 4 parameters passed, two images are needed
 	if len(params) == 4 {
 		path1 := params[0].(string)  // image 1
 		path2 := params[1].(string)  // image 2
@@ -242,6 +247,7 @@ func (s *StillImage) scaleToScreen(screen *ebiten.Image) { s.Sprite.scaleToScree
 func (b *Button) scaleToScreen(screen *ebiten.Image)     { b.Sprite.scaleToScreen(screen) }
 func (p *Parallax) scaleToScreen(screen *ebiten.Image)   { p.Sprite.scaleToScreen(screen) }
 func (i *InfoPage) scaleToScreen(screen *ebiten.Image)   { i.Sprite.scaleToScreen(screen) }
+func (k *Kinase) scaleToScreen(screen *ebiten.Image)   { k.Sprite.scaleToScreen(screen) }
 
 func newInfoPage(path1 string, path2 string, rect Rectangle, stat string) InfoPage {
 	sprite := newSprite(path1, path2, rect, 1.0)
@@ -409,7 +415,7 @@ func (s *Signal) update(params ...interface{}) {
 	}
 }
 
-func (s *Signal) bind(r Receptor) {
+func (s *Signal) bind(r *Receptor) {
 	s.is_dragged = false
 	if r.receptorType == "receptorA" || r.receptorType == "receptorD" {
 		s.rect.pos.x, s.rect.pos.y = r.rect.pos.x+80, r.rect.pos.y
@@ -490,16 +496,16 @@ func (k *Kinase) update(params ...interface{}) {
 			var x_c, y_c = ebiten.CursorPosition()
 			switch k.kinaseType {
 			case "temp_tk1A":
-				k.rect.pos.x = ((-5 * (x_c + 100) / (9 * 1)) + (screenWidth*1/6)) * screenWidth / baseScreenWidth
+				k.rect.pos.x = ((-5 * (x_c + 100) / (9 * 1)) + (screenWidth*1/7)) * screenWidth / baseScreenWidth
 				k.rect.pos.y = ((-1 * (y_c + 100) / (5 * 1)) + 650) * screenHeight / baseScreenHeight
 			case "temp_tk1B":
-				k.rect.pos.x = ((-5 * (x_c + 100) / (9 * 1)) + (screenWidth*3/6)) * screenWidth / baseScreenWidth
+				k.rect.pos.x = ((-5 * (x_c + 100) / (9 * 1)) + (screenWidth*4/7)) * screenWidth / baseScreenWidth
 				k.rect.pos.y = ((-1 * (y_c + 100) / (5 * 1)) + 600) * screenHeight / baseScreenHeight
 			case "temp_tk1C":
-				k.rect.pos.x = ((-5 * (x_c + 100) / (9 * 1)) + (screenWidth*6/6)) * screenWidth / baseScreenWidth
+				k.rect.pos.x = ((-5 * (x_c + 100) / (9 * 1)) + (screenWidth*7/7)) * screenWidth / baseScreenWidth
 				k.rect.pos.y = ((-1 * (y_c + 100) / (5 * 1)) + 600) * screenHeight / baseScreenHeight
 			case "temp_tk1D":
-				k.rect.pos.x = ((-5 * (x_c + 100) / (9 * 1)) + (screenWidth*8/6)) * screenWidth / baseScreenWidth
+				k.rect.pos.x = ((-5 * (x_c + 100) / (9 * 1)) + (screenWidth*9/7)) * screenWidth / baseScreenWidth
 				k.rect.pos.y = ((-1 * (y_c + 100) / (5 * 1)) + 650) * screenHeight / baseScreenHeight
 			}
 		} else if k.is_moving {
@@ -520,12 +526,12 @@ func (k *Kinase) update(params ...interface{}) {
 			}
 		}
 	}
-	if len(params) > 0 && k.kinaseType != "temp_tk1" {
-		rect, ok := params[0].(Rectangle)
-		if !ok {
-			return
+	if k.kinaseType == "tk1" {
+		if rect_point_collision(k.rect, b_pos) && ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) && aabb_collision(k.rect, transductionStruct.tk2.rect) {
+			k.is_clicked_on = true
 		}
-		if rect_point_collision(k.rect, b_pos) && ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) && aabb_collision(k.rect, rect) {
+	} else if k.kinaseType == "tk2" {
+		if rect_point_collision(k.rect, b_pos) && ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) && aabb_collision(k.rect, transductionStruct.tfa.rect) {
 			k.is_clicked_on = true
 		}
 	}
@@ -722,27 +728,31 @@ func newCodonChoice(path string, rect Rectangle, bases string) CodonChoice {
 		bases:  bases,
 	}
 }
-
-func (c CodonChoice) update1(dnaFrag string) bool {
-	var x_c, y_c = ebiten.CursorPosition()
-	var b_pos = newVector(x_c, y_c)
-	if rect_point_collision(c.rect, b_pos) && inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
-		if c.bases == transcribe(dnaFrag) {
-			return true
-		}
+func newTRNA(path string, rect Rectangle, bases string) tRNA {
+	codonChoice := newCodonChoice(path, rect, bases)
+	return tRNA{
+		CodonChoice: codonChoice,
+		//other
 	}
-	return false
 }
 
-func (c CodonChoice) update2(mrnaFrag string) bool {
+func (c CodonChoice) update(params ...interface{}) {
+	frag := params[0].(*Template)
 	var x_c, y_c = ebiten.CursorPosition()
 	var b_pos = newVector(x_c, y_c)
 	if rect_point_collision(c.rect, b_pos) && inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
-		if c.bases == translate(mrnaFrag) {
-			return true
-		}
+		if len(params) > 1 {
+			if c.bases == translate(frag.codon) {frag.is_complete = true}
+		} else {if c.bases == transcribe(frag.codon) {frag.is_complete = true}}
 	}
-	return false
+}
+
+func (t tRNA) update(params ...interface{}) {
+	t.CodonChoice.update(params[0], true)
+}
+
+func (t tRNA) draw(screen *ebiten.Image) {
+	t.CodonChoice.draw(screen)
 }
 
 func (c CodonChoice) draw(screen *ebiten.Image) {

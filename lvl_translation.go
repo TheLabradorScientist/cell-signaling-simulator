@@ -65,7 +65,7 @@ func (l Level4) Update(g *Game) {
 		l.wrongTrna2.bases = translate(randomRNACodon(l.rightTrna.bases))
 		l.reset = false
 	}
-	l.mrna[l.mrna_ptr].is_complete = l.rightTrna.update2(l.mrna[l.mrna_ptr].codon)
+	//l.mrna[l.mrna_ptr].is_complete = l.rightTrna.update2(l.mrna[l.mrna_ptr].codon)
 
 	if l.mrna[l.mrna_ptr].is_complete {
 		nextMRNACodon(g)

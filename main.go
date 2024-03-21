@@ -47,14 +47,6 @@ var (
 	codonFont         Font
 	seedSignal        int
 
-	// CYTO 1 SPRITES
-	protoCytoBg_1 StillImage
-	cytoBg_1      Parallax
-	cytoNuc_1     Parallax
-	tk1           Kinase
-	tk2           Kinase
-	tfa           TFA
-
 	// NUCLEUS SPRITES
 	nucleusBg     StillImage
 	rna           [5]Transcript
@@ -76,18 +68,21 @@ var (
 	mrna       [5]Template
 	protein    [5]Transcript
 	mrna_ptr   int
-	rightTrna  CodonChoice
-	wrongTrna1 CodonChoice
-	wrongTrna2 CodonChoice
+	rightTrna  tRNA
+	wrongTrna1 tRNA
+	wrongTrna2 tRNA
 )
 
 var menuSprites []GUI
 var aboutSprites []GUI
 var levSelSprites []GUI
 var plasmaSprites []GUI
+var cyto1Sprites []GUI
+var nucleusSprites []GUI
+var cyto2Sprites []GUI
 
 type Game struct {
-	switchedScene		  bool
+	switchedScene         bool
 	switchedToPlasma      bool
 	switchedToMenu        bool
 	switchedToCyto1       bool
@@ -149,8 +144,8 @@ func (g *Game) init() {
 	ebiten.SetWindowResizingMode(ebiten.WindowResizingModeOnlyFullscreenEnabled)
 	defaultFont = newFont(loadFont("CourierPrime-Regular.ttf"), 32)
 	codonFont = newFont(loadFont("BlackOpsOne-Regular.ttf"), 60)
-	//maxWidth, maxHeight       = g.Layout(maxWidth, maxHeight)
-	// Initialize audio context
+	//	maxWidth, maxHeight       = g.Layout(maxWidth, maxHeight)
+	// 	Initialize audio context
 	audioContext = audio.NewContext(44100)
 	g.switchedScene = true
 
@@ -168,7 +163,9 @@ func (g *Game) init() {
 	}
 
 	var s_map = SceneConstructorMap{
-		"Main Menu": newMainMenu, "About": newAbout, "Level Selection": newLevelSelection, "Signal Reception": newReceptionLevel,
+		"Main Menu": newMainMenu, "About": newAbout, "Level Selection": newLevelSelection,
+		"Signal Reception": newReceptionLevel, "Signal Transduction": newTransductionLevel,
+		"Transcription": newTranscriptionLevel,
 	}
 
 	g.stateMachine = newStateMachine(s_map)
@@ -177,15 +174,6 @@ func (g *Game) init() {
 	seedSignal = rand.Intn(4) + 1
 	infoButton = newInfoPage("infoButton.png", "infoPage.png", newRect(850, 0, 165, 165), "btn")
 	otherToMenuButton = newButton("menuButton.png", newRect(1000, 0, 300, 200), ToMenu)
-
-	/* 	protoPlasmaBg = newStillImage("PlasmaBg.png", newRect(0, 0, 1250, 750))
-	   	plasmaBg = newParallax("ParallaxPlasma.png", newRect(100, 100, 1250, 750), 4)
-	   	plasmaMembrane = newParallax("plasmaMembrane.png", newRect(100, 300, 1250, 750), 2) */
-	//plasmaMembrane2 = newParallax("plasmaMembrane.png", newRect(0, 200, 1250, 750), 2)
-
-	protoCytoBg_1 = newStillImage("CytoBg1.png", newRect(0, 0, 1250, 750))
-	cytoBg_1 = newParallax("ParallaxCyto1.png", newRect(100, 100, 1250, 750), 4)
-	cytoNuc_1 = newParallax("ParallaxCyto1.5.png", newRect(100, 100, 1250, 750), 3)
 
 	nucleusBg = newStillImage("NucleusBg.png", newRect(0, 0, 1250, 750))
 	cytoBg_2 = newStillImage("CytoBg2.png", newRect(0, 0, 1250, 750))
@@ -202,20 +190,6 @@ func (g *Game) init() {
 		// PLACEHOLDER IN CASE WE DO NOT GET TIME TO CODE RANDOM CODONS
 		//template = [5]string{"TAC", "GTC", "CGG", "ACA", "ACT"}
 	}
-	/*
-		receptorA = newReceptor("inact_receptorA.png", newRect(50, 400, 100, 100), "receptorA")
-		receptorB = newReceptor("inact_receptorB.png", newRect(350, 400, 100, 100), "receptorB")
-		receptorC = newReceptor("inact_receptorC.png", newRect(650, 400, 100, 100), "receptorC")
-		receptorD = newReceptor("inact_receptorD.png", newRect(950, 400, 100, 100), "receptorD")
-
-		temp_tk1A = newKinase("inact_TK1.png", newRect(50, 600, 150, 150), "temp_tk1A")
-		temp_tk1B = newKinase("inact_TK1.png", newRect(350, 600, 150, 150), "temp_tk1B")
-		temp_tk1C = newKinase("inact_TK1.png", newRect(650, 600, 150, 150), "temp_tk1C")
-		temp_tk1D = newKinase("inact_TK1.png", newRect(950, 600, 150, 150), "temp_tk1D") */
-
-	tk1 = newKinase("act_TK1.png", newRect(500, -100, 150, 150), "tk1")
-	tk2 = newKinase("inact_TK2.png", newRect(250, 175, 150, 150), "tk2")
-	tfa = newTFA("inact_TFA.png", newRect(700, 500, 150, 150), "tfa1")
 
 	for x := 0; x < 5; x++ {
 		dna[x] = newTemplate("DNA.png", newRect(-50+200*x, 500, 150, 150), template[x], x)
@@ -249,14 +223,14 @@ func (g *Game) init() {
 
 	mrna_ptr = 0
 
-	rightTrna = newCodonChoice("codonButton.png", newRect(50, 150, 192, 111), translate(mrna[0].codon))
-	wrongTrna1 = newCodonChoice("codonButton.png", newRect(350, 150, 192, 111), translate(randomRNACodon(rightTrna.bases)))
-	wrongTrna2 = newCodonChoice("codonButton.png", newRect(650, 150, 192, 111), translate(randomRNACodon(rightTrna.bases)))
+	rightTrna = newTRNA("codonButton.png", newRect(50, 150, 192, 111), translate(mrna[0].codon))
+	wrongTrna1 = newTRNA("codonButton.png", newRect(350, 150, 192, 111), translate(randomRNACodon(rightTrna.bases)))
+	wrongTrna2 = newTRNA("codonButton.png", newRect(650, 150, 192, 111), translate(randomRNACodon(rightTrna.bases)))
 
 }
 
 func (g *Game) Update() error {
-	
+
 	ebiten.SetWindowTitle("CSPS - " + scene)
 	//g.stateMachine.update(g)
 
@@ -274,31 +248,8 @@ func (g *Game) Update() error {
 	case "Signal Reception":
 		g.stateMachine.update(g)
 	case "Signal Transduction":
-		//ebiten.SetWindowTitle("Cell Signaling Pathway - Signal Transduction")
-		otherToMenuButton.update(g)
-		cytoBg_1.update()
-		cytoNuc_1.update()
-		tk1.activate()
-		tk1.update(tk2.rect)
-		tk2.update(tfa.rect)
-		tfa.update()
-		infoButton.update()
-		info = updateInfo()
-
-		if tk1.is_clicked_on {
-			tk2.activate()
-			tk1.is_clicked_on = false
-		}
-		if tk2.is_clicked_on {
-			tfa.activate()
-			tk2.is_clicked_on = false
-		}
-		if tfa.rect.pos.y > screenHeight {
-			ToNucleus(g)
-		}
-
+		g.stateMachine.update(g)
 	case "Transcription":
-		//ebiten.SetWindowTitle("Cell Signaling Pathway - Transcription")
 		otherToMenuButton.update(g)
 		temp_tfa.activate()
 		temp_tfa.update()
@@ -306,33 +257,39 @@ func (g *Game) Update() error {
 		infoButton.update()
 		info = updateInfo()
 
+		curr := &dna[currentFrag]
+
 		if reset {
-			rightChoice.bases = transcribe(dna[currentFrag].codon)
+			rightChoice.bases = transcribe(curr.codon)
 			wrongChoice1.bases = randomRNACodon(rightChoice.bases)
 			wrongChoice2.bases = randomRNACodon(rightChoice.bases)
 			reset = false
 		}
+
 		//fmt.Printf("%t\n", dna[currentFrag].is_complete)
-		dna[currentFrag].is_complete = rightChoice.update1(dna[currentFrag].codon)
-		//fmt.Printf("%t\n", dna[currentFrag].is_complete)
-		if dna[currentFrag].is_complete {
+		if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
+			rightChoice.update(curr)
+		}
+		
+		if curr.is_complete {
 			nextDNACodon(g)
 		}
 
 	case "Translation":
-		//ebiten.SetWindowTitle("Cell Signaling Pathway - Translation")
 		otherToMenuButton.update(g)
 		infoButton.update()
 		info = updateInfo()
 
+		curr := &mrna[mrna_ptr]
+
 		if reset {
-			rightTrna.bases = translate(mrna[mrna_ptr].codon)
+			rightTrna.bases = translate(curr.codon)
 			wrongTrna1.bases = translate(randomRNACodon(rightTrna.bases))
 			wrongTrna2.bases = translate(randomRNACodon(rightTrna.bases))
 			reset = false
 		}
 		if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
-			mrna[mrna_ptr].is_complete = rightTrna.update2(mrna[mrna_ptr].codon)
+			rightTrna.update(curr)
 		}
 
 		if ribosome.update_movement() {
@@ -415,15 +372,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			scene = "Signal Transduction"
 		}
 	case "Signal Transduction":
-		protoCytoBg_1.draw(screen)
-		cytoBg_1.draw(screen)
-		cytoNuc_1.draw(screen)
-		tk1.draw(screen)
-		tk2.draw(screen)
-		tfa.draw(screen)
-		defaultFont.drawFont(screen, "WELCOME TO THE CYTOPLASM! \n Click when each kinase overlaps to follow \n the phosphorylation cascade!!", 100, 50, color.Black)
-		infoButton.draw(screen)
-		otherToMenuButton.draw(screen)
+		g.stateMachine.draw(g, screen)
 		if g.switchedToNucleus {
 			scene = "Transcription"
 		}
@@ -545,7 +494,6 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 		ribosome.draw(screen)
 		infoButton.draw(screen)
-
 		otherToMenuButton.draw(screen)
 	}
 
