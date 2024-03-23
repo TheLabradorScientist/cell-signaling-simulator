@@ -5,7 +5,6 @@ import (
 	"fmt"
 	_ "image/png"
 	"log"
-	"math/rand"
 	"os"
 	"path/filepath"
 
@@ -27,33 +26,36 @@ var (
 	heightRatio               = float64(maxHeight / baseScreenHeight)
 
 	audioContext *audio.Context
+	audioPlayer       *audio.Player
 
 	err               error
 	scene             string = "Main Menu"
+
 	otherToMenuButton Button
-	audioPlayer       *audio.Player
-	template          = [5]string{}
-	reset             bool
-	infoButton        InfoPage
 	info              string
-	state_array       []GUI
+	infoButton        InfoPage
+
+	reset             bool
 	defaultFont       Font
 	codonFont         Font
+
 	seedSignal        int
-
-
-	menuSprites []GUI
-	aboutSprites []GUI
-	levSelSprites []GUI
-	plasmaSprites []GUI
-	cyto1Sprites []GUI
-	nucleusSprites []GUI
-	cyto2Sprites []GUI
+	template          = [5]string{}
 )
 
 type Game struct {
 	switchedScene         bool
 	stateMachine          *StateMachine
+
+	state_array       []GUI
+
+	menuSprites []GUI
+	aboutSprites []GUI
+	levSelSprites []GUI
+	receptionSprites []GUI
+	transductionSprites []GUI
+	transcriptionSprites []GUI
+	translationSprites []GUI
 }
 
 func loadFile(image string) string {
@@ -129,6 +131,9 @@ func (g *Game) init() {
 		log.Fatal(err)
 	}
 
+	infoButton = newInfoPage("infoButton.png", "infoPage.png", newRect(850, 0, 165, 165), "btn")
+	otherToMenuButton = newButton("menuButton.png", newRect(1000, 0, 300, 200), ToMenu)
+
 	var s_map = SceneConstructorMap{
 		"Main Menu": newMainMenu, "About": newAbout, "Level Selection": newLevelSelection,
 		"Signal Reception": newReceptionLevel, "Signal Transduction": newTransductionLevel,
@@ -137,38 +142,6 @@ func (g *Game) init() {
 
 	g.stateMachine = newStateMachine(s_map)
 	ToMenu(g)
-
-	seedSignal = rand.Intn(4) + 1
-	infoButton = newInfoPage("infoButton.png", "infoPage.png", newRect(850, 0, 165, 165), "btn")
-	otherToMenuButton = newButton("menuButton.png", newRect(1000, 0, 300, 200), ToMenu)
-
-	switch seedSignal {
-	case 1:
-		template = [5]string{"TAC", randomDNACodon(), randomDNACodon(), randomDNACodon(), "ACT"}
-	case 2:
-		template = [5]string{"TAC", randomDNACodon(), randomDNACodon(), randomDNACodon(), "ATT"}
-	case 3:
-		template = [5]string{"TAC", randomDNACodon(), randomDNACodon(), randomDNACodon(), "ATC"}
-	case 4:
-		template = [5]string{"TAC", randomDNACodon(), randomDNACodon(), randomDNACodon(), "ATT"}
-	}
-
-	for x := 0; x < 5; x++ {
-		dna[x] = newTemplate("DNA.png", newRect(-50+200*x, 500, 150, 150), template[x], x)}
-	for x := 0; x < 5; x++ {
-		rna[x] = newTranscript("RNA.png", newRect(0, 200, 150, 150), transcribe(template[x]))
-	}
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	for x := 0; x < 5; x++ {
-		mrna[x] = newTemplate("RNA.png", newRect(0, 400, 150, 150), transcribe(dna[x].codon), x)
-	}
-	for x := 0; x < 5; x++ {
-		protein[x] = newTranscript("aminoAcid.png", newRect(50+(150*x), 400, 150, 150), translate(mrna[x].codon))
-	}
 }
 
 func (g *Game) Update() error {
@@ -190,21 +163,21 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		// Use this if statement to set sizes of graphics to fullscreen scale, else normal scale.
 		if screenWidth == baseScreenWidth && screenHeight == baseScreenHeight {
 			screenWidth, screenHeight = ebiten.ScreenSizeInFullscreen()
-			g.stateMachine.Scale(screen)
+			g.stateMachine.Scale(g, screen)
 			defaultFont = newFont(loadFont("CourierPrime-Regular.ttf"), 32*int(heightRatio))
 			codonFont = newFont(loadFont("BlackOpsOne-Regular.ttf"), 60*int(heightRatio))
 		}
 	} else {
 		if screenWidth != baseScreenWidth && screenHeight != baseScreenHeight {
 			screenWidth, screenHeight = baseScreenWidth, baseScreenHeight
-			g.stateMachine.Scale(screen)
+			g.stateMachine.Scale(g, screen)
 			defaultFont = newFont(loadFont("CourierPrime-Regular.ttf"), 32)
 			codonFont = newFont(loadFont("BlackOpsOne-Regular.ttf"), 60)
 		}
 	}
 
 	if g.switchedScene {
-		g.stateMachine.Scale(screen)
+		g.stateMachine.Scale(g, screen)
 		g.switchedScene = false
 	}
 

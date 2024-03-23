@@ -1,11 +1,14 @@
 package main
 
+import "math/rand"
+
 func ToPlasma(g *Game) {
 	scene = "Signal Reception"
 	g.stateMachine.changeState(g, scene)
 }
 
 func ToMenu(g *Game) {
+	g.reset()
 	scene = "Main Menu"
 	g.stateMachine.changeState(g, scene)
 }
@@ -39,7 +42,40 @@ func ToAbout(g *Game) {
 
 func (g *Game) reset() {
 	// Set length of all sprite arrays to 0
+	g.menuSprites = nil
+	g.aboutSprites = nil
+	g.levSelSprites = nil
+	g.receptionSprites = nil
+	g.transductionSprites = nil
+	g.transcriptionSprites = nil
+	g.translationSprites = nil
+
 	// Set seed signal to random integer 
+	seedSignal = rand.Intn(4) + 1
+
 	// Set template to random codons
-	
+	switch seedSignal {
+	case 1:
+		template = [5]string{"TAC", randomDNACodon(), randomDNACodon(), randomDNACodon(), "ACT"}
+	case 2:
+		template = [5]string{"TAC", randomDNACodon(), randomDNACodon(), randomDNACodon(), "ATT"}
+	case 3:
+		template = [5]string{"TAC", randomDNACodon(), randomDNACodon(), randomDNACodon(), "ATC"}
+	case 4:
+		template = [5]string{"TAC", randomDNACodon(), randomDNACodon(), randomDNACodon(), "ATT"}
+	}
+
+	// Set dna, rna, and proteins to random codons
+	for x := 0; x < 5; x++ {
+		dna[x] = newTemplate("DNA.png", newRect(-50+200*x, 500, 150, 150), template[x], x)}
+	for x := 0; x < 5; x++ {
+		rna[x] = newTranscript("RNA.png", newRect(0, 200, 150, 150), transcribe(template[x]))
+	}
+
+	for x := 0; x < 5; x++ {
+		mrna[x] = newTemplate("RNA.png", newRect(0, 400, 150, 150), transcribe(dna[x].codon), x)
+	}
+	for x := 0; x < 5; x++ {
+		protein[x] = newTranscript("aminoAcid.png", newRect(50+(150*x), 400, 150, 150), translate(mrna[x].codon))
+	}
 }

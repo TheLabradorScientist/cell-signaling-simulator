@@ -2,6 +2,7 @@ package main
 
 import (
 	"image/color"
+	"math/rand"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
@@ -28,7 +29,7 @@ type TranslationLevel struct {
 var translationStruct *TranslationLevel
 
 func newTranslationLevel(g *Game) {
-	if len(cyto2Sprites) == 0 {
+	if len(g.translationSprites) == 0 {
 		translationStruct = &TranslationLevel{
 			cytoBg_2: newStillImage("CytoBg2.png", newRect(0, 0, 1250, 750)),
 
@@ -36,26 +37,21 @@ func newTranslationLevel(g *Game) {
 
 			message: "FINALLY, BACK TO THE CYTOPLASM! \n" +
 				"Match each codon from your mRNA template \n" +
-				"to its corresponding amino acid to synthesize your protein!!!!",
+				"to its corresponding amino acid to synthesize \n" +
+				"your protein!!!!",
 		}
 
-		for x := 0; x < 5; x++ {
-			mrna[x] = newTemplate("RNA.png", newRect(0, 400, 150, 150), transcribe(dna[x].codon), x)
-		}
-		for x := 0; x < 5; x++ {
-			protein[x] = newTranscript("aminoAcid.png", newRect(50+(150*x), 400, 150, 150), translate(mrna[x].codon))
-		}
 		translationStruct.rightTrna = newTRNA("codonButton.png", newRect(50, 150, 192, 111), translate(mrna[0].codon))
 		translationStruct.wrongTrna1 = newTRNA("codonButton.png", newRect(350, 150, 192, 111), translate(randomRNACodon(translationStruct.rightTrna.bases)))
 		translationStruct.wrongTrna2 = newTRNA("codonButton.png", newRect(650, 150, 192, 111), translate(randomRNACodon(translationStruct.rightTrna.bases)))
 		translationStruct.infoButton = infoButton
 		translationStruct.otherToMenuButton = otherToMenuButton
 
-		cyto2Sprites = []GUI{
-			&translationStruct.cytoBg_2,
-			&translationStruct.ribosome, &translationStruct.rightTrna,
-			&translationStruct.wrongTrna1, &translationStruct.wrongTrna2,
-			&translationStruct.infoButton, &translationStruct.otherToMenuButton,
+		g.translationSprites = []GUI{
+			&translationStruct.cytoBg_2, &translationStruct.ribosome, 
+			&translationStruct.rightTrna, &translationStruct.wrongTrna1,
+			&translationStruct.wrongTrna2, &translationStruct.otherToMenuButton,
+			&translationStruct.infoButton, 
 		}
 	}
 	g.stateMachine.state = translationStruct
@@ -64,7 +60,17 @@ func newTranslationLevel(g *Game) {
 func (t *TranslationLevel) Init(g *Game) {
 	mrna_ptr = 0
 	reset = false
-	state_array = cyto2Sprites
+	t.ResetChoices()
+	g.state_array = g.translationSprites
+}
+
+func (t *TranslationLevel) ResetChoices() {
+	curr := &mrna[mrna_ptr]
+	rand.Shuffle(len(spots), func(i, j int) {spots[i], spots[j] = spots[j], spots[i]})
+	t.rightTrna.reset(0, translate(curr.codon))
+	t.wrongTrna1.reset(1, translate(randomRNACodon(t.rightTrna.bases)))
+	t.wrongTrna2.reset(2, translate(randomRNACodon(t.rightTrna.bases)))
+	reset = false
 }
 
 func (t *TranslationLevel) Update(g *Game) {
@@ -73,12 +79,8 @@ func (t *TranslationLevel) Update(g *Game) {
 
 	curr := &mrna[mrna_ptr]
 
-	if reset {
-		t.rightTrna.bases = translate(curr.codon)
-		t.wrongTrna1.bases = translate(randomRNACodon(t.rightTrna.bases))
-		t.wrongTrna2.bases = translate(randomRNACodon(t.rightTrna.bases))
-		reset = false
-	}
+	if reset {t.ResetChoices()}
+
 	if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
 		t.rightTrna.update(curr)
 	}

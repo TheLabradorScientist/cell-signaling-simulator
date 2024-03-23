@@ -2,6 +2,7 @@ package main
 
 import (
 	"image/color"
+	"math/rand"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
@@ -11,6 +12,7 @@ var (
 	currentFrag   = 0
 	rna		[5]Transcript
 	dna		[5]Template
+	spots   = [3]int{50, 350, 650}
 )
 
 type TranscriptionLevel struct {
@@ -34,33 +36,29 @@ type TranscriptionLevel struct {
 var transcriptionStruct *TranscriptionLevel
 
 func newTranscriptionLevel(g *Game) {
-	if len(nucleusSprites) == 0 {
+	if len(g.transcriptionSprites) == 0 {
 		transcriptionStruct = &TranscriptionLevel{
 			nucleusBg: newStillImage("NucleusBg.png", newRect(0, 0, 1250, 750)),
 
-			temp_tfa: newTFA("act_TFA.png", newRect(400, -100, 150, 150), "tfa2"),
+			temp_tfa: newTFA("inact_TFA.png", "act_TFA.png", newRect(400, -100, 150, 150), "tfa2"),
 			rnaPolymerase: newRNAPolymerase("rnaPolym.png", newRect(-350, 100, 340, 265)),
 		
 			message: "WELCOME TO THE NUCLEUS!\n" +
 			"Match each codon on the DNA template to the complementary\n" +
 			"RNA codon to transcribe a new mRNA molecule!!!",
 		}
-		for x := 0; x < 5; x++ {
-			dna[x] = newTemplate("DNA.png", newRect(-50+200*x, 500, 150, 150), template[x], x)}
-		for x := 0; x < 5; x++ {
-			rna[x] = newTranscript("RNA.png", newRect(0, 200, 150, 150), transcribe(template[x]))
-		}
+
 		transcriptionStruct.rightChoice = newCodonChoice("codonButton.png", newRect(50, 150, 192, 111), transcribe(dna[0].codon))
 		transcriptionStruct.wrongChoice1 = newCodonChoice("codonButton.png", newRect(350, 150, 192, 111), randomRNACodon(transcriptionStruct.rightChoice.bases))
 		transcriptionStruct.wrongChoice2 = newCodonChoice("codonButton.png", newRect(650, 150, 192, 111), randomRNACodon(transcriptionStruct.rightChoice.bases))
 		transcriptionStruct.infoButton = infoButton
 		transcriptionStruct.otherToMenuButton = otherToMenuButton
 
-		nucleusSprites = []GUI{
+		g.transcriptionSprites = []GUI{
 			&transcriptionStruct.nucleusBg, &transcriptionStruct.temp_tfa,
 			&transcriptionStruct.rnaPolymerase, &transcriptionStruct.rightChoice,
 			&transcriptionStruct.wrongChoice1, &transcriptionStruct.wrongChoice2,
-			&transcriptionStruct.infoButton, &transcriptionStruct.otherToMenuButton,
+			&transcriptionStruct.otherToMenuButton, &transcriptionStruct.infoButton, 
 		}
 	}
 	g.stateMachine.state = transcriptionStruct
@@ -68,34 +66,38 @@ func newTranscriptionLevel(g *Game) {
 
 func (t *TranscriptionLevel) Init(g *Game) {
 	currentFrag = 0
+	t.ResetChoices()
+	g.state_array = g.transcriptionSprites
+	t.temp_tfa.activate()
+}
+
+func (t *TranscriptionLevel) ResetChoices() {
+	curr := &dna[currentFrag]
+	rand.Shuffle(len(spots), func(i, j int) {spots[i], spots[j] = spots[j], spots[i]})
+	t.rightChoice.reset(0, transcribe(curr.codon))
+	t.wrongChoice1.reset(1, randomRNACodon(t.rightChoice.bases))
+	t.wrongChoice2.reset(2, randomRNACodon(t.rightChoice.bases))
 	reset = false
-	state_array = nucleusSprites
 }
 
 func (t *TranscriptionLevel) Update(g *Game) {
-		t.otherToMenuButton.update(g)
-		t.infoButton.update()
-		t.temp_tfa.activate()
-		t.temp_tfa.update()
-		t.rnaPolymerase.update(t.temp_tfa.rect.pos.y)
+	t.otherToMenuButton.update(g)
+	t.infoButton.update()
+	t.temp_tfa.update()
+	t.rnaPolymerase.update(t.temp_tfa.rect.pos.y)
 
-		curr := &dna[currentFrag]
+	curr := &dna[currentFrag]
 
-		if reset {
-			t.rightChoice.bases = transcribe(curr.codon)
-			t.wrongChoice1.bases = randomRNACodon(t.rightChoice.bases)
-			t.wrongChoice2.bases = randomRNACodon(t.rightChoice.bases)
-			reset = false
-		}
+	if reset {t.ResetChoices()}
 
-		//fmt.Printf("%t\n", dna[currentFrag].is_complete)
-		if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
-			t.rightChoice.update(curr)
-		}
+	//fmt.Printf("%t\n", dna[currentFrag].is_complete)
+	if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
+		t.rightChoice.update(curr)
+	}
 		
-		if curr.is_complete {
-			nextDNACodon(g)
-		}
+	if curr.is_complete {
+		nextDNACodon(g)
+	}
 
 }
 

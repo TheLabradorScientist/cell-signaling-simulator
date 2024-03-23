@@ -32,7 +32,7 @@ func newRect(x int, y int, width int, height int) Rectangle {
 
 // Check if a point and a rectangle collide
 func rect_point_collision(rect Rectangle, point Vector) bool {
-	if rect.pos.x <= point.x && rect.pos.x+rect.width >= point.y &&
+	if rect.pos.x <= point.x && rect.pos.x+rect.width >= point.x &&
 		rect.pos.y <= point.y && rect.pos.y+rect.height >= point.y {
 		return true
 	}

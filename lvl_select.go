@@ -19,7 +19,7 @@ var levSelStruct *LevelSelection
 
 // Initialize level selection struct and levSelSprites array if not initialized, then set state to levSelStruct
 func newLevelSelection(g *Game) {
-	if len(levSelSprites) == 0 {
+	if len(g.levSelSprites) == 0 {
 		levSelStruct = &LevelSelection{
 			levSelBg: newStillImage("levSelBg.png", newRect(0, 0, 1250, 750)),
 			levToMenuButton: newButton("menuButton.png", newRect(250, 190, 300, 200), ToMenu),
@@ -28,7 +28,7 @@ func newLevelSelection(g *Game) {
 			levToNucleusButton: newButton("levToNucleusBtn.png", newRect(520, 285, 300, 180), ToNucleus),
 			levToCyto2Button: newButton("levToCyto2Btn.png", newRect(820, 285, 300, 180), ToCyto2),
 		}
-		levSelSprites = []GUI{
+		g.levSelSprites = []GUI{
 			&levSelStruct.levSelBg, &levSelStruct.levToMenuButton, &levSelStruct.levToPlasmaButton, &levSelStruct.levToCyto1Button,
 			&levSelStruct.levToNucleusButton, &levSelStruct.levToCyto2Button,	
 		}
@@ -37,19 +37,19 @@ func newLevelSelection(g *Game) {
 }
 
 func (l *LevelSelection) Init(g *Game) {
-	state_array = levSelSprites
+	g.state_array = g.levSelSprites
 }
 
 func (l *LevelSelection) Update(g *Game) {
 	if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
-		for _, element := range levSelSprites {
+		for _, element := range g.levSelSprites {
 			element.update(g)
 		}
 	}
 }
 
 func (l *LevelSelection) Draw(g *Game, screen *ebiten.Image) {
-	for _, element := range levSelSprites {
+	for _, element := range g.levSelSprites {
 		element.draw(screen)
 	}
 }

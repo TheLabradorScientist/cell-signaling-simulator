@@ -2,7 +2,6 @@ package main
 
 import (
 	"image/color"
-	"math/rand"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
@@ -31,29 +30,30 @@ var receptors []*Receptor
 var receptorKinase map[*Receptor]*Kinase
 
 func newReceptionLevel(g *Game) {
-	if len(plasmaSprites) == 0 {
+	if len(g.receptionSprites) == 0 {
 		receptionStruct = &ReceptionLevel{
 			protoPlasmaBg:  newStillImage("PlasmaBg.png", newRect(0, 0, 1250, 750)),
 			plasmaBg:       newParallax("ParallaxPlasma.png", newRect(100, 100, 1250, 750), 4),
 			plasmaMembrane: newParallax("plasmaMembrane.png", newRect(100, 300, 1250, 750), 2),
 
-			receptorA: newReceptor("inact_receptorA.png", newRect(50, 400, 100, 100), "receptorA"),
-			receptorB: newReceptor("inact_receptorB.png", newRect(350, 400, 100, 100), "receptorB"),
-			receptorC: newReceptor("inact_receptorC.png", newRect(650, 400, 100, 100), "receptorC"),
-			receptorD: newReceptor("inact_receptorD.png", newRect(950, 400, 100, 100), "receptorD"),
+			receptorA: newReceptor("inact_receptorA.png", "act_receptorA.png", newRect(50, 400, 100, 100), "receptorA"),
+			receptorB: newReceptor("inact_receptorB.png", "act_receptorB.png", newRect(350, 400, 100, 100), "receptorB"),
+			receptorC: newReceptor("inact_receptorC.png", "act_receptorC.png", newRect(650, 400, 100, 100), "receptorC"),
+			receptorD: newReceptor("inact_receptorD.png", "act_receptorD.png", newRect(950, 400, 100, 100), "receptorD"),
 
-			temp_tk1A: newKinase("inact_TK1.png", newRect(50, 600, 150, 150), "temp_tk1A"),
-			temp_tk1B: newKinase("inact_TK1.png", newRect(350, 600, 150, 150), "temp_tk1B"),
-			temp_tk1C: newKinase("inact_TK1.png", newRect(650, 600, 150, 150), "temp_tk1C"),
-			temp_tk1D: newKinase("inact_TK1.png", newRect(950, 600, 150, 150), "temp_tk1D"),
+			temp_tk1A: newKinase("inact_TK1.png", "act_TK1.png", newRect(50, 600, 150, 150), "temp_tk1A"),
+			temp_tk1B: newKinase("inact_TK1.png", "act_TK1.png", newRect(350, 600, 150, 150), "temp_tk1B"),
+			temp_tk1C: newKinase("inact_TK1.png", "act_TK1.png", newRect(650, 600, 150, 150), "temp_tk1C"),
+			temp_tk1D: newKinase("inact_TK1.png", "act_TK1.png", newRect(950, 600, 150, 150), "temp_tk1D"),
 			
 			message: "WELCOME TO THE PLASMA MEMBRANE!\n" +
 				"Drag the signal to the matching receptor\n" +
 				"to enter the cell!",
 		}
-		seedSignal = rand.Intn(4) + 1
+
 		receptionStruct.infoButton = infoButton
 		receptionStruct.otherToMenuButton = otherToMenuButton
+
 		switch seedSignal {
 		case 1:
 			receptionStruct.signal = newSignal("signalA.png", newRect(500, 100, 100, 100))
@@ -73,12 +73,12 @@ func newReceptionLevel(g *Game) {
 			template = [5]string{"TAC", randomDNACodon(), randomDNACodon(), randomDNACodon(), "ATT"}
 		}
 
-		plasmaSprites = []GUI{
+		g.receptionSprites = []GUI{
 			&receptionStruct.protoPlasmaBg, &receptionStruct.plasmaBg, &receptionStruct.plasmaMembrane,
 			&receptionStruct.signal, &receptionStruct.receptorA, &receptionStruct.receptorB,
 			&receptionStruct.receptorC, &receptionStruct.receptorD, &receptionStruct.temp_tk1A,
 			&receptionStruct.temp_tk1B, &receptionStruct.temp_tk1C, &receptionStruct.temp_tk1D,
-			&receptionStruct.infoButton, &receptionStruct.otherToMenuButton,
+			&receptionStruct.otherToMenuButton, &receptionStruct.infoButton,
 		}
 
 		receptors = []*Receptor{&receptionStruct.receptorA, &receptionStruct.receptorB, &receptionStruct.receptorC, &receptionStruct.receptorD}
@@ -93,18 +93,18 @@ func newReceptionLevel(g *Game) {
 }
 
 func (r *ReceptionLevel) Init(g *Game) {
-	state_array = plasmaSprites
+	g.state_array = g.receptionSprites
 }
 
 func (r *ReceptionLevel) Update(g *Game) {
-	for _, element := range plasmaSprites {
+	for _, element := range g.receptionSprites {
 		element.update(g)
 	}
 
 	for _, receptor := range receptors {
 		if receptor.is_touching_signal {
 			if matchSR(r.signal.signalType, receptor.receptorType) {
-				receptor.animate("act_" + receptor.receptorType + ".png")
+				receptor.animate()
 				r.signal.bind(receptor)
 				receptorKinase[receptor].activate()
 			}	
@@ -117,7 +117,7 @@ func (r *ReceptionLevel) Update(g *Game) {
 }
 
 func (r *ReceptionLevel) Draw(g *Game, screen *ebiten.Image) {
-	for _, element := range plasmaSprites {
+	for _, element := range g.receptionSprites {
 		element.draw(screen)
 	}
 	defaultFont.drawFont(screen, r.message, 100, 50, color.RGBA{220, 100, 100, 50})

@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"image/color"
 
-	//"reflect"
-	//"math"
 	"strings"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -19,7 +17,7 @@ type ButtonFunc func(*Game)
 type GUI interface {
 	draw(screen *ebiten.Image)
 	update(params ...interface{})
-	scaleToScreen(screen *ebiten.Image)
+	scaleToScreen()
 	//getStructType(GUI) reflect.Type
 }
 
@@ -189,19 +187,6 @@ func newSprite(params ...interface{}) Sprite {
 	}
 }
 
-// 	Method of Sprite struct, calls scaleImage() on sprite image using
-// 	sprite geometry (op) and scaling factors
-func (s *Sprite) scaleToScreen(screen *ebiten.Image) {
-	s.op = ebiten.GeoM{}
-	if ebiten.IsFullscreen() {
-		s.image = scaleImage(s.origImage, 1.15*s.scaleW*float64(widthRatio), 1.2*s.scaleH*float64(heightRatio))
-		//s.image = scaleImage(s.origImage, s.scaleW*float64(widthRatio), s.scaleH*float64(heightRatio))
-	} else { 
-		s.image = scaleImage(s.origImage, s.scaleW, s.scaleH)
-	}
-	// NEVER TRY THIS CODE- IT BREAKS THE COMPUTER!!! - s.image = scaleImage(s.origImage, s.scaleW*float64(baseScreenWidth/screenWidth), s.scaleH*float64(baseScreenHeight/screenHeight))
-}
-
 // General function for scaling any image using the parameters for scaling factors
 func scaleImage(img *ebiten.Image, scaleFactorW float64, scaleFactorH float64) *ebiten.Image {
 	bounds := img.Bounds()
@@ -212,6 +197,19 @@ func scaleImage(img *ebiten.Image, scaleFactorW float64, scaleFactorH float64) *
 	ops.GeoM.Scale(scaleFactorW, scaleFactorH)				
 	scaled.DrawImage(ebiten.NewImageFromImage(img), ops)	// Draws resized img onto the empty scaled image
 	return scaled											// Returns scaled with img drawn onto new bounds
+}
+
+// 	Method of Sprite struct, calls scaleImage() on sprite image using
+// 	sprite geometry (op) and scaling factors
+func (s *Sprite) scaleToScreen() {
+	s.op = ebiten.GeoM{}
+	if ebiten.IsFullscreen() {
+		s.image = scaleImage(s.origImage, 1.15*s.scaleW*float64(widthRatio), 1.2*s.scaleH*float64(heightRatio))
+		//s.image = scaleImage(s.origImage, s.scaleW*float64(widthRatio), s.scaleH*float64(heightRatio))
+	} else { 
+		s.image = scaleImage(s.origImage, s.scaleW, s.scaleH)
+	}
+	// NEVER TRY THIS CODE- IT BREAKS THE COMPUTER!!! - s.image = scaleImage(s.origImage, s.scaleW*float64(baseScreenWidth/screenWidth), s.scaleH*float64(baseScreenHeight/screenHeight))
 }
 
 func (s Sprite) draw(screen *ebiten.Image, params ...interface{}) {
@@ -243,12 +241,6 @@ func (s StillImage) draw(screen *ebiten.Image) {
 
 func (s StillImage) update(params ...interface{}) {}
 
-func (s *StillImage) scaleToScreen(screen *ebiten.Image) { s.Sprite.scaleToScreen(screen) }
-func (b *Button) scaleToScreen(screen *ebiten.Image)     { b.Sprite.scaleToScreen(screen) }
-func (p *Parallax) scaleToScreen(screen *ebiten.Image)   { p.Sprite.scaleToScreen(screen) }
-func (i *InfoPage) scaleToScreen(screen *ebiten.Image)   { i.Sprite.scaleToScreen(screen) }
-func (k *Kinase) scaleToScreen(screen *ebiten.Image)   { k.Sprite.scaleToScreen(screen) }
-
 func newInfoPage(path1 string, path2 string, rect Rectangle, stat string) InfoPage {
 	sprite := newSprite(path1, path2, rect, 1.0)
 	return InfoPage{
@@ -263,15 +255,15 @@ func (i *InfoPage) update(params ...interface{}) {
 	if rect_point_collision(i.rect, b_pos) && inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
 		if i.status == "btn" {
 			i.status = "pg"
-			i.rect = newRect(0, 0, screenWidth, screenHeight)
-			sprite := newSprite("infoPage.png", i.rect, 1.0)
-			i.Sprite = sprite
+			i.Sprite.rect = newRect(0, 0, screenWidth, screenHeight)
 		} else {
 			i.status = "btn"
-			i.rect = newRect(850, 0, 165, 165)
-			sprite := newSprite("infoButton.png", i.rect, 1.0)
-			i.Sprite = sprite
+			i.Sprite.rect = newRect(850, 0, 165, 165)
 		}
+		temp_img := i.Sprite.origImage
+		i.Sprite.origImage = i.Sprite.origImage_2
+		i.Sprite.origImage_2 = temp_img
+		i.Sprite.scaleToScreen()
 	}
 }
 
@@ -350,7 +342,6 @@ func newVolButton(path string, rect Rectangle, cmd ButtonFunc, player audio.Play
 
 func (v *VolButton) update(params ...interface{}) {
 	v.Button.update(params...)
-	//curr := int64(v.player.Position())
 	if v.status == "ON" && !v.player.IsPlaying() {
 		v.player.Rewind()
 		v.player.Play()
@@ -427,8 +418,8 @@ func (s Signal) draw(screen *ebiten.Image) {
 	s.Sprite.draw(screen)
 }
 
-func newReceptor(path string, rect Rectangle, rtype string) Receptor {
-	sprite := newSprite(path, rect, 0.52)
+func newReceptor(path1 string, path2 string, rect Rectangle, rtype string) Receptor {
+	sprite := newSprite(path1, path2, rect, 0.52)
 	return Receptor{
 		Sprite:             sprite,
 		is_touching_signal: false,
@@ -471,13 +462,13 @@ func (r *Receptor) update(params ...interface{}) {
 	}
 }
 
-func (r *Receptor) animate(newImage string) {
-	sprite := newSprite(newImage, r.rect, 0.52)
-	r.Sprite = sprite
+func (r *Receptor) animate() {
+	r.Sprite.origImage = r.Sprite.origImage_2
+	r.Sprite.scaleToScreen()
 }
 
-func newKinase(path string, rect Rectangle, ktype string) Kinase {
-	sprite := newSprite(path, rect, 0.52)
+func newKinase(path1 string, path2 string, rect Rectangle, ktype string) Kinase {
+	sprite := newSprite(path1, path2, rect, 0.52)
 	return Kinase{
 		Sprite:        sprite,
 		is_moving:     false,
@@ -546,17 +537,13 @@ func (k Kinase) draw(screen *ebiten.Image) {
 }
 
 func (k *Kinase) activate() {
-	if k.kinaseType == "tk1" {
-		k.animate("act_TK1.png")
-	}
 	if k.kinaseType == "tk2" {
 		k.rect.pos.y -= 3 * (screenHeight / baseScreenHeight)
-		k.animate("act_TK2.png")
 	}
 	if strings.Contains(k.kinaseType, "temp_tk1") && !k.is_moving {
 		k.rect.pos.y -= 3 * (screenHeight / baseScreenHeight)
-		k.animate("act_TK1.png")
 	}
+	k.animate()
 	k.is_moving = true
 }
 
@@ -568,16 +555,16 @@ func (k *Kinase) descend() {
 	}
 }
 
-func (k *Kinase) animate(newImage string) {
-	sprite := newSprite(newImage, k.rect, 0.52)
-	k.Sprite = sprite
+func (k *Kinase) animate() {
+	k.Sprite.origImage = k.Sprite.origImage_2
+	k.Sprite.scaleToScreen()
 }
 
 func (t *TFA) activate() {
 	if t.tfaType == "tfa1" {
 		t.rect.pos.y -= 3 * (screenHeight / 750)
 	}
-	t.animate("act_TFA.png")
+	t.animate()
 	if t.tfaType == "tfa2" {
 		t.Sprite.scaleW *= 1.25
 		t.Sprite.scaleH *= 1.25
@@ -585,8 +572,8 @@ func (t *TFA) activate() {
 	t.is_active = true
 }
 
-func newTFA(path string, rect Rectangle, tfaType string) TFA {
-	sprite := newSprite(path, rect, 0.52)
+func newTFA(path1 string, path2 string, rect Rectangle, tfaType string) TFA {
+	sprite := newSprite(path1, path2, rect, 0.52)
 	if err != nil {
 		fmt.Println("Error parsing date:", err)
 	}
@@ -609,9 +596,9 @@ func (t *TFA) update(params ...interface{}) {
 	}
 }
 
-func (t *TFA) animate(newImage string) {
-	sprite := newSprite(newImage, t.rect, 0.52)
-	t.Sprite = sprite
+func (t *TFA) animate() {
+	t.Sprite.origImage = t.Sprite.origImage_2
+	t.Sprite.scaleToScreen()
 }
 
 func (t TFA) draw(screen *ebiten.Image) {
@@ -727,22 +714,33 @@ func newCodonChoice(path string, rect Rectangle, bases string) CodonChoice {
 		bases:  bases,
 	}
 }
-func newTRNA(path string, rect Rectangle, bases string) tRNA {
-	codonChoice := newCodonChoice(path, rect, bases)
-	return tRNA{
-		CodonChoice: codonChoice,
-		//other
-	}
-}
 
 func (c CodonChoice) update(params ...interface{}) {
 	frag := params[0].(*Template)
 	var x_c, y_c = ebiten.CursorPosition()
 	var b_pos = newVector(x_c, y_c)
-	if rect_point_collision(c.rect, b_pos) && inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
-		if len(params) > 1 {
-			if c.bases == translate(frag.codon) {frag.is_complete = true}
-		} else {if c.bases == transcribe(frag.codon) {frag.is_complete = true}}
+	if rect_point_collision(c.Sprite.rect, b_pos) && inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
+		if len(params) == 2 && c.bases == translate(frag.codon) || len(params) == 1 && c.bases == transcribe(frag.codon) {
+			frag.is_complete = true
+		}
+	}
+}
+
+func (c CodonChoice) draw(screen *ebiten.Image) {
+	c.Sprite.draw(screen)
+	codonFont.drawFont(screen, c.bases, c.rect.pos.x+25, c.rect.pos.y+90, color.Black)
+}
+
+func (c *CodonChoice) reset(index int, newBases string) {
+	c.rect.pos.x = spots[index]
+	c.bases = newBases
+}
+
+func newTRNA(path string, rect Rectangle, bases string) tRNA {
+	codonChoice := newCodonChoice(path, rect, bases)
+	return tRNA{
+		CodonChoice: codonChoice,
+		//other
 	}
 }
 
@@ -752,11 +750,6 @@ func (t tRNA) update(params ...interface{}) {
 
 func (t tRNA) draw(screen *ebiten.Image) {
 	t.CodonChoice.draw(screen)
-}
-
-func (c CodonChoice) draw(screen *ebiten.Image) {
-	c.Sprite.draw(screen)
-	codonFont.drawFont(screen, c.bases, c.rect.pos.x+25, c.rect.pos.y+90, color.Black)
 }
 
 // Updates movement of ribosome

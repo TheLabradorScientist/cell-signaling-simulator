@@ -23,7 +23,7 @@ var menuStruct *MainMenu
 
 // Initialize menu struct and menuSprites array if not initialized, then set state to menuStruct
 func newMainMenu(g *Game) {
-	if len(menuSprites) == 0 {
+	if len(g.menuSprites) == 0 {
 		menuStruct = &MainMenu{
 			protoStartBg: newStillImage("MenuBg.png", newRect(0, 0, 1250, 750)),
 			startBg:      newParallax("StartBg.png", newRect(0, 0, 1250, 750), 5),
@@ -37,7 +37,7 @@ func newMainMenu(g *Game) {
 			levSelButton: newButton("levSelButton.png", newRect(700, 450, 300, 200), ToLevelSelect),
 		}
 		menuStruct.volButton = newVolButton("volButtonOn.png", newRect(100, 100, 165, 165), menuStruct.volButton.Toggle, *audioPlayer)
-		menuSprites = []GUI{
+		g.menuSprites = []GUI{
 			&menuStruct.protoStartBg, &menuStruct.startBg, &menuStruct.startP1, &menuStruct.startP2,
 			&menuStruct.startP3, &menuStruct.startP4, &menuStruct.fixedStart, &menuStruct.playbutton,
 			&menuStruct.aboutButton, &menuStruct.levSelButton, &menuStruct.volButton}
@@ -46,17 +46,17 @@ func newMainMenu(g *Game) {
 }
 
 func (m *MainMenu) Init(g *Game) {
-	state_array = menuSprites
+	g.state_array = g.menuSprites
 }
 
 func (m *MainMenu) Update(g *Game) {
-	for _, element := range menuSprites {
+	for _, element := range g.menuSprites {
 		element.update(g)
 	}
 }
 
 func (m *MainMenu) Draw(g *Game, screen *ebiten.Image) {
-	for _, element := range menuSprites {
+	for _, element := range g.menuSprites {
 		element.draw(screen)
 	}
 }
