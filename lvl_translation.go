@@ -35,10 +35,11 @@ func newTranslationLevel(g *Game) {
 
 			ribosome: newRibosome("ribosome.png", newRect(40, 300, 404, 367)),
 
-			message: "FINALLY, BACK TO THE CYTOPLASM! \n" +
+			message: 
+				"FINALLY, BACK TO THE CYTOPLASM! \n" +
 				"Match each codon from your mRNA template \n" +
-				"to its corresponding amino acid to synthesize \n" +
-				"your protein!!!!",
+				"to its corresponding amino acid to \n" +
+				"synthesize your protein!!!!",
 		}
 
 		translationStruct.rightTrna = newTRNA("codonButton.png", newRect(50, 150, 192, 111), translate(mrna[0].codon))

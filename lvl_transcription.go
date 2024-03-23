@@ -43,14 +43,16 @@ func newTranscriptionLevel(g *Game) {
 			temp_tfa: newTFA("inact_TFA.png", "act_TFA.png", newRect(400, -100, 150, 150), "tfa2"),
 			rnaPolymerase: newRNAPolymerase("rnaPolym.png", newRect(-350, 100, 340, 265)),
 		
-			message: "WELCOME TO THE NUCLEUS!\n" +
-			"Match each codon on the DNA template to the complementary\n" +
-			"RNA codon to transcribe a new mRNA molecule!!!",
+			message: 
+				"WELCOME TO THE NUCLEUS! \n" +
+				"Match each codon on the DNA template to \n" +
+				"the complementary RNA codon to transcribe \n" +
+				"a new mRNA molecule!!!",
 		}
 
-		transcriptionStruct.rightChoice = newCodonChoice("codonButton.png", newRect(50, 150, 192, 111), transcribe(dna[0].codon))
-		transcriptionStruct.wrongChoice1 = newCodonChoice("codonButton.png", newRect(350, 150, 192, 111), randomRNACodon(transcriptionStruct.rightChoice.bases))
-		transcriptionStruct.wrongChoice2 = newCodonChoice("codonButton.png", newRect(650, 150, 192, 111), randomRNACodon(transcriptionStruct.rightChoice.bases))
+		transcriptionStruct.rightChoice = newCodonChoice("codonButton.png", newRect(50, 200, 192, 111), transcribe(dna[0].codon))
+		transcriptionStruct.wrongChoice1 = newCodonChoice("codonButton.png", newRect(350, 200, 192, 111), randomRNACodon(transcriptionStruct.rightChoice.bases))
+		transcriptionStruct.wrongChoice2 = newCodonChoice("codonButton.png", newRect(650, 200, 192, 111), randomRNACodon(transcriptionStruct.rightChoice.bases))
 		transcriptionStruct.infoButton = infoButton
 		transcriptionStruct.otherToMenuButton = otherToMenuButton
 

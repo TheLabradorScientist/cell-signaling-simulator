@@ -32,8 +32,10 @@ func newTransductionLevel(g *Game) {
 			tk2: newKinase("inact_TK2.png", "act_TK2.png", newRect(250, 175, 150, 150), "tk2"),
 			tfa: newTFA("inact_TFA.png", "act_TFA.png", newRect(700, 500, 150, 150), "tfa1"),
 
-			message: "WELCOME TO THE CYTOPLASM! \n" +
-				"Click when each kinase overlaps to follow \n the phosphorylation cascade!!",
+			message: 
+				"WELCOME TO THE CYTOPLASM! \n" +
+				"Click when the kinases overlap to \n" +
+				"follow the phosphorylation cascade!!",
 		}
 		transductionStruct.infoButton = infoButton
 		transductionStruct.otherToMenuButton = otherToMenuButton

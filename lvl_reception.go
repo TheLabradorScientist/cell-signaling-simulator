@@ -46,9 +46,10 @@ func newReceptionLevel(g *Game) {
 			temp_tk1C: newKinase("inact_TK1.png", "act_TK1.png", newRect(650, 600, 150, 150), "temp_tk1C"),
 			temp_tk1D: newKinase("inact_TK1.png", "act_TK1.png", newRect(950, 600, 150, 150), "temp_tk1D"),
 			
-			message: "WELCOME TO THE PLASMA MEMBRANE!\n" +
-				"Drag the signal to the matching receptor\n" +
-				"to enter the cell!",
+			message: 
+				"WELCOME TO THE PLASMA MEMBRANE! \n" +
+				"Drag the signal to the matching \n" +
+				"receptor to enter the cell!",
 		}
 
 		receptionStruct.infoButton = infoButton

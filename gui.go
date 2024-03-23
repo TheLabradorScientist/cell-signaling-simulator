@@ -383,7 +383,7 @@ func newSignal(path string, rect Rectangle) Signal {
 }
 
 func (s *Signal) update(params ...interface{}) {
-	var x_c, y_c = ebiten.CursorPosition()
+	x_c, y_c := ebiten.CursorPosition()
 	var b_pos = newVector(x_c, y_c)
 
 	if !s.is_dragged {
@@ -391,18 +391,17 @@ func (s *Signal) update(params ...interface{}) {
 			s.is_dragged = true
 		}
 	} else if s.is_dragged {
-		if s.rect.pos.y <= receptionStruct.receptorB.rect.pos.y && b_pos.y <= receptionStruct.receptorB.rect.pos.y-50 {
-			s.rect.pos.y = b_pos.y - (s.rect.height / 2)
+		if s.rect.pos.y <= receptionStruct.receptorB.rect.pos.y && b_pos.y <= receptionStruct.receptorB.rect.pos.y-25 {
+			s.Sprite.drag(true, true, b_pos)
 		} else {
-			if s.rect.pos.y > receptionStruct.receptorB.rect.pos.y {
-				s.rect.pos.y -= 1
-			} else if s.rect.pos.y < receptionStruct.receptorB.rect.pos.y {
-				s.rect.pos.y += 1
-			}
+			s.Sprite.drag(true, false, b_pos)
 		}
-		s.rect.pos = newVector(b_pos.x-s.rect.width/2, s.rect.pos.y)
-
 	}
+}
+
+func (s *Sprite) drag(x_drag, y_drag bool, b_pos Vector) {
+	if x_drag {s.rect.pos.x = b_pos.x - (s.rect.width/2)}
+	if y_drag {s.rect.pos.y = b_pos.y - (s.rect.height/2)}
 }
 
 func (s *Signal) bind(r *Receptor) {
@@ -436,24 +435,16 @@ func (r *Receptor) update(params ...interface{}) {
 	switch r.receptorType {
 	case "receptorA":
 		r.rect.pos.x = ((-5 * (x_c + 100) / (9 * 1)) + (screenWidth*1/7)) * screenWidth / baseScreenWidth
-		r.rect.pos.y = ((-1 * (y_c + 100) / (5 * 1)) + 450) * screenHeight / baseScreenHeight
-		//r.rect.pos.x = plasmaMembrane.rect.pos.x + 50
-		//r.rect.pos.y = plasmaMembrane.rect.pos.y + 400
+		r.rect.pos.y = ((-1 * (y_c + 100) / (4 * 1)) + 450) * screenHeight / baseScreenHeight
 	case "receptorB":
 		r.rect.pos.x = ((-5 * (x_c + 100) / (9 * 1)) + (screenWidth*4/7)) * screenWidth / baseScreenWidth
-		r.rect.pos.y = ((-1 * (y_c + 100) / (5 * 1)) + 400) * screenHeight / baseScreenHeight
-		//r.rect.pos.x = plasmaMembrane.rect.pos.x + 500
-		//r.rect.pos.y = plasmaMembrane.rect.pos.y + 400
+		r.rect.pos.y = ((-1 * (y_c + 100) / (4 * 1)) + 400) * screenHeight / baseScreenHeight
 	case "receptorC":
 		r.rect.pos.x = ((-5 * (x_c + 100) / (9 * 1)) + (screenWidth*7/7)) * screenWidth / baseScreenWidth
-		r.rect.pos.y = ((-1 * (y_c + 100) / (5 * 1)) + 400) * screenHeight / baseScreenHeight
-		//r.rect.pos.x = plasmaMembrane.rect.pos.x + 950
-		//r.rect.pos.y = plasmaMembrane.rect.pos.y + 400
+		r.rect.pos.y = ((-1 * (y_c + 100) / (4 * 1)) + 400) * screenHeight / baseScreenHeight
 	case "receptorD":
 		r.rect.pos.x = ((-5 * (x_c + 100) / (9 * 1)) + (screenWidth*9/7)) * screenWidth / baseScreenWidth
-		r.rect.pos.y = ((-1 * (y_c + 100) / (5 * 1)) + 450) * screenHeight / baseScreenHeight
-		//r.rect.pos.x = plasmaMembrane.rect.pos.x + 1400
-		//r.rect.pos.y = plasmaMembrane.rect.pos.y + 400
+		r.rect.pos.y = ((-1 * (y_c + 100) / (4 * 1)) + 450) * screenHeight / baseScreenHeight
 	}
 	if aabb_collision(receptionStruct.signal.rect, r.rect) {
 		r.is_touching_signal = true
