@@ -5,14 +5,14 @@ import (
 	"math/rand"
 
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/inpututil"
+	//"github.com/hajimehoshi/ebiten/v2/inpututil"
 )
 
 var (
 	currentFrag   = 0
 	rna		[5]Transcript
 	dna		[5]Template
-	spots   = [3]int{50, 350, 650}
+	spots   = [3]int{100, 400, 700}
 )
 
 type TranscriptionLevel struct {
@@ -50,9 +50,9 @@ func newTranscriptionLevel(g *Game) {
 				"a new mRNA molecule!!!",
 		}
 
-		transcriptionStruct.rightChoice = newCodonChoice("codonButton.png", newRect(50, 200, 192, 111), transcribe(dna[0].codon))
-		transcriptionStruct.wrongChoice1 = newCodonChoice("codonButton.png", newRect(350, 200, 192, 111), randomRNACodon(transcriptionStruct.rightChoice.bases))
-		transcriptionStruct.wrongChoice2 = newCodonChoice("codonButton.png", newRect(650, 200, 192, 111), randomRNACodon(transcriptionStruct.rightChoice.bases))
+		transcriptionStruct.rightChoice = newCodonChoice("codonButton.png", newRect(100, 200, 192, 111), transcribe(dna[0].codon))
+		transcriptionStruct.wrongChoice1 = newCodonChoice("codonButton.png", newRect(400, 200, 192, 111), randomRNACodon(transcriptionStruct.rightChoice.bases))
+		transcriptionStruct.wrongChoice2 = newCodonChoice("codonButton.png", newRect(700, 200, 192, 111), randomRNACodon(transcriptionStruct.rightChoice.bases))
 		transcriptionStruct.infoButton = infoButton
 		transcriptionStruct.otherToMenuButton = otherToMenuButton
 
@@ -76,9 +76,9 @@ func (t *TranscriptionLevel) Init(g *Game) {
 func (t *TranscriptionLevel) ResetChoices() {
 	curr := &dna[currentFrag]
 	rand.Shuffle(len(spots), func(i, j int) {spots[i], spots[j] = spots[j], spots[i]})
-	t.rightChoice.reset(0, transcribe(curr.codon))
-	t.wrongChoice1.reset(1, randomRNACodon(t.rightChoice.bases))
-	t.wrongChoice2.reset(2, randomRNACodon(t.rightChoice.bases))
+	t.rightChoice.reset(0, 200, transcribe(curr.codon))
+	t.wrongChoice1.reset(1, 200, randomRNACodon(t.rightChoice.bases))
+	t.wrongChoice2.reset(2, 200, randomRNACodon(t.rightChoice.bases))
 	reset = false
 }
 
@@ -93,9 +93,9 @@ func (t *TranscriptionLevel) Update(g *Game) {
 	if reset {t.ResetChoices()}
 
 	//fmt.Printf("%t\n", dna[currentFrag].is_complete)
-	if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
-		t.rightChoice.update(curr)
-	}
+	t.rightChoice.update(curr)
+	t.wrongChoice1.update(curr)
+	t.wrongChoice2.update(curr)
 		
 	if curr.is_complete {
 		nextDNACodon(g)

@@ -100,6 +100,7 @@ type Nucleobase struct {
 type CodonChoice struct {
 	Sprite
 	bases string
+	is_dragged bool
 	// codonType string // Correct vs Incorrect
 }
 
@@ -703,18 +704,31 @@ func newCodonChoice(path string, rect Rectangle, bases string) CodonChoice {
 	return CodonChoice{
 		Sprite: sprite,
 		bases:  bases,
+		is_dragged: false,
 	}
 }
 
-func (c CodonChoice) update(params ...interface{}) {
+func (c *CodonChoice) update(params ...interface{}) {
 	frag := params[0].(*Template)
 	var x_c, y_c = ebiten.CursorPosition()
 	var b_pos = newVector(x_c, y_c)
-	if rect_point_collision(c.Sprite.rect, b_pos) && inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
-		if len(params) == 2 && c.bases == translate(frag.codon) || len(params) == 1 && c.bases == transcribe(frag.codon) {
-			frag.is_complete = true
+	if rect_point_collision(c.Sprite.rect, b_pos) {
+		if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
+			c.is_dragged = true
+		} else if inpututil.IsMouseButtonJustReleased(ebiten.MouseButtonLeft) {
+			c.is_dragged = false
+			if len(params) == 2 {
+				if aabb_collision(c.rect, translationStruct.ribosome.rect) && c.bases == translate(frag.codon) {
+					frag.is_complete = true
+				}
+			} else if len(params) == 1 {
+				if aabb_collision(c.rect, transcriptionStruct.rnaPolymerase.rect) && c.bases == transcribe(frag.codon) {
+					frag.is_complete = true
+				}
+			}
 		}
 	}
+	if c.is_dragged {c.Sprite.drag(true, true, b_pos)}
 }
 
 func (c CodonChoice) draw(screen *ebiten.Image) {
@@ -722,8 +736,8 @@ func (c CodonChoice) draw(screen *ebiten.Image) {
 	codonFont.drawFont(screen, c.bases, c.rect.pos.x+25, c.rect.pos.y+90, color.Black)
 }
 
-func (c *CodonChoice) reset(index int, newBases string) {
-	c.rect.pos.x = spots[index]
+func (c *CodonChoice) reset(index, y_pos int, newBases string) {
+	c.rect.pos = newVector(spots[index], y_pos)
 	c.bases = newBases
 }
 
@@ -735,7 +749,7 @@ func newTRNA(path string, rect Rectangle, bases string) tRNA {
 	}
 }
 
-func (t tRNA) update(params ...interface{}) {
+func (t *tRNA) update(params ...interface{}) {
 	t.CodonChoice.update(params[0], true)
 }
 

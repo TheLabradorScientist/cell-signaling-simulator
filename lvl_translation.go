@@ -5,7 +5,7 @@ import (
 	"math/rand"
 
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/inpututil"
+	//"github.com/hajimehoshi/ebiten/v2/inpututil"
 )
 
 var (
@@ -42,9 +42,9 @@ func newTranslationLevel(g *Game) {
 				"synthesize your protein!!!!",
 		}
 
-		translationStruct.rightTrna = newTRNA("codonButton.png", newRect(50, 150, 192, 111), translate(mrna[0].codon))
-		translationStruct.wrongTrna1 = newTRNA("codonButton.png", newRect(350, 150, 192, 111), translate(randomRNACodon(translationStruct.rightTrna.bases)))
-		translationStruct.wrongTrna2 = newTRNA("codonButton.png", newRect(650, 150, 192, 111), translate(randomRNACodon(translationStruct.rightTrna.bases)))
+		translationStruct.rightTrna = newTRNA("codonButton.png", newRect(100, 200, 192, 111), translate(mrna[0].codon))
+		translationStruct.wrongTrna1 = newTRNA("codonButton.png", newRect(400, 200, 192, 111), translate(randomRNACodon(translationStruct.rightTrna.bases)))
+		translationStruct.wrongTrna2 = newTRNA("codonButton.png", newRect(700, 200, 192, 111), translate(randomRNACodon(translationStruct.rightTrna.bases)))
 		translationStruct.infoButton = infoButton
 		translationStruct.otherToMenuButton = otherToMenuButton
 
@@ -68,9 +68,9 @@ func (t *TranslationLevel) Init(g *Game) {
 func (t *TranslationLevel) ResetChoices() {
 	curr := &mrna[mrna_ptr]
 	rand.Shuffle(len(spots), func(i, j int) {spots[i], spots[j] = spots[j], spots[i]})
-	t.rightTrna.reset(0, translate(curr.codon))
-	t.wrongTrna1.reset(1, translate(randomRNACodon(t.rightTrna.bases)))
-	t.wrongTrna2.reset(2, translate(randomRNACodon(t.rightTrna.bases)))
+	t.rightTrna.reset(0, 200, translate(curr.codon))
+	t.wrongTrna1.reset(1, 200, translate(randomRNACodon(t.rightTrna.bases)))
+	t.wrongTrna2.reset(2, 200, translate(randomRNACodon(t.rightTrna.bases)))
 	reset = false
 }
 
@@ -82,9 +82,9 @@ func (t *TranslationLevel) Update(g *Game) {
 
 	if reset {t.ResetChoices()}
 
-	if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
-		t.rightTrna.update(curr)
-	}
+	t.rightTrna.update(curr)
+	t.wrongTrna1.update(curr)
+	t.wrongTrna2.update(curr)
 
 	t.ribosome.update(g)
 }
