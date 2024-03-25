@@ -7,7 +7,7 @@ import (
 )
 
 type TransductionLevel struct {
-	// CYTO 1 SPRITES
+	// TRANSDUCTION SPRITES
 	protoCytoBg_1     StillImage
 	cytoBg_1          Parallax
 	cytoNuc_1         Parallax
@@ -34,7 +34,7 @@ func newTransductionLevel(g *Game) {
 
 			message: 
 				"WELCOME TO THE CYTOPLASM! \n" +
-				"Click when the kinases overlap to \n" +
+				"Click where the kinases overlap to \n" +
 				"follow the phosphorylation cascade!!",
 		}
 		transductionStruct.infoButton = infoButton
@@ -73,7 +73,9 @@ func (t *TransductionLevel) Update(g *Game) {
 
 func (t *TransductionLevel) Draw(g *Game, screen *ebiten.Image) {
 	for _, element := range g.transductionSprites {
-		element.draw(screen)
+		if element != &t.infoButton{element.draw(screen)}
 	}
-	defaultFont.drawFont(screen, t.message, 100, 50, color.Black)
+	defaultFont.drawFont(screen, t.message, 75, 50, color.Black)
+
+	t.infoButton.draw(screen)
 }

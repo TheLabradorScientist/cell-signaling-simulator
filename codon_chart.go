@@ -77,7 +77,6 @@ func randomBase(nuclAcid string) string {
 func randomRNACodon(exception string) string {
 	randCodon := ""
 	for x := 0; x < 3; x++ {
-		seedSignal = rand.Intn(4) + 1
 		randCodon += randomBase("RNA")
 	}
 	if randCodon != exception {
@@ -91,7 +90,6 @@ func randomDNACodon() string {
 	exceptions := []string{"ATC", "ATT", "ACT"}
 	randCodon := ""
 	for x := 0; x < 3; x++ {
-		seedSignal = rand.Intn(4) + 1
 		randCodon += randomBase("DNA")
 	}
 	if !contains(exceptions, randCodon) {

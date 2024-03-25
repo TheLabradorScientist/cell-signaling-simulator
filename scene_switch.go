@@ -1,6 +1,9 @@
 package main
 
-import "math/rand"
+import (
+	"fmt"
+	"math/rand"
+)
 
 func ToPlasma(g *Game) {
 	scene = "Signal Reception"
@@ -67,13 +70,13 @@ func (g *Game) reset() {
 
 	// Set dna, rna, and proteins to random codons
 	for x := 0; x < 5; x++ {
-		dna[x] = newTemplate("DNA.png", newRect(-50+200*x, 500, 150, 150), template[x], x)}
+		dna[x] = newTemplate("DNA.png", newRect(0+200*x, 400, 150, 150), template[x], x)}
 	for x := 0; x < 5; x++ {
-		rna[x] = newTranscript("RNA.png", newRect(0, 200, 150, 150), transcribe(template[x]))
+		rna[x] = newTranscript("RNA" + fmt.Sprint(x) + ".png", newRect(250, 0, 150, 150), transcribe(template[x]))
 	}
 
 	for x := 0; x < 5; x++ {
-		mrna[x] = newTemplate("RNA.png", newRect(0, 400, 150, 150), transcribe(dna[x].codon), x)
+		mrna[x] = newTemplate("DNA.png", newRect(0, 400, 150, 150), transcribe(dna[x].codon), x)
 	}
 	for x := 0; x < 5; x++ {
 		protein[x] = newTranscript("aminoAcid.png", newRect(50+(150*x), 400, 150, 150), translate(mrna[x].codon))

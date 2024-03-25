@@ -25,8 +25,8 @@ type GUI interface {
 //	return reflect.TypeOf(g)
 //}
 
-//	Create Sprite struct with fields for image, second image (optional),
-//	rectangle, scale factors, matrix draw option, + original images
+// Create Sprite struct with fields for image, second image (optional),
+// rectangle, scale factors, matrix draw option, + original images
 type Sprite struct {
 	image       *ebiten.Image
 	image_2     *ebiten.Image
@@ -99,7 +99,7 @@ type Nucleobase struct {
 
 type CodonChoice struct {
 	Sprite
-	bases string
+	bases      string
 	is_dragged bool
 	// codonType string // Correct vs Incorrect
 }
@@ -135,15 +135,15 @@ type StillImage struct {
 func newSprite(params ...interface{}) Sprite {
 	// if 4 parameters passed, two images are needed
 	if len(params) == 4 {
-		path1 := params[0].(string)  // image 1
-		path2 := params[1].(string)  // image 2
+		path1 := params[0].(string) // image 1
+		path2 := params[1].(string) // image 2
 		rect := params[2].(Rectangle)
 		scaleW, scaleH := params[3].(float64), params[3].(float64)
 
 		// Store original image from the parameter to use for scaling in fullscreen
 		var origImg, _, err1 = ebitenutil.NewImageFromFile(loadFile(path1))
 		var origImg2, _, err2 = ebitenutil.NewImageFromFile(loadFile(path2))
-		
+
 		// Check error if image does not exist
 		if err1 != nil {
 			fmt.Println("Error parsing date:", err)
@@ -193,21 +193,21 @@ func scaleImage(img *ebiten.Image, scaleFactorW float64, scaleFactorH float64) *
 	bounds := img.Bounds()
 	width := int(float64(bounds.Dx()) * scaleFactorW)
 	height := int(float64(bounds.Dy()) * scaleFactorH)
-	scaled := ebiten.NewImage(width, height)				// Creates empty new image with desired width/height
-	ops := &ebiten.DrawImageOptions{}						// Create new DrawImageOptions to resize img from parameter
-	ops.GeoM.Scale(scaleFactorW, scaleFactorH)				
-	scaled.DrawImage(ebiten.NewImageFromImage(img), ops)	// Draws resized img onto the empty scaled image
-	return scaled											// Returns scaled with img drawn onto new bounds
+	scaled := ebiten.NewImage(width, height) // Creates empty new image with desired width/height
+	ops := &ebiten.DrawImageOptions{}        // Create new DrawImageOptions to resize img from parameter
+	ops.GeoM.Scale(scaleFactorW, scaleFactorH)
+	scaled.DrawImage(ebiten.NewImageFromImage(img), ops) // Draws resized img onto the empty scaled image
+	return scaled                                        // Returns scaled with img drawn onto new bounds
 }
 
-// 	Method of Sprite struct, calls scaleImage() on sprite image using
-// 	sprite geometry (op) and scaling factors
+// Method of Sprite struct, calls scaleImage() on sprite image using
+// sprite geometry (op) and scaling factors
 func (s *Sprite) scaleToScreen() {
 	s.op = ebiten.GeoM{}
 	if ebiten.IsFullscreen() {
 		s.image = scaleImage(s.origImage, 1.15*s.scaleW*float64(widthRatio), 1.2*s.scaleH*float64(heightRatio))
 		//s.image = scaleImage(s.origImage, s.scaleW*float64(widthRatio), s.scaleH*float64(heightRatio))
-	} else { 
+	} else {
 		s.image = scaleImage(s.origImage, s.scaleW, s.scaleH)
 	}
 	// NEVER TRY THIS CODE- IT BREAKS THE COMPUTER!!! - s.image = scaleImage(s.origImage, s.scaleW*float64(baseScreenWidth/screenWidth), s.scaleH*float64(baseScreenHeight/screenHeight))
@@ -401,8 +401,12 @@ func (s *Signal) update(params ...interface{}) {
 }
 
 func (s *Sprite) drag(x_drag, y_drag bool, b_pos Vector) {
-	if x_drag {s.rect.pos.x = b_pos.x - (s.rect.width/2)}
-	if y_drag {s.rect.pos.y = b_pos.y - (s.rect.height/2)}
+	if x_drag {
+		s.rect.pos.x = b_pos.x - (s.rect.width / 2)
+	}
+	if y_drag {
+		s.rect.pos.y = b_pos.y - (s.rect.height / 2)
+	}
 }
 
 func (s *Signal) bind(r *Receptor) {
@@ -435,16 +439,16 @@ func (r *Receptor) update(params ...interface{}) {
 	var x_c, y_c = ebiten.CursorPosition()
 	switch r.receptorType {
 	case "receptorA":
-		r.rect.pos.x = ((-5 * (x_c + 100) / (9 * 1)) + (screenWidth*1/7)) * screenWidth / baseScreenWidth
+		r.rect.pos.x = ((-5 * (x_c + 100) / (9 * 1)) + (screenWidth * 1 / 7)) * screenWidth / baseScreenWidth
 		r.rect.pos.y = ((-1 * (y_c + 100) / (4 * 1)) + 450) * screenHeight / baseScreenHeight
 	case "receptorB":
-		r.rect.pos.x = ((-5 * (x_c + 100) / (9 * 1)) + (screenWidth*4/7)) * screenWidth / baseScreenWidth
+		r.rect.pos.x = ((-5 * (x_c + 100) / (9 * 1)) + (screenWidth * 4 / 7)) * screenWidth / baseScreenWidth
 		r.rect.pos.y = ((-1 * (y_c + 100) / (4 * 1)) + 400) * screenHeight / baseScreenHeight
 	case "receptorC":
-		r.rect.pos.x = ((-5 * (x_c + 100) / (9 * 1)) + (screenWidth*7/7)) * screenWidth / baseScreenWidth
+		r.rect.pos.x = ((-5 * (x_c + 100) / (9 * 1)) + (screenWidth * 7 / 7)) * screenWidth / baseScreenWidth
 		r.rect.pos.y = ((-1 * (y_c + 100) / (4 * 1)) + 400) * screenHeight / baseScreenHeight
 	case "receptorD":
-		r.rect.pos.x = ((-5 * (x_c + 100) / (9 * 1)) + (screenWidth*9/7)) * screenWidth / baseScreenWidth
+		r.rect.pos.x = ((-5 * (x_c + 100) / (9 * 1)) + (screenWidth * 9 / 7)) * screenWidth / baseScreenWidth
 		r.rect.pos.y = ((-1 * (y_c + 100) / (4 * 1)) + 450) * screenHeight / baseScreenHeight
 	}
 	if aabb_collision(receptionStruct.signal.rect, r.rect) {
@@ -478,16 +482,16 @@ func (k *Kinase) update(params ...interface{}) {
 			var x_c, y_c = ebiten.CursorPosition()
 			switch k.kinaseType {
 			case "temp_tk1A":
-				k.rect.pos.x = ((-5 * (x_c + 100) / (9 * 1)) + (screenWidth*1/7)) * screenWidth / baseScreenWidth
+				k.rect.pos.x = ((-5 * (x_c + 100) / (9 * 1)) + (screenWidth * 1 / 7)) * screenWidth / baseScreenWidth
 				k.rect.pos.y = ((-1 * (y_c + 100) / (5 * 1)) + 650) * screenHeight / baseScreenHeight
 			case "temp_tk1B":
-				k.rect.pos.x = ((-5 * (x_c + 100) / (9 * 1)) + (screenWidth*4/7)) * screenWidth / baseScreenWidth
+				k.rect.pos.x = ((-5 * (x_c + 100) / (9 * 1)) + (screenWidth * 4 / 7)) * screenWidth / baseScreenWidth
 				k.rect.pos.y = ((-1 * (y_c + 100) / (5 * 1)) + 600) * screenHeight / baseScreenHeight
 			case "temp_tk1C":
-				k.rect.pos.x = ((-5 * (x_c + 100) / (9 * 1)) + (screenWidth*7/7)) * screenWidth / baseScreenWidth
+				k.rect.pos.x = ((-5 * (x_c + 100) / (9 * 1)) + (screenWidth * 7 / 7)) * screenWidth / baseScreenWidth
 				k.rect.pos.y = ((-1 * (y_c + 100) / (5 * 1)) + 600) * screenHeight / baseScreenHeight
 			case "temp_tk1D":
-				k.rect.pos.x = ((-5 * (x_c + 100) / (9 * 1)) + (screenWidth*9/7)) * screenWidth / baseScreenWidth
+				k.rect.pos.x = ((-5 * (x_c + 100) / (9 * 1)) + (screenWidth * 9 / 7)) * screenWidth / baseScreenWidth
 				k.rect.pos.y = ((-1 * (y_c + 100) / (5 * 1)) + 650) * screenHeight / baseScreenHeight
 			}
 		} else if k.is_moving {
@@ -557,10 +561,10 @@ func (t *TFA) activate() {
 		t.rect.pos.y -= 3 * (screenHeight / 750)
 	}
 	t.animate()
-	if t.tfaType == "tfa2" {
+	/* 	if t.tfaType == "tfa2" {
 		t.Sprite.scaleW *= 1.25
 		t.Sprite.scaleH *= 1.25
-	}
+	} */
 	t.is_active = true
 }
 
@@ -581,7 +585,7 @@ func (t *TFA) update(params ...interface{}) {
 		if t.rect.pos.y <= screenHeight && t.tfaType == "tfa1" {
 			t.rect.pos.y += 2 * (screenHeight / 750)
 		}
-		if t.rect.pos.y <= 400*screenHeight/750 && t.tfaType == "tfa2" {
+		if t.rect.pos.y <= 450 && t.tfaType == "tfa2" {
 			t.rect.pos.y += 2 * (screenHeight / 750)
 			t.rect.pos.x -= 1 * (screenWidth / 1250)
 		}
@@ -598,7 +602,7 @@ func (t TFA) draw(screen *ebiten.Image) {
 }
 
 func newRNAPolymerase(path string, rect Rectangle) RNAPolymerase {
-	sprite := newSprite(path, rect, 1.0)
+	sprite := newSprite(path, rect, 0.5)
 	return RNAPolymerase{
 		Sprite: sprite,
 	}
@@ -610,8 +614,8 @@ func (r *RNAPolymerase) update(params ...interface{}) {
 		if !ok {
 			return
 		}
-		if tfaPosY >= 300 {
-			if r.rect.pos.x <= 25 {
+		if tfaPosY >= 450 {
+			if r.rect.pos.x <= 110 {
 				r.rect.pos.y += 1 * (screenHeight / 750)
 				r.rect.pos.x += 2 * (screenWidth / 1250)
 			}
@@ -631,7 +635,7 @@ func (r RNAPolymerase) draw(screen *ebiten.Image) {
 }
 
 func newTranscript(path string, rect Rectangle, codon string) Transcript {
-	sprite := newSprite(path, rect, 1.0)
+	sprite := newSprite(path, rect, 0.5)
 	return Transcript{
 		Sprite: sprite,
 		codon:  codon,
@@ -639,18 +643,11 @@ func newTranscript(path string, rect Rectangle, codon string) Transcript {
 }
 
 func (transcr Transcript) draw(screen *ebiten.Image) {
-	op := &ebiten.DrawImageOptions{}
-	op.GeoM.Translate(float64(transcr.rect.pos.x), float64(transcr.rect.pos.y))
-	scaleW := float64(screenWidth) / 1250
-	scaleH := float64(screenHeight) / 750
-	op.GeoM.Scale(scaleW, scaleH)
-	transcr.rect.width *= int(scaleW)
-	transcr.rect.height *= int(scaleH)
-	screen.DrawImage(transcr.image, op)
+	transcr.Sprite.draw(screen)
 }
 
 func newTemplate(path string, rect Rectangle, codon string, fragment int) Template {
-	sprite := newSprite(path, rect, 1.0)
+	sprite := newSprite(path, rect, 0.5)
 	return Template{
 		Sprite:      sprite,
 		codon:       codon,
@@ -660,14 +657,14 @@ func newTemplate(path string, rect Rectangle, codon string, fragment int) Templa
 }
 
 func (temp Template) draw(screen *ebiten.Image) {
-	op := &ebiten.DrawImageOptions{}
-	op.GeoM.Translate(float64(temp.rect.pos.x), float64(temp.rect.pos.y))
-	scaleW := float64(screenWidth) / 1250
-	scaleH := float64(screenHeight) / 750
-	op.GeoM.Scale(scaleW, scaleH)
-	temp.rect.width *= int(scaleW)
-	temp.rect.height *= int(scaleH)
-	screen.DrawImage(temp.image, op)
+	temp.Sprite.draw(screen)
+}
+
+func (transcr *Transcript) move() {
+	if transcr.rect.pos.x < 1250 {
+		transcr.rect.pos.x += 4
+		transcr.rect.pos.y -= 1
+	}
 }
 
 func nextDNACodon(g *Game) {
@@ -676,8 +673,12 @@ func nextDNACodon(g *Game) {
 		dna[currentFrag].is_complete = false
 		reset = true
 	} else {
-		ToCyto2(g)
-		reset = false
+		if rna[4].rect.pos.x < 1250 {
+			rna[4].move()
+		} else {
+			ToCyto2(g)
+			reset = false
+		}
 	}
 }
 
@@ -702,8 +703,8 @@ func newRibosome(path string, rect Rectangle) Ribosome {
 func newCodonChoice(path string, rect Rectangle, bases string) CodonChoice {
 	sprite := newSprite(path, rect, 1.0)
 	return CodonChoice{
-		Sprite: sprite,
-		bases:  bases,
+		Sprite:     sprite,
+		bases:      bases,
 		is_dragged: false,
 	}
 }
@@ -728,7 +729,9 @@ func (c *CodonChoice) update(params ...interface{}) {
 			}
 		}
 	}
-	if c.is_dragged {c.Sprite.drag(true, true, b_pos)}
+	if c.is_dragged {
+		c.Sprite.drag(true, true, b_pos)
+	}
 }
 
 func (c CodonChoice) draw(screen *ebiten.Image) {
@@ -771,7 +774,9 @@ func (ribo *Ribosome) update(params ...interface{}) {
 				ribo.rect.pos.y += 3 * (screenHeight / 750)
 			} else if ribo.rect.pos.x < (160 * (mrna_ptr + 1)) {
 				ribo.rect.pos.x += 5 * (screenWidth / 1250)
-			} else {nextMRNACodon(g)}
+			} else {
+				nextMRNACodon(g)
+			}
 		}
 	}
 }

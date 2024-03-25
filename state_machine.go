@@ -26,6 +26,7 @@ func newStateMachine(s_map SceneConstructorMap) *StateMachine {
 }
 
 func (s *StateMachine) changeState(g *Game, s_name string) {
+	//s.state.volButton.player.Close()
 	s.s_map[s_name](g)
 	s.state.Init(g)
 	info = updateInfo()

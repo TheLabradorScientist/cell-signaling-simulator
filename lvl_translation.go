@@ -5,7 +5,6 @@ import (
 	"math/rand"
 
 	"github.com/hajimehoshi/ebiten/v2"
-	//"github.com/hajimehoshi/ebiten/v2/inpututil"
 )
 
 var (
@@ -15,7 +14,7 @@ var (
 )
 
 type TranslationLevel struct {
-	// CYTO 2 SPRITES
+	// TRANSLATION SPRITES
 	cytoBg_2          StillImage
 	ribosome          Ribosome
 	rightTrna         tRNA
@@ -37,8 +36,8 @@ func newTranslationLevel(g *Game) {
 
 			message: 
 				"FINALLY, BACK TO THE CYTOPLASM! \n" +
-				"Match each codon from your mRNA template \n" +
-				"to its corresponding amino acid to \n" +
+				"Drag the tRNA with the corresponding \n" +
+				"amino acid to the ribosome to \n" +
 				"synthesize your protein!!!!",
 		}
 
@@ -98,7 +97,6 @@ func (t *TranslationLevel) Draw(g *Game, screen *ebiten.Image) {
 	t.wrongTrna1.draw(screen)
 	t.wrongTrna2.draw(screen)
 
-	t.infoButton.draw(screen)
 	t.otherToMenuButton.draw(screen)
 
 	// Draw amino acids before ribosome moves without drawing amino acid for STOP.
@@ -110,10 +108,12 @@ func (t *TranslationLevel) Draw(g *Game, screen *ebiten.Image) {
 	}
 
 	if mrna_ptr != -1 {
-		codonFont.drawFont(screen, mrna[mrna_ptr].codon, mrna[0].rect.pos.x+500, mrna[0].rect.pos.y+200, color.Black)
+		codonFont.drawFont(screen, mrna[mrna_ptr].codon, mrna[0].rect.pos.x+500, mrna[0].rect.pos.y+300, color.Black)
 	}
 
 	t.ribosome.draw(screen)
 
-	defaultFont.drawFont(screen, t.message, 100, 50, color.Black)
+	defaultFont.drawFont(screen, t.message, 75, 50, color.Black)
+
+	t.infoButton.draw(screen)
 }

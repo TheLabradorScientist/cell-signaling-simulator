@@ -7,7 +7,7 @@ import (
 )
 
 type ReceptionLevel struct {
-	// PLASMA SPRITES
+	// RECEPTION SPRITES
 	protoPlasmaBg     StillImage
 	plasmaBg          Parallax
 	plasmaMembrane    Parallax
@@ -119,8 +119,8 @@ func (r *ReceptionLevel) Update(g *Game) {
 
 func (r *ReceptionLevel) Draw(g *Game, screen *ebiten.Image) {
 	for _, element := range g.receptionSprites {
-		element.draw(screen)
+		if element != &r.infoButton{element.draw(screen)}
 	}
-	defaultFont.drawFont(screen, r.message, 100, 50, color.RGBA{220, 100, 100, 50})
-
+	defaultFont.drawFont(screen, r.message, 75, 50, color.RGBA{220, 75, 100, 50})
+	r.infoButton.draw(screen)
 }
