@@ -9,14 +9,16 @@ import (
 
 var (
 	mrna_ptr = 0
-	mrna     [5]Template
-	protein  [5]Transcript
+	mrna     	[5]Template
+	protein  	[5]Transcript	
+	mRNAbases   [15]Nucleobase
 )
 
 type TranslationLevel struct {
 	// TRANSLATION SPRITES
 	cytoBg_2          StillImage
 	ribosome          Ribosome
+	mRNA			  [5]Template
 	rightTrna         tRNA
 	wrongTrna1        tRNA
 	wrongTrna2        tRNA
@@ -33,7 +35,7 @@ func newTranslationLevel(g *Game) {
 			cytoBg_2: newStillImage("CytoBg2.png", newRect(0, 0, 1250, 750)),
 
 			ribosome: newRibosome("ribosome.png", newRect(40, 300, 404, 367)),
-
+			mRNA: mrna,
 			message: 
 				"FINALLY, BACK TO THE CYTOPLASM! \n" +
 				"Drag the tRNA with the corresponding \n" +
@@ -49,6 +51,7 @@ func newTranslationLevel(g *Game) {
 
 		g.translationSprites = []GUI{
 			&translationStruct.cytoBg_2, &translationStruct.ribosome, 
+			&translationStruct.mRNA[0],
 			&translationStruct.rightTrna, &translationStruct.wrongTrna1,
 			&translationStruct.wrongTrna2, &translationStruct.otherToMenuButton,
 			&translationStruct.infoButton, 
@@ -59,7 +62,12 @@ func newTranslationLevel(g *Game) {
 
 func (t *TranslationLevel) Init(g *Game) {
 	mrna_ptr = 0
-	reset = false
+	for x := 0; x < len(mRNAbases); x++ {
+		base := string(mrna[x/3].codon[x%3])
+		posX := mrna[2].rect.pos.x + (50 * x)
+		posY := mrna[2].rect.pos.y
+		mRNAbases[x] = newNucleobase(base, newRect(posX, posY, 65, 150), x, true)
+	}
 	t.ResetChoices()
 	g.state_array = g.translationSprites
 }
@@ -91,7 +99,7 @@ func (t *TranslationLevel) Update(g *Game) {
 func (t *TranslationLevel) Draw(g *Game, screen *ebiten.Image) {
 	t.cytoBg_2.draw(screen)
 
-	mrna[0].draw(screen)
+	t.mRNA[0].draw(screen)
 
 	t.rightTrna.draw(screen)
 	t.wrongTrna1.draw(screen)
@@ -107,11 +115,19 @@ func (t *TranslationLevel) Draw(g *Game, screen *ebiten.Image) {
 		}
 	}
 
-	if mrna_ptr != -1 {
-		codonFont.drawFont(screen, mrna[mrna_ptr].codon, mrna[0].rect.pos.x+500, mrna[0].rect.pos.y+300, color.Black)
-	}
-
 	t.ribosome.draw(screen)
+
+	if mrna_ptr != -1 {
+		if mrna_ptr == 0 {
+			mRNAbases[0].draw(screen)
+			mRNAbases[1].draw(screen)
+			mRNAbases[2].draw(screen)
+		} else {
+			for y := 0; y < 3; y++ {
+				mRNAbases[(mrna_ptr*3)+y].draw(screen)
+			}
+		}
+	}
 
 	defaultFont.drawFont(screen, t.message, 75, 50, color.Black)
 

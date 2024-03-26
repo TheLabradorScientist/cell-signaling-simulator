@@ -79,6 +79,7 @@ type TFA struct {
 type Transcript struct {
 	Sprite
 	codon string
+	isRNA bool
 }
 
 type Template struct {
@@ -580,9 +581,15 @@ func (t *TFA) update(params ...interface{}) {
 		if t.rect.pos.y <= screenHeight && t.tfaType == "tfa1" {
 			t.rect.pos.y += 2 * (screenHeight / 750)
 		}
-		if t.rect.pos.y <= 450 && t.tfaType == "tfa2" {
-			t.rect.pos.y += 4 * (screenHeight / 750)
-			t.rect.pos.x -= 2 * (screenWidth / 1250)
+		if t.tfaType == "tfa2" {
+			rnaPolymPos := transcriptionStruct.rnaPolymerase.rect.pos
+			if rnaPolymPos.x >= 80 {
+				t.rect.pos.x = rnaPolymPos.x + 60
+				t.rect.pos.y = rnaPolymPos.y + 115
+			} else if t.rect.pos.y <= 450 {
+				t.rect.pos.y += 4 * (screenHeight / 750)
+				t.rect.pos.x -= 2 * (screenWidth / 1250)
+			}
 		}
 	}
 }
@@ -605,40 +612,52 @@ func newRNAPolymerase(path string, rect Rectangle) RNAPolymerase {
 
 func (r *RNAPolymerase) update(params ...interface{}) {
 	if len(params) > 0 {
-		tfaPosY, ok := params[0].(int)
+		g, ok := params[0].(*Game)
+		tfaPosY := transcriptionStruct.temp_tfa.rect.pos.y
 		if !ok {
 			return
 		}
-		if tfaPosY >= 450 {
-			if r.rect.pos.x <= 110 {
-				r.rect.pos.y += 1 * (screenHeight / 750)
-				r.rect.pos.x += 2 * (screenWidth / 1250)
+		if tfaPosY >= 420 {
+			if r.rect.pos.x <= 80 {
+				r.rect.pos.y += 2 * (screenHeight / 750)
+				r.rect.pos.x += 4 * (screenWidth / 1250)
+			}
+		}
+		// Checks if current DNA codon is complete
+		if dna[currentFrag].is_complete {
+			if currentFrag == 4 && r.rect.pos.x < screenWidth+50 {
+				r.rect.pos.x += 5 * (screenWidth / 1250)
+				r.rect.pos.y += 3 * (screenHeight / 750)
+			} else if r.rect.pos.x < (160 * (currentFrag + 1)) {
+				r.rect.pos.x += 5 * (screenWidth / 1250)
+			} else {
+				nextDNACodon(g)
 			}
 		}
 	}
 }
 
 func (r RNAPolymerase) draw(screen *ebiten.Image) {
-	op := &ebiten.DrawImageOptions{}
-	op.GeoM.Translate(float64(r.rect.pos.x), float64(r.rect.pos.y))
-	scaleW := float64(screenWidth) / 1250
-	scaleH := float64(screenHeight) / 750
-	op.GeoM.Scale(scaleW, scaleH)
-	r.rect.width *= int(scaleW)
-	r.rect.height *= int(scaleH)
-	screen.DrawImage(r.image, op)
+	r.Sprite.draw(screen)
 }
 
-func newTranscript(path string, rect Rectangle, codon string) Transcript {
+func newTranscript(path string, rect Rectangle, codon string, isRNA bool) Transcript {
 	sprite := newSprite(path, rect, 0.5)
 	return Transcript{
 		Sprite: sprite,
 		codon:  codon,
+		isRNA:  isRNA,
 	}
 }
 
 func (transcr Transcript) draw(screen *ebiten.Image) {
 	transcr.Sprite.draw(screen)
+}
+
+func (transcr *Transcript) update(params ...interface{}) {
+	if transcr.isRNA {
+		transcr.rect.pos.x = transcriptionStruct.rnaPolymerase.rect.pos.x - 750
+	}
 }
 
 func newTemplate(path string, rect Rectangle, codon string, fragment int) Template {
@@ -654,6 +673,8 @@ func newTemplate(path string, rect Rectangle, codon string, fragment int) Templa
 func (temp Template) draw(screen *ebiten.Image) {
 	temp.Sprite.draw(screen)
 }
+
+func (temp Template) update(params ...interface{}) {}
 
 func (transcr *Transcript) move() {
 	if transcr.rect.pos.x < 1250 {
@@ -782,8 +803,10 @@ func (ribo Ribosome) draw(screen *ebiten.Image) {
 
 func newNucleobase(btype string, rect Rectangle, index int, isTemp bool) Nucleobase {
 	path := nucleobaseImages[btype]
-	sprite := newSprite(path, rect, 0.5)
-	if isTemp == false {sprite.op.Rotate(-3.14)}
+	sprite := newSprite(path, rect, 0.48)
+	if !isTemp {
+		sprite.op.Rotate(-3.14)
+	}
 	return Nucleobase{
 		Sprite:     sprite,
 		baseType:   btype,
@@ -802,13 +825,17 @@ var nucleobaseImages = map[string]string{
 
 func (n Nucleobase) draw(screen *ebiten.Image) {
 	n.Sprite.draw(screen)
-	codonFont.drawFont(screen, n.baseType, n.rect.pos.x-50, n.rect.pos.y-50, color.Black)
+	if !n.isTemplate {
+		codonFont.drawFont(screen, n.baseType, n.rect.pos.x-50, n.rect.pos.y-50, color.Black)
+	} else {
+		codonFont.drawFont(screen, n.baseType, n.rect.pos.x, n.rect.pos.y+100, color.Black)
+	}
+
 }
 
 func (n *Nucleobase) update(params ...interface{}) {
-	posX := 150 + rna[4].rect.pos.x + (50 * n.index)
-	n.rect.pos.x = posX
-	n.rect.pos.y = rna[4].rect.pos.y + 500 - (25 * n.index)
+	n.rect.pos.x = (675 + transcriptionStruct.RNA[currentFrag].rect.pos.x + (50 * n.index)) - 150*(currentFrag-1)
+	n.rect.pos.y = (transcriptionStruct.RNA[4].rect.pos.y + 400 + (25 * n.index)) - 75*(currentFrag-1)
 }
 
 func (n Nucleobase) String() string {
