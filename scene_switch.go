@@ -78,6 +78,6 @@ func (g *Game) reset() {
 		mrna[x] = newTemplate("DNA.png", newRect(100*x, 400, 150, 150), transcribe(dna[x].codon), x)
 	}
 	for x := 0; x < 5; x++ {
-		protein[x] = newTranscript("aminoAcid.png", newRect(50+(150*x), 400, 150, 150), translate(mrna[x].codon), false)
+		protein[x] = newTranscript("aminoAcid.png", newRect(110+(150*x), 375, 150, 150), translate(mrna[x].codon), false)
 	}
 }

@@ -12,6 +12,11 @@ var (
 	rna         [5]Transcript
 	dna         [5]Template
 	spots       = [3]int{350, 650, 950}
+	adenine = newNucleobase("A", newRect(100, 500, 65, 150), 0, false)
+	thymine = newNucleobase("T", newRect(100, 500, 65, 150), 0, false)
+	guanine = newNucleobase("G", newRect(100, 500, 65, 150), 0, false)
+	cytosine = newNucleobase("C", newRect(100, 500, 65, 150), 0, false)
+	uracil = newNucleobase("U", newRect(100, 500, 65, 150), 0, false)
 )
 
 type TranscriptionLevel struct {
@@ -19,11 +24,11 @@ type TranscriptionLevel struct {
 	nucleusBg         StillImage
 	temp_tfa          TFA
 	rnaPolymerase     RNAPolymerase
-	RNA               [5]Transcript
-	DNA               [5]Template
+	RNA               [6]Transcript
+	DNA               [6]Template
 	DNAbases    	  [15]Nucleobase
-	origRNAbases	  [15]Nucleobase	// Dummy list containing positions and bases, accessed by RNA bases
-	RNAbases 		  [15]Nucleobase 	// List that is actually drawn onto screen and updated.
+	origRNAbases	  [18]Nucleobase	// Dummy list containing positions and bases, accessed by RNA bases
+	RNAbases 		  [18]Nucleobase 	// List that is actually drawn onto screen and updated.
 	rightChoice       CodonChoice
 	wrongChoice1      CodonChoice
 	wrongChoice2      CodonChoice
@@ -46,17 +51,20 @@ func newTranscriptionLevel(g *Game) {
 
 			temp_tfa:      newTFA("inact_TFA.png", "act_TFA.png", newRect(420, -100, 150, 150), "tfa2"),
 			rnaPolymerase: newRNAPolymerase("rnaPolym.png", newRect(-400, 100, 340, 265)),
-			DNA:           dna,
-			RNA:           rna,
 			message: "WELCOME TO THE NUCLEUS! \n" +
 				"Drag the complementary RNA codon \n" +
 				"to RNA Polymerase to transcribe \n" +
 				"a new mRNA molecule!!!",
 		}
 
+		copy(transcriptionStruct.DNA[:], dna[:])
+		transcriptionStruct.DNA[5] = dna[4]
+		copy(transcriptionStruct.RNA[:], rna[:])
+		transcriptionStruct.RNA[5] = newTranscript("RNA5.png", transcriptionStruct.RNA[4].rect, transcriptionStruct.RNA[4].codon, true)
+
 		transcriptionStruct.rightChoice = newCodonChoice("codonButton.png", newRect(100, 200, 192, 111), transcribe(dna[0].codon))
-		transcriptionStruct.wrongChoice1 = newCodonChoice("codonButton.png", newRect(400, 200, 192, 111), randomRNACodon(transcriptionStruct.rightChoice.bases))
-		transcriptionStruct.wrongChoice2 = newCodonChoice("codonButton.png", newRect(700, 200, 192, 111), randomRNACodon(transcriptionStruct.rightChoice.bases))
+		transcriptionStruct.wrongChoice1 = newCodonChoice("codonButton.png", newRect(400, 200, 192, 111), randomRNACodon(transcriptionStruct.rightChoice.codon))
+		transcriptionStruct.wrongChoice2 = newCodonChoice("codonButton.png", newRect(700, 200, 192, 111), randomRNACodon(transcriptionStruct.rightChoice.codon))
 		transcriptionStruct.infoButton = infoButton
 		transcriptionStruct.otherToMenuButton = otherToMenuButton
 
@@ -75,11 +83,14 @@ func newTranscriptionLevel(g *Game) {
 
 func (t *TranscriptionLevel) Init(g *Game) {
 	currentFrag = 0
-	for x := 0; x < len(t.origRNAbases); x++ {
+	t.origRNAbases[0] = newNucleobase("N/A", newRect(0, 0, 65, 150), 0, false)
+	t.origRNAbases[1] = newNucleobase("N/A", newRect(0, 0, 65, 150), 1, false)
+	t.origRNAbases[2] = newNucleobase("N/A", newRect(0, 0, 65, 150), 2, false)
+	for x := 0; x < len(t.origRNAbases)-3; x++ {
 		base := string(t.RNA[x/3].codon[x%3])
 		posX := 125 + t.RNA[currentFrag].rect.pos.x + (50 * x)
 		posY := 250 + t.RNA[currentFrag].rect.pos.y + 220 - (15 * x)
-		t.origRNAbases[x] = newNucleobase(base, newRect(posX, posY, 65, 150), x, false)
+		t.origRNAbases[x+3] = newNucleobase(base, newRect(posX, posY, 65, 150), x, false)
 	}
 	t.RNAbases = t.origRNAbases
 	for x := 0; x < len(t.DNAbases); x++ {
@@ -94,13 +105,13 @@ func (t *TranscriptionLevel) Init(g *Game) {
 }
 
 func (t *TranscriptionLevel) ResetChoices() {
-	curr := &dna[currentFrag]
+	curr := &t.DNA[currentFrag]
 	rand.Shuffle(len(spots), func(i, j int) { spots[i], spots[j] = spots[j], spots[i] })
 	t.rightChoice.reset(0, 600, transcribe(curr.codon))
-	t.wrongChoice1.reset(1, 600, randomRNACodon(t.rightChoice.bases))
-	t.wrongChoice2.reset(2, 600, randomRNACodon(t.rightChoice.bases))
-	for x := 0; x < currentFrag*3; x++ {
-		temp := (currentFrag*3) - 1 - x
+	t.wrongChoice1.reset(1, 600, randomRNACodon(t.rightChoice.codon))
+	t.wrongChoice2.reset(2, 600, randomRNACodon(t.rightChoice.codon))
+	for x := 0; x < (currentFrag+1)*3; x++ {
+		temp := (currentFrag+1)*3 -1 - x
 		base := t.RNAbases[x]
 		base.rect.pos.y = t.origRNAbases[temp].rect.pos.y
 		t.RNAbases[x] = base
@@ -111,11 +122,12 @@ func (t *TranscriptionLevel) ResetChoices() {
 func (t *TranscriptionLevel) Update(g *Game) {
 	t.otherToMenuButton.update(g)
 	t.RNA[currentFrag].update()
+	if currentFrag < 5 {t.RNA[currentFrag+1].update()}
 	t.infoButton.update()
 	t.temp_tfa.update()
 	t.rnaPolymerase.update(g)
 
-	curr := &dna[currentFrag]
+	curr := &t.DNA[currentFrag]
 
 	if reset {
 		t.ResetChoices()
@@ -130,7 +142,14 @@ func (t *TranscriptionLevel) Update(g *Game) {
 		base.update()
 		t.RNAbases[i] = base
 	}
-
+	// Checks if current DNA codon is complete
+	if t.DNA[currentFrag].is_complete && !t.rnaPolymerase.next {
+		nextDNACodon()
+	}
+	if t.RNA[5].rect.pos.y <= -600 {
+		ToCyto2(g)
+		reset = false
+	}
 }
 
 func (t *TranscriptionLevel) Draw(g *Game, screen *ebiten.Image) {
@@ -146,7 +165,7 @@ func (t *TranscriptionLevel) Draw(g *Game, screen *ebiten.Image) {
 	t.wrongChoice1.draw(screen)
 	t.wrongChoice2.draw(screen)
 
-	for y := 0; y < currentFrag*3; y++ {
+	for y := 0; y < (currentFrag+1)*3; y++ {
 		t.RNAbases[y].draw(screen)
 	}
 
@@ -155,7 +174,7 @@ func (t *TranscriptionLevel) Draw(g *Game, screen *ebiten.Image) {
 			t.DNAbases[0].draw(screen)
 			t.DNAbases[1].draw(screen)
 			t.DNAbases[2].draw(screen)
-		} else {
+		} else if currentFrag < 5 {
 			for y := 0; y < 3; y++ {
 				t.DNAbases[(currentFrag*3)+y].draw(screen)
 			}

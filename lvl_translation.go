@@ -43,9 +43,11 @@ func newTranslationLevel(g *Game) {
 				"synthesize your protein!!!!",
 		}
 
-		translationStruct.rightTrna = newTRNA("codonButton.png", newRect(100, 200, 192, 111), translate(mrna[0].codon))
-		translationStruct.wrongTrna1 = newTRNA("codonButton.png", newRect(400, 200, 192, 111), translate(randomRNACodon(translationStruct.rightTrna.bases)))
-		translationStruct.wrongTrna2 = newTRNA("codonButton.png", newRect(700, 200, 192, 111), translate(randomRNACodon(translationStruct.rightTrna.bases)))
+		translationStruct.rightTrna = newTRNA("codonButton.png", newRect(100, 200, 192, 111), mrna[0].codon, translate(mrna[0].codon))
+		randomCodon1 := randomRNACodon(translationStruct.rightTrna.codon)
+		translationStruct.wrongTrna1 = newTRNA("codonButton.png", newRect(400, 200, 192, 111), randomCodon1, translate(randomCodon1))
+		randomCodon2 := randomRNACodon(translationStruct.rightTrna.codon)
+		translationStruct.wrongTrna2 = newTRNA("codonButton.png", newRect(700, 200, 192, 111), randomCodon2, translate(randomCodon2))
 		translationStruct.infoButton = infoButton
 		translationStruct.otherToMenuButton = otherToMenuButton
 
@@ -75,9 +77,11 @@ func (t *TranslationLevel) Init(g *Game) {
 func (t *TranslationLevel) ResetChoices() {
 	curr := &mrna[mrna_ptr]
 	rand.Shuffle(len(spots), func(i, j int) {spots[i], spots[j] = spots[j], spots[i]})
-	t.rightTrna.reset(0, 200, translate(curr.codon))
-	t.wrongTrna1.reset(1, 200, translate(randomRNACodon(t.rightTrna.bases)))
-	t.wrongTrna2.reset(2, 200, translate(randomRNACodon(t.rightTrna.bases)))
+	t.rightTrna.reset(0, 200, curr.codon, translate(curr.codon))
+	randomCodon1 := randomRNACodon(t.rightTrna.codon)
+	t.wrongTrna1.reset(1, 200, randomCodon1, translate(randomCodon1))
+	randomCodon2 := randomRNACodon(t.rightTrna.codon)
+	t.wrongTrna2.reset(2, 200, randomCodon2, translate(randomCodon2))
 	reset = false
 }
 
@@ -111,7 +115,7 @@ func (t *TranslationLevel) Draw(g *Game, screen *ebiten.Image) {
 	for x := 0; x <= mrna_ptr; x++ {
 		if x < 4 {
 			protein[x].draw(screen)
-			codonFont.drawFont(screen, protein[x].codon, protein[x].rect.pos.x, protein[x].rect.pos.y, color.Black)
+			codonFont.drawFont(screen, protein[x].codon, protein[x].rect.pos.x, protein[x].rect.pos.y+25, color.Black)
 		}
 	}
 

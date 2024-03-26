@@ -32,17 +32,17 @@ func transcribe(codon string) string {
 	var n string
 	for i := 0; i < len(codon); i++ {
 		n = string(codon[i])
-		if n == "A" {
+		switch n {
+		case "A":
 			transcription = append(transcription, "U")
-		}
-		if n == "T" {
+		case "T":
 			transcription = append(transcription, "A")
-		}
-		if n == "G" {
+		case "G":
 			transcription = append(transcription, "C")
-		}
-		if n == "C" {
+		case "C":
 			transcription = append(transcription, "G")
+		case "U":
+			transcription = append(transcription, "A")
 		}
 	}
 	var result string = strings.Join([]string(transcription), "")

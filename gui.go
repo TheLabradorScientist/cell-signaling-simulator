@@ -91,6 +91,7 @@ type Template struct {
 
 type RNAPolymerase struct {
 	Sprite
+	next bool
 }
 
 type Nucleobase struct {
@@ -102,14 +103,14 @@ type Nucleobase struct {
 
 type CodonChoice struct {
 	Sprite
-	bases      string
+	codon      string
+	bases      [3]Nucleobase
 	is_dragged bool
-	// codonType string // Correct vs Incorrect
 }
 
 type tRNA struct {
 	CodonChoice
-	// delta (method for moving amino acid to correct spot)
+	aminoAcid	Nucleobase
 }
 
 type Ribosome struct {
@@ -607,16 +608,17 @@ func newRNAPolymerase(path string, rect Rectangle) RNAPolymerase {
 	sprite := newSprite(path, rect, 0.5)
 	return RNAPolymerase{
 		Sprite: sprite,
+		next:   false,
 	}
 }
 
 func (r *RNAPolymerase) update(params ...interface{}) {
 	if len(params) > 0 {
-		g, ok := params[0].(*Game)
+		//g, ok := params[0].(*Game)
 		tfaPosY := transcriptionStruct.temp_tfa.rect.pos.y
-		if !ok {
-			return
-		}
+		//if !ok {
+		//	return
+		//}
 		if tfaPosY >= 420 {
 			if r.rect.pos.x <= 80 {
 				r.rect.pos.y += 2 * (screenHeight / 750)
@@ -624,14 +626,16 @@ func (r *RNAPolymerase) update(params ...interface{}) {
 			}
 		}
 		// Checks if current DNA codon is complete
-		if dna[currentFrag].is_complete {
-			if currentFrag == 4 && r.rect.pos.x < screenWidth+50 {
+		if r.next {
+			if currentFrag == 5 && r.rect.pos.x < screenWidth+50 {
 				r.rect.pos.x += 5 * (screenWidth / 1250)
 				r.rect.pos.y += 3 * (screenHeight / 750)
 			} else if r.rect.pos.x < (160 * (currentFrag + 1)) {
 				r.rect.pos.x += 5 * (screenWidth / 1250)
 			} else {
-				nextDNACodon(g)
+				transcriptionStruct.DNA[currentFrag].is_complete = false
+				reset = true
+				r.next = false
 			}
 		}
 	}
@@ -656,7 +660,14 @@ func (transcr Transcript) draw(screen *ebiten.Image) {
 
 func (transcr *Transcript) update(params ...interface{}) {
 	if transcr.isRNA {
-		transcr.rect.pos.x = transcriptionStruct.rnaPolymerase.rect.pos.x - 750
+		if currentFrag < 5 {
+			transcr.rect.pos.x = transcriptionStruct.rnaPolymerase.rect.pos.x - 750
+		} else if transcriptionStruct.rnaPolymerase.rect.pos.x > 1000 {
+			if transcr.rect.pos.y > -600 {
+				transcr.rect.pos.y -= 4
+				transcr.rect.pos.x += 2
+			}
+		}
 	}
 }
 
@@ -676,25 +687,10 @@ func (temp Template) draw(screen *ebiten.Image) {
 
 func (temp Template) update(params ...interface{}) {}
 
-func (transcr *Transcript) move() {
-	if transcr.rect.pos.x < 1250 {
-		transcr.rect.pos.x += 4
-		transcr.rect.pos.y -= 1
-	}
-}
-
-func nextDNACodon(g *Game) {
-	if currentFrag < 4 {
+func nextDNACodon() {
+	if currentFrag < 5 {
 		currentFrag++
-		dna[currentFrag].is_complete = false
-		reset = true
-	} else {
-		if rna[4].rect.pos.x < 1250 {
-			rna[4].move()
-		} else {
-			ToCyto2(g)
-			reset = false
-		}
+		transcriptionStruct.rnaPolymerase.next = true
 	}
 }
 
@@ -709,19 +705,17 @@ func nextMRNACodon(g *Game) {
 	}
 }
 
-func newRibosome(path string, rect Rectangle) Ribosome {
+func newCodonChoice(path string, rect Rectangle, codon string) CodonChoice {
 	sprite := newSprite(path, rect, 1.0)
-	return Ribosome{
-		Sprite: sprite,
+	var bases [3]Nucleobase
+	for x := 0; x < len(codon); x++ {
+		bases[x] = newNucleobase(string(codon[x]), newRect(100+sprite.rect.pos.x+(50*x), sprite.rect.pos.y+500, 65, 150), 0, false)
 	}
-}
-
-func newCodonChoice(path string, rect Rectangle, bases string) CodonChoice {
-	sprite := newSprite(path, rect, 1.0)
 	return CodonChoice{
 		Sprite:     sprite,
-		bases:      bases,
+		codon:      codon,
 		is_dragged: false,
+		bases:      bases,
 	}
 }
 
@@ -735,11 +729,11 @@ func (c *CodonChoice) update(params ...interface{}) {
 		} else if inpututil.IsMouseButtonJustReleased(ebiten.MouseButtonLeft) {
 			c.is_dragged = false
 			if len(params) == 2 {
-				if aabb_collision(c.rect, translationStruct.ribosome.rect) && c.bases == translate(frag.codon) {
+				if aabb_collision(c.rect, translationStruct.ribosome.rect) && c.codon == transcribe(frag.codon) {
 					frag.is_complete = true
 				}
 			} else if len(params) == 1 {
-				if aabb_collision(c.rect, transcriptionStruct.rnaPolymerase.rect) && c.bases == transcribe(frag.codon) {
+				if aabb_collision(c.rect, transcriptionStruct.rnaPolymerase.rect) && c.codon == transcribe(frag.codon) {
 					frag.is_complete = true
 				}
 			}
@@ -748,32 +742,68 @@ func (c *CodonChoice) update(params ...interface{}) {
 	if c.is_dragged {
 		c.Sprite.drag(true, true, b_pos)
 	}
+	for x := 0; x < len(c.bases); x++ {
+		c.bases[x].baseType = string(c.codon[x])
+		c.bases[x].rect.pos.x = 100 + c.Sprite.rect.pos.x + (50 * x)
+		c.bases[x].rect.pos.y = c.Sprite.rect.pos.y + 125
+		switch c.bases[x].baseType {
+		case "A":
+		c.bases[x].Sprite.image = adenine.image
+		case "T":
+		c.bases[x].Sprite.image = thymine.image
+		case "G":
+		c.bases[x].Sprite.image = guanine.image
+		case "C":
+		c.bases[x].Sprite.image = cytosine.image
+		case "U":
+		c.bases[x].Sprite.image = uracil.image
+		}
+	}
 }
 
 func (c CodonChoice) draw(screen *ebiten.Image) {
 	c.Sprite.draw(screen)
-	codonFont.drawFont(screen, c.bases, c.rect.pos.x+25, c.rect.pos.y+90, color.Black)
+	for _, base := range c.bases {
+		base.draw(screen)
+	}
 }
 
 func (c *CodonChoice) reset(index, y_pos int, newBases string) {
 	c.rect.pos = newVector(spots[index], y_pos)
-	c.bases = newBases
+	c.codon = newBases
 }
 
-func newTRNA(path string, rect Rectangle, bases string) tRNA {
-	codonChoice := newCodonChoice(path, rect, bases)
+func newTRNA(path string, rect Rectangle, codon string, amino string) tRNA {
+	codonChoice := newCodonChoice(path, rect, transcribe(codon))
+	aminoAcid := newNucleobase(amino, codonChoice.rect, 1, false)
 	return tRNA{
 		CodonChoice: codonChoice,
-		//other
+		aminoAcid: 	 aminoAcid,
 	}
 }
 
 func (t *tRNA) update(params ...interface{}) {
 	t.CodonChoice.update(params[0], true)
+	t.aminoAcid.rect.pos.x = t.rect.pos.x+150
+	t.aminoAcid.rect.pos.y = t.rect.pos.y
 }
 
 func (t tRNA) draw(screen *ebiten.Image) {
 	t.CodonChoice.draw(screen)
+	t.aminoAcid.draw(screen)
+}
+
+func (t *tRNA) reset(index, y_pos int, newBases string, newAminoAcid string) {
+	t.rect.pos = newVector(spots[index], y_pos)
+	t.codon = transcribe(newBases)
+	t.aminoAcid.baseType = newAminoAcid
+}
+
+func newRibosome(path string, rect Rectangle) Ribosome {
+	sprite := newSprite(path, rect, 0.5)
+	return Ribosome{
+		Sprite: sprite,
+	}
 }
 
 // Updates movement of ribosome
@@ -802,7 +832,10 @@ func (ribo Ribosome) draw(screen *ebiten.Image) {
 }
 
 func newNucleobase(btype string, rect Rectangle, index int, isTemp bool) Nucleobase {
-	path := nucleobaseImages[btype]
+	var path string
+	if btype != "A" && btype != "T" && btype != "G" && btype != "C" && btype != "U" && btype != "N/A" {
+		path = nucleobaseImages["amino"]
+	} else {path = nucleobaseImages[btype]}
 	sprite := newSprite(path, rect, 0.48)
 	if !isTemp {
 		sprite.op.Rotate(-3.14)
@@ -816,17 +849,23 @@ func newNucleobase(btype string, rect Rectangle, index int, isTemp bool) Nucleob
 }
 
 var nucleobaseImages = map[string]string{
-	"A": "adenine.png",
-	"T": "thymine.png",
-	"G": "guanine.png",
-	"C": "cytosine.png",
-	"U": "uracil.png",
+	"A":   "adenine.png",
+	"T":   "thymine.png",
+	"G":   "guanine.png",
+	"C":   "cytosine.png",
+	"U":   "uracil.png",
+	"N/A": "empty.png",
+	"amino": "aminoAcid.png", // This is CS. So I can break the rules of biology. :)
 }
 
 func (n Nucleobase) draw(screen *ebiten.Image) {
 	n.Sprite.draw(screen)
 	if !n.isTemplate {
-		codonFont.drawFont(screen, n.baseType, n.rect.pos.x-50, n.rect.pos.y-50, color.Black)
+		if n.baseType != "N/A" {
+			if n.baseType != "A" && n.baseType != "T" && n.baseType != "G" && n.baseType != "C" && n.baseType != "U" {
+				codonFont.drawFont(screen, n.baseType, n.rect.pos.x-100, n.rect.pos.y-25, color.Black)
+			} else {codonFont.drawFont(screen, n.baseType, n.rect.pos.x-50, n.rect.pos.y-50, color.Black)}
+		}
 	} else {
 		codonFont.drawFont(screen, n.baseType, n.rect.pos.x, n.rect.pos.y+100, color.Black)
 	}
@@ -835,7 +874,7 @@ func (n Nucleobase) draw(screen *ebiten.Image) {
 
 func (n *Nucleobase) update(params ...interface{}) {
 	n.rect.pos.x = (675 + transcriptionStruct.RNA[currentFrag].rect.pos.x + (50 * n.index)) - 150*(currentFrag-1)
-	n.rect.pos.y = (transcriptionStruct.RNA[4].rect.pos.y + 400 + (25 * n.index)) - 75*(currentFrag-1)
+	n.rect.pos.y = (transcriptionStruct.RNA[5].rect.pos.y + 400 + (25 * n.index)) - 75*(currentFrag-1)
 }
 
 func (n Nucleobase) String() string {
