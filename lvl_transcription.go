@@ -12,6 +12,8 @@ var (
 	rna         [5]Transcript
 	dna         [5]Template
 	spots       = [3]int{350, 650, 950}
+	DNAbases 	[15]Nucleobase
+	RNAbases	[15]Nucleobase
 )
 
 type TranscriptionLevel struct {
@@ -66,6 +68,12 @@ func newTranscriptionLevel(g *Game) {
 
 func (t *TranscriptionLevel) Init(g *Game) {
 	currentFrag = 0
+	for x := 0; x < len(RNAbases); x++ {
+		base := string(rna[x/3].codon[x%3])
+		posX := 125+rna[4].rect.pos.x + (50*x)
+		posY := rna[4].rect.pos.y+275 - (15*x)
+		RNAbases[x] = newNucleobase(base, newRect(posX, posY, 65, 150), x, false)
+	}
 	t.ResetChoices()
 	g.state_array = g.transcriptionSprites
 	t.temp_tfa.activate()
@@ -101,6 +109,11 @@ func (t *TranscriptionLevel) Update(g *Game) {
 		nextDNACodon(g)
 	}
 
+	for i, base := range RNAbases {
+		base.update()
+		RNAbases[i] = base
+	}
+
 }
 
 func (t *TranscriptionLevel) Draw(g *Game, screen *ebiten.Image) {
@@ -110,21 +123,18 @@ func (t *TranscriptionLevel) Draw(g *Game, screen *ebiten.Image) {
 	t.rnaPolymerase.draw(screen)
 	dna[0].draw(screen)
 	t.temp_tfa.draw(screen)
-	//for x := 0; x < 5; x++ {
-	//}
 	//codonFont.drawFont(screen, strings.Join(template[0:5], ""), dna[currentFrag].rect.pos.x+300, dna[currentFrag].rect.pos.y, color.Black)
 
 	t.rightChoice.draw(screen)
 	t.wrongChoice1.draw(screen)
 	t.wrongChoice2.draw(screen)
 
-	for x := 0; x < currentFrag; x++ {
-		//Can be replaced with nucleobase.draw(screen), which will draw bases with codonFont on them.
-		codonFont.drawFont(screen, rna[x].codon, 125+rna[4].rect.pos.x+(200*x), rna[4].rect.pos.y+250, color.Black)
+	for z := 0; z < currentFrag*3; z++ {
+		RNAbases[z].draw(screen)
 	}
 
 	if currentFrag != -1 {
-		codonFont.drawFont(screen, dna[currentFrag].codon, dna[0].rect.pos.x+500, dna[0].rect.pos.y, color.Black)
+		codonFont.drawFont(screen, dna[currentFrag].codon, dna[0].rect.pos.x+500, dna[0].rect.pos.y+50, color.Black)
 	}
 
 	defaultFont.drawFont(screen, t.message, 75, 50, color.Black)

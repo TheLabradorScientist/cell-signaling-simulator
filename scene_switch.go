@@ -36,12 +36,10 @@ func ToLevelSelect(g *Game) {
 	g.stateMachine.changeState(g, scene)
 }
 
-
 func ToAbout(g *Game) {
 	scene = "About"
 	g.stateMachine.changeState(g, scene)
 }
-
 
 func (g *Game) reset() {
 	// Set length of all sprite arrays to 0
@@ -53,7 +51,7 @@ func (g *Game) reset() {
 	g.transcriptionSprites = nil
 	g.translationSprites = nil
 
-	// Set seed signal to random integer 
+	// Set seed signal to random integer
 	seedSignal = rand.Intn(4) + 1
 
 	// Set template to random codons
@@ -70,9 +68,10 @@ func (g *Game) reset() {
 
 	// Set dna, rna, and proteins to random codons
 	for x := 0; x < 5; x++ {
-		dna[x] = newTemplate("DNA.png", newRect(0+200*x, 400, 150, 150), template[x], x)}
+		dna[x] = newTemplate("DNA.png", newRect(200*x, 400, 150, 150), template[x], x)
+	}
 	for x := 0; x < 5; x++ {
-		rna[x] = newTranscript("RNA" + fmt.Sprint(x) + ".png", newRect(250, 0, 150, 150), transcribe(template[x]))
+		rna[x] = newTranscript("RNA"+fmt.Sprint(x)+".png", newRect(250, 0, 150, 150), transcribe(template[x]))
 	}
 
 	for x := 0; x < 5; x++ {

@@ -94,7 +94,9 @@ type RNAPolymerase struct {
 
 type Nucleobase struct {
 	Sprite
-	baseType string
+	baseType   string
+	index      int
+	isTemplate bool
 }
 
 type CodonChoice struct {
@@ -561,18 +563,11 @@ func (t *TFA) activate() {
 		t.rect.pos.y -= 3 * (screenHeight / 750)
 	}
 	t.animate()
-	/* 	if t.tfaType == "tfa2" {
-		t.Sprite.scaleW *= 1.25
-		t.Sprite.scaleH *= 1.25
-	} */
 	t.is_active = true
 }
 
 func newTFA(path1 string, path2 string, rect Rectangle, tfaType string) TFA {
 	sprite := newSprite(path1, path2, rect, 0.52)
-	if err != nil {
-		fmt.Println("Error parsing date:", err)
-	}
 	return TFA{
 		Sprite:    sprite,
 		is_active: false,
@@ -586,8 +581,8 @@ func (t *TFA) update(params ...interface{}) {
 			t.rect.pos.y += 2 * (screenHeight / 750)
 		}
 		if t.rect.pos.y <= 450 && t.tfaType == "tfa2" {
-			t.rect.pos.y += 2 * (screenHeight / 750)
-			t.rect.pos.x -= 1 * (screenWidth / 1250)
+			t.rect.pos.y += 4 * (screenHeight / 750)
+			t.rect.pos.x -= 2 * (screenWidth / 1250)
 		}
 	}
 }
@@ -785,10 +780,37 @@ func (ribo Ribosome) draw(screen *ebiten.Image) {
 	ribo.Sprite.draw(screen)
 }
 
-func newNucelobase(path string, rect Rectangle, btype string) Nucleobase {
-	sprite := newSprite(path, rect, 1.0)
+func newNucleobase(btype string, rect Rectangle, index int, isTemp bool) Nucleobase {
+	path := nucleobaseImages[btype]
+	sprite := newSprite(path, rect, 0.5)
+	if isTemp == false {sprite.op.Rotate(-3.14)}
 	return Nucleobase{
-		Sprite:   sprite,
-		baseType: btype,
+		Sprite:     sprite,
+		baseType:   btype,
+		index:      index,
+		isTemplate: isTemp,
 	}
+}
+
+var nucleobaseImages = map[string]string{
+	"A": "adenine.png",
+	"T": "thymine.png",
+	"G": "guanine.png",
+	"C": "cytosine.png",
+	"U": "uracil.png",
+}
+
+func (n Nucleobase) draw(screen *ebiten.Image) {
+	n.Sprite.draw(screen)
+	codonFont.drawFont(screen, n.baseType, n.rect.pos.x-50, n.rect.pos.y-50, color.Black)
+}
+
+func (n *Nucleobase) update(params ...interface{}) {
+	posX := 150 + rna[4].rect.pos.x + (50 * n.index)
+	n.rect.pos.x = posX
+	n.rect.pos.y = rna[4].rect.pos.y + 500 - (25 * n.index)
+}
+
+func (n Nucleobase) String() string {
+	return n.baseType
 }
