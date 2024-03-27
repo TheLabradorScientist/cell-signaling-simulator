@@ -12,11 +12,16 @@ var (
 	mrna     	[5]Template
 	protein  	[5]Transcript	
 	mRNAbases   [15]Nucleobase
+
+	aminoAcid = newNucleobase("X", newRect(0, 0, 60, 60), 1, false)
+	stop = newNucleobase("STOP", newRect(0, 0, 60, 60), 1, false)
 )
 
 type TranslationLevel struct {
 	// TRANSLATION SPRITES
-	cytoBg_2          StillImage
+	protoCytoBg_2     StillImage
+	cytoBg_2          Parallax
+	cytoNuc_2         Parallax
 	ribosome          Ribosome
 	mRNA			  [5]Template
 	rightTrna         tRNA
@@ -32,9 +37,11 @@ var translationStruct *TranslationLevel
 func newTranslationLevel(g *Game) {
 	if len(g.translationSprites) == 0 {
 		translationStruct = &TranslationLevel{
-			cytoBg_2: newStillImage("CytoBg2.png", newRect(0, 0, 1250, 750)),
+			protoCytoBg_2: newStillImage("CytoBg2.png", newRect(0, 0, 1250, 750)),
+			cytoBg_2:      newParallax("ParallaxCyto2.png", newRect(100, 100, 1250, 750), 4),
+			cytoNuc_2:     newParallax("ParallaxCyto2.5.png", newRect(100, 100, 1250, 750), 3),
 
-			ribosome: newRibosome("ribosome.png", newRect(40, 300, 404, 367)),
+			ribosome: newRibosome("ribosome.png", newRect(-200, 50, 300, 330)),
 			mRNA: mrna,
 			message: 
 				"FINALLY, BACK TO THE CYTOPLASM! \n" +
@@ -43,17 +50,17 @@ func newTranslationLevel(g *Game) {
 				"synthesize your protein!!!!",
 		}
 
-		translationStruct.rightTrna = newTRNA("codonButton.png", newRect(100, 200, 192, 111), mrna[0].codon, translate(mrna[0].codon))
+		translationStruct.rightTrna = newTRNA("tRNA.png", newRect(100, 450, 140, 200), mrna[0].codon, translate(mrna[0].codon))
 		randomCodon1 := randomRNACodon(translationStruct.rightTrna.codon)
-		translationStruct.wrongTrna1 = newTRNA("codonButton.png", newRect(400, 200, 192, 111), randomCodon1, translate(randomCodon1))
+		translationStruct.wrongTrna1 = newTRNA("tRNA.png", newRect(400, 450, 140, 200), randomCodon1, translate(randomCodon1))
 		randomCodon2 := randomRNACodon(translationStruct.rightTrna.codon)
-		translationStruct.wrongTrna2 = newTRNA("codonButton.png", newRect(700, 200, 192, 111), randomCodon2, translate(randomCodon2))
+		translationStruct.wrongTrna2 = newTRNA("tRNA.png", newRect(700, 450, 140, 200), randomCodon2, translate(randomCodon2))
 		translationStruct.infoButton = infoButton
 		translationStruct.otherToMenuButton = otherToMenuButton
 
 		g.translationSprites = []GUI{
-			&translationStruct.cytoBg_2, &translationStruct.ribosome, 
-			&translationStruct.mRNA[0],
+			&translationStruct.protoCytoBg_2, &translationStruct.cytoBg_2, &translationStruct.cytoNuc_2,
+			&translationStruct.ribosome, &translationStruct.mRNA[0],
 			&translationStruct.rightTrna, &translationStruct.wrongTrna1,
 			&translationStruct.wrongTrna2, &translationStruct.otherToMenuButton,
 			&translationStruct.infoButton, 
@@ -77,15 +84,17 @@ func (t *TranslationLevel) Init(g *Game) {
 func (t *TranslationLevel) ResetChoices() {
 	curr := &mrna[mrna_ptr]
 	rand.Shuffle(len(spots), func(i, j int) {spots[i], spots[j] = spots[j], spots[i]})
-	t.rightTrna.reset(0, 200, curr.codon, translate(curr.codon))
+	t.rightTrna.reset(0, 450, curr.codon, translate(curr.codon))
 	randomCodon1 := randomRNACodon(t.rightTrna.codon)
-	t.wrongTrna1.reset(1, 200, randomCodon1, translate(randomCodon1))
+	t.wrongTrna1.reset(1, 450, randomCodon1, translate(randomCodon1))
 	randomCodon2 := randomRNACodon(t.rightTrna.codon)
-	t.wrongTrna2.reset(2, 200, randomCodon2, translate(randomCodon2))
+	t.wrongTrna2.reset(2, 450, randomCodon2, translate(randomCodon2))
 	reset = false
 }
 
 func (t *TranslationLevel) Update(g *Game) {
+	t.cytoBg_2.update()
+	t.cytoNuc_2.update()
 	t.otherToMenuButton.update(g)
 	t.infoButton.update()
 
@@ -101,25 +110,29 @@ func (t *TranslationLevel) Update(g *Game) {
 }
 
 func (t *TranslationLevel) Draw(g *Game, screen *ebiten.Image) {
+	t.protoCytoBg_2.draw(screen)
 	t.cytoBg_2.draw(screen)
+	t.cytoNuc_2.draw(screen)
 
 	t.mRNA[0].draw(screen)
 
-	t.rightTrna.draw(screen)
-	t.wrongTrna1.draw(screen)
-	t.wrongTrna2.draw(screen)
-
 	t.otherToMenuButton.draw(screen)
 
-	// Draw amino acids before ribosome moves without drawing amino acid for STOP.
-	for x := 0; x <= mrna_ptr; x++ {
-		if x < 4 {
-			protein[x].draw(screen)
-			codonFont.drawFont(screen, protein[x].codon, protein[x].rect.pos.x, protein[x].rect.pos.y+25, color.Black)
+	if t.ribosome.rect.pos.x >= 42 {
+		// Draw amino acids before ribosome moves without drawing amino acid for STOP.
+		for x := 0; x <= mrna_ptr; x++ {
+			if x < 4 {
+				protein[x].draw(screen)
+				codonFont.drawFont(screen, protein[x].codon, protein[x].rect.pos.x, protein[x].rect.pos.y+25, color.Black)
+			}
 		}
 	}
 
 	t.ribosome.draw(screen)
+
+	t.rightTrna.draw(screen)
+	t.wrongTrna1.draw(screen)
+	t.wrongTrna2.draw(screen)
 
 	if mrna_ptr != -1 {
 		if mrna_ptr == 0 {

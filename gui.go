@@ -300,6 +300,9 @@ func (p *Parallax) update(params ...interface{}) {
 		p.rect.pos.y = -2 * (y_c + 100) / (3 * l)
 	case "Signal Transduction":
 		p.rect.pos.x = -5 * (x_c + 80) / (7 * l)
+		p.rect.pos.y = -3 * (y_c + 100) / (5 * l)	
+	case "Translation":
+		p.rect.pos.x = -5 * (x_c + 95) / (7 * l)
 		p.rect.pos.y = -3 * (y_c + 100) / (5 * l)
 	}
 	//p.rect.pos.x = (x_c - 625) / (2*l);
@@ -706,7 +709,7 @@ func nextMRNACodon(g *Game) {
 }
 
 func newCodonChoice(path string, rect Rectangle, codon string) CodonChoice {
-	sprite := newSprite(path, rect, 1.0)
+	sprite := newSprite(path, rect, 0.5)
 	var bases [3]Nucleobase
 	for x := 0; x < len(codon); x++ {
 		bases[x] = newNucleobase(string(codon[x]), newRect(100+sprite.rect.pos.x+(50*x), sprite.rect.pos.y+500, 65, 150), 0, false)
@@ -744,8 +747,13 @@ func (c *CodonChoice) update(params ...interface{}) {
 	}
 	for x := 0; x < len(c.bases); x++ {
 		c.bases[x].baseType = string(c.codon[x])
-		c.bases[x].rect.pos.x = 100 + c.Sprite.rect.pos.x + (50 * x)
-		c.bases[x].rect.pos.y = c.Sprite.rect.pos.y + 125
+		if len(params) == 2 {
+			c.bases[x].rect.pos.x = 75 + c.Sprite.rect.pos.x + (50 * x)
+			c.bases[x].rect.pos.y = c.Sprite.rect.pos.y + 300
+		} else {
+			c.bases[x].rect.pos.x = 100 + c.Sprite.rect.pos.x + (50 * x)
+			c.bases[x].rect.pos.y = c.Sprite.rect.pos.y + 125
+		}
 		switch c.bases[x].baseType {
 		case "A":
 		c.bases[x].Sprite.image = adenine.image
@@ -775,7 +783,7 @@ func (c *CodonChoice) reset(index, y_pos int, newBases string) {
 
 func newTRNA(path string, rect Rectangle, codon string, amino string) tRNA {
 	codonChoice := newCodonChoice(path, rect, transcribe(codon))
-	aminoAcid := newNucleobase(amino, codonChoice.rect, 1, false)
+	aminoAcid := newNucleobase(amino, codonChoice.rect, 1, true)
 	return tRNA{
 		CodonChoice: codonChoice,
 		aminoAcid: 	 aminoAcid,
@@ -784,8 +792,8 @@ func newTRNA(path string, rect Rectangle, codon string, amino string) tRNA {
 
 func (t *tRNA) update(params ...interface{}) {
 	t.CodonChoice.update(params[0], true)
-	t.aminoAcid.rect.pos.x = t.rect.pos.x+150
-	t.aminoAcid.rect.pos.y = t.rect.pos.y
+	t.aminoAcid.rect.pos.x = t.rect.pos.x+25
+	t.aminoAcid.rect.pos.y = t.rect.pos.y-25
 }
 
 func (t tRNA) draw(screen *ebiten.Image) {
@@ -797,6 +805,11 @@ func (t *tRNA) reset(index, y_pos int, newBases string, newAminoAcid string) {
 	t.rect.pos = newVector(spots[index], y_pos)
 	t.codon = transcribe(newBases)
 	t.aminoAcid.baseType = newAminoAcid
+	if t.aminoAcid.baseType == "STOP" {
+		t.aminoAcid.Sprite.image = stop.image 
+	} else {
+		t.aminoAcid.Sprite.image = aminoAcid.image
+	}
 }
 
 func newRibosome(path string, rect Rectangle) Ribosome {
@@ -812,6 +825,10 @@ func (ribo *Ribosome) update(params ...interface{}) {
 		g, ok := params[0].(*Game)
 		if !ok {
 			return
+		}
+		if ribo.rect.pos.x <= 40 {
+			ribo.rect.pos.y += 2 * (screenHeight / 750)
+			ribo.rect.pos.x += 4 * (screenWidth / 1250)
 		}
 		// Checks if current mRNA codon is complete
 		if mrna[mrna_ptr].is_complete {
@@ -833,7 +850,7 @@ func (ribo Ribosome) draw(screen *ebiten.Image) {
 
 func newNucleobase(btype string, rect Rectangle, index int, isTemp bool) Nucleobase {
 	var path string
-	if btype != "A" && btype != "T" && btype != "G" && btype != "C" && btype != "U" && btype != "N/A" {
+	if btype != "A" && btype != "T" && btype != "G" && btype != "C" && btype != "U" && btype != "N/A" && btype != "STOP" {
 		path = nucleobaseImages["amino"]
 	} else {path = nucleobaseImages[btype]}
 	sprite := newSprite(path, rect, 0.48)
@@ -855,6 +872,7 @@ var nucleobaseImages = map[string]string{
 	"C":   "cytosine.png",
 	"U":   "uracil.png",
 	"N/A": "empty.png",
+	"STOP": "empty.png",
 	"amino": "aminoAcid.png", // This is CS. So I can break the rules of biology. :)
 }
 
@@ -862,12 +880,12 @@ func (n Nucleobase) draw(screen *ebiten.Image) {
 	n.Sprite.draw(screen)
 	if !n.isTemplate {
 		if n.baseType != "N/A" {
-			if n.baseType != "A" && n.baseType != "T" && n.baseType != "G" && n.baseType != "C" && n.baseType != "U" {
-				codonFont.drawFont(screen, n.baseType, n.rect.pos.x-100, n.rect.pos.y-25, color.Black)
-			} else {codonFont.drawFont(screen, n.baseType, n.rect.pos.x-50, n.rect.pos.y-50, color.Black)}
+			codonFont.drawFont(screen, n.baseType, n.rect.pos.x-50, n.rect.pos.y-50, color.Black)
 		}
 	} else {
-		codonFont.drawFont(screen, n.baseType, n.rect.pos.x, n.rect.pos.y+100, color.Black)
+		if n.baseType != "A" && n.baseType != "T" && n.baseType != "G" && n.baseType != "C" && n.baseType != "U" {
+			codonFont.drawFont(screen, n.baseType, n.rect.pos.x, n.rect.pos.y+50, color.Black)
+		} else {codonFont.drawFont(screen, n.baseType, n.rect.pos.x, n.rect.pos.y+100, color.Black)}
 	}
 
 }

@@ -12,11 +12,11 @@ var (
 	rna         [5]Transcript
 	dna         [5]Template
 	spots       = [3]int{350, 650, 950}
-	adenine = newNucleobase("A", newRect(100, 500, 65, 150), 0, false)
-	thymine = newNucleobase("T", newRect(100, 500, 65, 150), 0, false)
-	guanine = newNucleobase("G", newRect(100, 500, 65, 150), 0, false)
-	cytosine = newNucleobase("C", newRect(100, 500, 65, 150), 0, false)
-	uracil = newNucleobase("U", newRect(100, 500, 65, 150), 0, false)
+	adenine     = newNucleobase("A", newRect(100, 500, 65, 150), 0, false)
+	thymine     = newNucleobase("T", newRect(100, 500, 65, 150), 0, false)
+	guanine     = newNucleobase("G", newRect(100, 500, 65, 150), 0, false)
+	cytosine    = newNucleobase("C", newRect(100, 500, 65, 150), 0, false)
+	uracil      = newNucleobase("U", newRect(100, 500, 65, 150), 0, false)
 )
 
 type TranscriptionLevel struct {
@@ -26,9 +26,9 @@ type TranscriptionLevel struct {
 	rnaPolymerase     RNAPolymerase
 	RNA               [6]Transcript
 	DNA               [6]Template
-	DNAbases    	  [15]Nucleobase
-	origRNAbases	  [18]Nucleobase	// Dummy list containing positions and bases, accessed by RNA bases
-	RNAbases 		  [18]Nucleobase 	// List that is actually drawn onto screen and updated.
+	DNAbases          [15]Nucleobase
+	origRNAbases      [18]Nucleobase // Dummy list containing positions and bases, accessed by RNA bases
+	RNAbases          [18]Nucleobase // List that is actually drawn onto screen and updated.
 	rightChoice       CodonChoice
 	wrongChoice1      CodonChoice
 	wrongChoice2      CodonChoice
@@ -111,7 +111,7 @@ func (t *TranscriptionLevel) ResetChoices() {
 	t.wrongChoice1.reset(1, 600, randomRNACodon(t.rightChoice.codon))
 	t.wrongChoice2.reset(2, 600, randomRNACodon(t.rightChoice.codon))
 	for x := 0; x < (currentFrag+1)*3; x++ {
-		temp := (currentFrag+1)*3 -1 - x
+		temp := (currentFrag+1)*3 - 1 - x
 		base := t.RNAbases[x]
 		base.rect.pos.y = t.origRNAbases[temp].rect.pos.y
 		t.RNAbases[x] = base
@@ -122,7 +122,9 @@ func (t *TranscriptionLevel) ResetChoices() {
 func (t *TranscriptionLevel) Update(g *Game) {
 	t.otherToMenuButton.update(g)
 	t.RNA[currentFrag].update()
-	if currentFrag < 5 {t.RNA[currentFrag+1].update()}
+	if currentFrag < 5 {
+		t.RNA[currentFrag+1].update()
+	}
 	t.infoButton.update()
 	t.temp_tfa.update()
 	t.rnaPolymerase.update(g)
