@@ -529,9 +529,9 @@ func (k *Kinase) update(params ...interface{}) {
 		}
 	}
 	if k.rect.pos.x+k.rect.width >= screenWidth {
-		k.delta = -3
+		k.delta = -4
 	} else if k.rect.pos.x <= 0 {
-		k.delta = 3
+		k.delta = 4
 	}
 }
 
@@ -552,9 +552,9 @@ func (k *Kinase) activate() {
 
 func (k *Kinase) descend() {
 	if ebiten.IsFullscreen() {
-		k.rect.pos.y += 3
+		k.rect.pos.y += 4
 	} else {
-		k.rect.pos.y += 2
+		k.rect.pos.y += 3
 	}
 }
 
@@ -583,7 +583,7 @@ func newTFA(path1 string, path2 string, rect Rectangle, tfaType string) TFA {
 func (t *TFA) update(params ...interface{}) {
 	if t.is_active {
 		if t.rect.pos.y <= screenHeight && t.tfaType == "tfa1" {
-			t.rect.pos.y += 2 * (screenHeight / 750)
+			t.rect.pos.y += 3 * (screenHeight / 750)
 		}
 		if t.tfaType == "tfa2" {
 			rnaPolymPos := transcriptionStruct.rnaPolymerase.rect.pos
@@ -712,7 +712,7 @@ func newCodonChoice(path string, rect Rectangle, codon string) CodonChoice {
 	sprite := newSprite(path, rect, 0.5)
 	var bases [3]Nucleobase
 	for x := 0; x < len(codon); x++ {
-		bases[x] = newNucleobase(string(codon[x]), newRect(100+sprite.rect.pos.x+(50*x), sprite.rect.pos.y+500, 65, 150), 0, false)
+		bases[x] = newNucleobase(string(codon[x]), newRect(8+sprite.rect.pos.x+(50*x), sprite.rect.pos.y+500, 65, 150), 0, false)
 	}
 	return CodonChoice{
 		Sprite:     sprite,
@@ -748,10 +748,10 @@ func (c *CodonChoice) update(params ...interface{}) {
 	for x := 0; x < len(c.bases); x++ {
 		c.bases[x].baseType = string(c.codon[x])
 		if len(params) == 2 {
-			c.bases[x].rect.pos.x = 75 + c.Sprite.rect.pos.x + (50 * x)
+			c.bases[x].rect.pos.x = 65 + c.Sprite.rect.pos.x + (50 * x)
 			c.bases[x].rect.pos.y = c.Sprite.rect.pos.y + 300
 		} else {
-			c.bases[x].rect.pos.x = 100 + c.Sprite.rect.pos.x + (50 * x)
+			c.bases[x].rect.pos.x = 85 + c.Sprite.rect.pos.x + (50 * x)
 			c.bases[x].rect.pos.y = c.Sprite.rect.pos.y + 125
 		}
 		switch c.bases[x].baseType {
