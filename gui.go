@@ -476,7 +476,7 @@ func newKinase(path1 string, path2 string, rect Rectangle, ktype string) Kinase 
 		Sprite:        sprite,
 		is_moving:     false,
 		is_clicked_on: false,
-		delta:         3,
+		delta:         4,
 		kinaseType:    ktype,
 	}
 }
