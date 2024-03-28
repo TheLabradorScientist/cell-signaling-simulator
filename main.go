@@ -2,11 +2,8 @@ package main
 
 import (
 	"bytes"
-	"fmt"
 	_ "image/png"
 	"log"
-	"os"
-	"path/filepath"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/audio"
@@ -66,60 +63,19 @@ type Game struct {
 	translationSprites   []GUI
 }
 
-func executableDir() string {
-    // Get the absolute path of the executable
-    exePath, err := os.Executable()
-    if err != nil {
-        panic(err) // Handle error
-    }
-    // Get the directory of the executable
-    dir := filepath.Dir(exePath)
-    return dir
+func loadImage(image string) ([]byte, error) {
+	// Load asset data from embedded source
+	return Asset("Images/" + image)
 }
 
-func loadFile(image string) string {
-    // Get the absolute path to the Assets/Images directory
-    imageDir := filepath.Join(executableDir(), "Assets", "Images")
-    // Construct the absolute path to the image file
-    imagepath := filepath.Join(imageDir, image)
-    // Open file
-    file, err := os.Open(imagepath)
-    if err != nil {
-        fmt.Println("Error opening file:", err)
-        return "Error"
-    }
-    defer file.Close()
-    return file.Name()
+func loadFont(font string) ([]byte, error) {
+	// Load asset data from embedded source
+	return Asset("Fonts/" + font)
 }
 
-func loadFont(image string) string {
-    // Get the absolute path to the Assets/Images directory
-    fontDir := filepath.Join(executableDir(), "Assets", "Fonts")
-    // Construct the absolute path to the image file
-    fontpath := filepath.Join(fontDir, image)
-    // Open file
-    file, err := os.Open(fontpath)
-    if err != nil {
-        fmt.Println("Error opening file:", err)
-        return "Error"
-    }
-    defer file.Close()
-    return file.Name()
-}
-
-func loadMusic(music string) string {
-    // Get the absolute path to the Assets/Images directory
-    musicDir := filepath.Join(executableDir(), "Assets", "Music")
-    // Construct the absolute path to the image file
-    musicpath := filepath.Join(musicDir, music)
-    // Open file
-    file, err := os.Open(musicpath)
-    if err != nil {
-        fmt.Println("Error opening file:", err)
-        return "Error"
-    }
-    defer file.Close()
-    return file.Name()
+func loadMusic(music string) ([]byte, error) {
+	// Load asset data from embedded source
+	return Asset("Music/" + music)
 }
 
 func (g *Game) init() {
@@ -127,8 +83,8 @@ func (g *Game) init() {
 	ebiten.SetWindowSize(screenWidth, screenHeight)
 	ebiten.SetWindowResizingMode(ebiten.WindowResizingModeOnlyFullscreenEnabled)
 
-	defaultFont = newFont(loadFont("CourierPrime-Regular.ttf"), 32)
-	codonFont = newFont(loadFont("BlackOpsOne-Regular.ttf"), 60)
+	defaultFont = newFont("CourierPrime-Regular.ttf", 32)
+	codonFont = newFont("BlackOpsOne-Regular.ttf", 60)
 
 	//	maxWidth, maxHeight       = g.Layout(maxWidth, maxHeight)
 
@@ -137,7 +93,7 @@ func (g *Game) init() {
 
 	g.switchedScene = true
 
-	mp3Bytes, err := os.ReadFile(loadMusic("Signaling_of_the_Cell_MenuScreen.mp3"))
+	mp3Bytes, err := loadMusic("Signaling_of_the_Cell_MenuScreen.mp3")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -190,15 +146,15 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		if screenWidth == baseScreenWidth && screenHeight == baseScreenHeight {
 			screenWidth, screenHeight = ebiten.ScreenSizeInFullscreen()
 			g.stateMachine.Scale(g, screen)
-			defaultFont = newFont(loadFont("CourierPrime-Regular.ttf"), 32*int(heightRatio))
-			codonFont = newFont(loadFont("BlackOpsOne-Regular.ttf"), 60*int(heightRatio))
+			defaultFont = newFont("CourierPrime-Regular.ttf", 32*int(heightRatio))
+			codonFont = newFont("BlackOpsOne-Regular.ttf", 60*int(heightRatio))
 		}
 	} else {
 		if screenWidth != baseScreenWidth && screenHeight != baseScreenHeight {
 			screenWidth, screenHeight = baseScreenWidth, baseScreenHeight
 			g.stateMachine.Scale(g, screen)
-			defaultFont = newFont(loadFont("CourierPrime-Regular.ttf"), 32)
-			codonFont = newFont(loadFont("BlackOpsOne-Regular.ttf"), 60)
+			defaultFont = newFont("CourierPrime-Regular.ttf", 32)
+			codonFont = newFont("BlackOpsOne-Regular.ttf", 60)
 		}
 	}
 

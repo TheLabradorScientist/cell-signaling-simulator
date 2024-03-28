@@ -3,7 +3,6 @@ package main
 import (
 	"image/color"
 	"log"
-	"os"
 
 	"golang.org/x/image/font"
 	"golang.org/x/image/font/opentype"
@@ -17,7 +16,7 @@ type Font struct {
 }
 
 func newFont(path string, size int) Font {
-	font_data, err := os.ReadFile(path)
+	font_data, err := loadFont(path)
 	if err != nil {
 		log.Fatal(err)
 	}
