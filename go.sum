@@ -2,6 +2,8 @@ github.com/ebitengine/oto/v3 v3.1.1 h1:utFNkSF4yXqA7VhMg7oHp3OSdz3vuzJQ42rCDnd8p
 github.com/ebitengine/oto/v3 v3.1.1/go.mod h1:bQM4zk9glIVjTynn8X0Lp1zngTlZltFFfzJvx543vdA=
 github.com/ebitengine/purego v0.6.1 h1:sjN8rfzbhXQ59/pE+wInswbU9aMDHiwlup4p/a07Mkg=
 github.com/ebitengine/purego v0.6.1/go.mod h1:ah1In8AOtksoNK6yk5z1HTJeUkC1Ez4Wk2idgGslMwQ=
+github.com/go-bindata/go-bindata v3.1.2+incompatible h1:5vjJMVhowQdPzjE1LdxyFF7YFTXg5IgGVW4gBr5IbvE=
+github.com/go-bindata/go-bindata v3.1.2+incompatible/go.mod h1:xK8Dsgwmeed+BBsSy2XTopBn/8uK2HWuGSnA11C3Joo=
 github.com/hajimehoshi/bitmapfont/v3 v3.0.0 h1:r2+6gYK38nfztS/et50gHAswb9hXgxXECYgE8Nczmi4=
 github.com/hajimehoshi/bitmapfont/v3 v3.0.0/go.mod h1:+CxxG+uMmgU4mI2poq944i3uZ6UYFfAkj9V6WqmuvZA=
 github.com/hajimehoshi/ebiten/v2 v2.6.7 h1:rxlMxu487wZN/JteykmuGdO1qotOolL8vJDU85lPh7A=
