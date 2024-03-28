@@ -1,14 +1,17 @@
 package main
 
 import (
-	"fmt"
+	//"fmt"
+	"bytes"
+	"image"
 	"image/color"
-
+	_ "image/png"
 	"strings"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/audio"
-	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
+
+	//"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 )
 
@@ -135,62 +138,64 @@ type StillImage struct {
 	Sprite
 }
 
-// Create new sprite with variadic parameters for multiple images
 func newSprite(params ...interface{}) Sprite {
-	// if 4 parameters passed, two images are needed
-	if len(params) == 4 {
-		path1 := params[0].(string) // image 1
-		path2 := params[1].(string) // image 2
-		rect := params[2].(Rectangle)
-		scaleW, scaleH := params[3].(float64), params[3].(float64)
+    var img, img_2, origImg, origImg2 *ebiten.Image
 
-		// Store original image from the parameter to use for scaling in fullscreen
-		var origImg, _, err1 = ebitenutil.NewImageFromFile(loadFile(path1))
-		var origImg2, _, err2 = ebitenutil.NewImageFromFile(loadFile(path2))
+    if len(params) < 3 || len(params) > 4 {
+        // Handle invalid number of parameters
+        return Sprite{}
+    }
 
-		// Check error if image does not exist
-		if err1 != nil {
-			fmt.Println("Error parsing date:", err)
-		}
-		if err2 != nil {
-			fmt.Println("Error parsing date:", err)
-		}
+    rect := params[len(params)-2].(Rectangle)
+    scale := params[len(params)-1].(float64)
 
-		// Scale original image from parameter based on scaling factors
-		var img_1 = scaleImage(origImg, scaleW, scaleH)
-		var img_2 = scaleImage(origImg2, scaleW, scaleH)
+    // If 4 parameters passed, two images are needed
+    if len(params) == 4 {
+        path1 := params[0].(string)
+        path2 := params[1].(string)
 
-		// Return Sprite struct
-		return Sprite{
-			image:       img_1,
-			image_2:     img_2,
-			rect:        rect,
-			scaleW:      scaleW,
-			scaleH:      scaleH,
-			origImage:   origImg,
-			origImage_2: origImg2,
-		}
+        // Load asset data from embedded source
+		byteData, err1 := loadImage(path1)
+		tempImg, _, err2 := image.Decode(bytes.NewReader(byteData))
+		origImg = ebiten.NewImageFromImage(tempImg)
+		byteData2, err3 := loadImage(path2)
+		tempImg2, _, err4 := image.Decode(bytes.NewReader(byteData2))
+		origImg2 = ebiten.NewImageFromImage(tempImg2)
 
-	} else { // if 3 parameters passed, no second image needed.
-		path := params[0].(string)
-		rect := params[1].(Rectangle)
-		scaleW, scaleH := params[2].(float64), params[2].(float64)
-		var origImg, _, err1 = ebitenutil.NewImageFromFile(loadFile(path))
-		if err1 != nil {
-			fmt.Println("Error parsing date:", err)
-		}
-		var img_1 = scaleImage(origImg, scaleW, scaleH)
-		return Sprite{
-			image:       img_1,
-			image_2:     img_1,
-			rect:        rect,
-			scaleW:      scaleW,
-			scaleH:      scaleH,
-			origImage:   origImg,
-			origImage_2: origImg,
-		}
-	}
+        if err1 != nil || err2 != nil || err3 != nil || err4 != nil {
+            // Handle error loading images
+            return Sprite{}
+        }
+
+        img = ebiten.NewImageFromImage(scaleImage(origImg, scale, scale))
+        img_2 = ebiten.NewImageFromImage(scaleImage(origImg2, scale, scale))
+    } else { // If 3 parameters passed, no second image needed
+        path := params[0].(string)
+        
+        // Load asset data from embedded source
+		byteData, err1 := loadImage(path)
+		tempImg, _, err2 := image.Decode(bytes.NewReader(byteData))
+		origImg = ebiten.NewImageFromImage(tempImg)
+        if err1 != nil || err2 != nil {
+            // Handle error loading image
+            return Sprite{}
+        }
+
+        img = ebiten.NewImageFromImage(scaleImage(origImg, scale, scale))
+        img_2 = img // Use the same image for both img_1 and img_2
+    }
+
+    return Sprite{
+        image:       img,
+        image_2:     img_2,
+        rect:        rect,
+        scaleW:      scale,
+        scaleH:      scale,
+        origImage:   origImg,
+        origImage_2: origImg2,
+    }
 }
+
 
 // General function for scaling any image using the parameters for scaling factors
 func scaleImage(img *ebiten.Image, scaleFactorW float64, scaleFactorH float64) *ebiten.Image {
