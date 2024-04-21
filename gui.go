@@ -834,10 +834,10 @@ func (c CodonChoice) draw(screen *ebiten.Image) {
 	}
 }
 
-func (c *CodonChoice) reset(index, y_pos int, newBases string) {
+/* func (c *CodonChoice) reset(index, y_pos int, newBases string) {
 	c.rect.pos = newVector(spots[index], y_pos)
 	c.codon = newBases
-}
+} */
 
 func newTRNA(path string, rect Rectangle, codon string, amino string) tRNA {
 	codonChoice := newCodonChoice(path, rect, transcribe(codon))

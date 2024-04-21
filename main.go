@@ -3,7 +3,7 @@ package main
 import (
 	"bytes"
 	"embed"
-	_ "embed"
+	//_ "embed"
 	_ "image/png"
 	"log"
 
