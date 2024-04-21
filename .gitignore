@@ -1,3 +1,4 @@
 dist/
 Assets/bindata.go
 bindata.go
+assets.go
