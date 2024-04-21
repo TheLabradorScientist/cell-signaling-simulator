@@ -1,2 +1,3 @@
 dist/
-Assets/
+Assets/bindata.go
+bindata.go
