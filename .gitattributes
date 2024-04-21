@@ -1,3 +1,0 @@
-*.go filter=lfs diff=lfs merge=lfs -text
-assets.go filter=lfs diff=lfs merge=lfs -text
-bindata.go filter=lfs diff=lfs merge=lfs -text
