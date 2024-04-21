@@ -27,14 +27,14 @@ var (
 	audioContext *audio.Context
 	audioPlayer  *audio.Player
 
-	err   error
+	err error
 	//go:embed Assets/Images/*.png
 	imageFS embed.FS
 	//go:embed Assets/Fonts/*.ttf
 	fontFS embed.FS
 	//go:embed Assets/Music/*.mp3
 	musicFS embed.FS
-	scene string = "Main Menu"
+	scene   string = "Main Menu"
 
 	otherToMenuButton Button
 	info              string
